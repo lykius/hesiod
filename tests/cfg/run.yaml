@@ -1,0 +1,11 @@
+group_1:
+  param_a: 1
+  param_b: 1.2
+group_2:
+  param_c: true
+  param_d: "param_d"
+group_3:
+  param_e:
+    param_f: "param_f"
+    param_g: 2
+    param_h: 4.56

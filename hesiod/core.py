@@ -1,34 +1,37 @@
 from typing import Optional, cast, Callable, TypeVar, Type, Any
+import functools
 
-import hydra
-from omegaconf import DictConfig
+from omegaconf import OmegaConf
 
 
 _CFG = None
 T = TypeVar("T")
-TaskFunction = Callable[[], Any]
+Function = Callable[[], Any]
 
 
-def hesiod(task_function: Callable) -> Callable[[TaskFunction], Any]:
+def main(cfg_path: str = "cfg/run.yaml") -> Callable[[Function], Function]:
     """Decorator for a given function.
 
-    The decorato saves the configuration loaded by hydra
-    and run the task function inside the hydra environment.
+    The decorator loads the configuration with OmegaConf
+    and runs the given function.
 
     Args:
-        task_function : task function to be run.
+        fn : function to be wrapped.
 
     Returns:
-        Task function wrapped in hydra environment.
+        Function wrapped in the decorator.
     """
 
-    @hydra.main(config_path="conf", config_name="conf")
-    def hydra_entry_point(cfg: DictConfig) -> Any:
-        global _CFG
-        _CFG = cfg
-        task_function()
+    def decorator(fn: Function) -> Function:
+        @functools.wraps(fn)
+        def decorated_fn() -> Any:
+            global _CFG
+            _CFG = OmegaConf.load(cfg_path)
+            fn()
 
-    return hydra_entry_point
+        return decorated_fn
+
+    return decorator
 
 
 def get_param(name: str, t: Optional[Type[T]] = None) -> T:
