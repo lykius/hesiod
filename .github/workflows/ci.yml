@@ -1,4 +1,4 @@
-name: Run tests
+name: Test & Release
 
 on:
   push:
@@ -25,6 +25,13 @@ jobs:
         curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
         echo "PATH=$HOME/.poetry/bin:$PATH" >> $GITHUB_ENV
     - name: Install dependencies
-      run: poetry install
+      run: |
+        poetry install
+        echo "PATH=$HOME/.venv/bin:$PATH" >> $GITHUB_ENV
     - name: Test with pytest
-      run: poetry run pytest
+      run: pytest
+    - name: Run code quality checks
+      run: |
+        black .
+        mypy .
+
