@@ -10,10 +10,13 @@ TaskFunction = Callable[[], Any]
 
 
 def hesiod(task_function: Callable) -> Callable[[TaskFunction], Any]:
-    """Save configuration loaded from hydra and run task_function.
+    """Decorator for a given function.
+
+    The decorato saves the configuration loaded by hydra
+    and run the task function inside the hydra environment.
 
     Args:
-        task_function : task function to be run
+        task_function : task function to be run.
 
     Returns:
         Task function wrapped in hydra environment.
@@ -32,14 +35,14 @@ def get_param(name: str, t: Optional[Type[T]] = None) -> T:
     """Get requested parameter from global configuration.
 
     Args:
-        name : name of the parameter
-        t : type of the parameter
+        name : name of the parameter.
+        t : type of the parameter.
 
     Raises:
-        ValueError: if the requested parameter is not of the required type
+        ValueError: if the requested parameter is not of the required type.
 
     Returns:
-        The requested parameter
+        The requested parameter.
     """
     value = _CFG
     for n in name.split("."):
