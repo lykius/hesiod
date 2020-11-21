@@ -7,4 +7,4 @@
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![CI](https://github.com/lykius/hesiod/workflows/CI/badge.svg)](https://github.com/lykius/hesiod)
 
-A wrapper for hydra.
+A simple utility to manage configurations.
