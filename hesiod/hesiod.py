@@ -1,15 +1,15 @@
-from typing import cast, Callable, TypeVar, Type, Any
+from typing import Optional, cast, Callable, TypeVar, Type, Any
 
 import hydra
-from hydra.types import TaskFunction
 from omegaconf import DictConfig
 
 
 _CFG = None
 T = TypeVar("T")
+TaskFunction = Callable[[], Any]
 
 
-def hesiod(task_function: TaskFunction) -> Callable[[TaskFunction], Any]:
+def hesiod(task_function: Callable) -> Callable[[TaskFunction], Any]:
     """Save configuration loaded from hydra and run task_function.
 
     Args:
@@ -19,7 +19,7 @@ def hesiod(task_function: TaskFunction) -> Callable[[TaskFunction], Any]:
         Task function wrapped in hydra environment.
     """
 
-    @hydra.main(config_path="conf", config_name="run")
+    @hydra.main(config_path="conf", config_name="conf")
     def hydra_entry_point(cfg: DictConfig) -> Any:
         global _CFG
         _CFG = cfg
@@ -28,7 +28,7 @@ def hesiod(task_function: TaskFunction) -> Callable[[TaskFunction], Any]:
     return hydra_entry_point
 
 
-def get_param(name: str, t: Type[T] = object) -> T:
+def get_param(name: str, t: Optional[Type[T]] = None) -> T:
     """Get requested parameter from global configuration.
 
     Args:
@@ -44,6 +44,6 @@ def get_param(name: str, t: Type[T] = object) -> T:
     value = _CFG
     for n in name.split("."):
         value = getattr(value, n)
-    if not isinstance(value, t):
+    if t is not None and not isinstance(value, t):
         raise ValueError(f"{name} is {type(value)} but requested {t}")
     return cast(T, value)
