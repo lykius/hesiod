@@ -1,0 +1,10 @@
+[flake8]
+exclude = .venv
+ignore =
+    # E203 whitespace before ':' (gets overwritten by Black)
+    E203
+    # E501: line too long
+    E501
+    # W503: line break before binary operator (in conflict with Black)
+    W503
+max-complexity=10
