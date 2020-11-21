@@ -27,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         poetry install
-        echo "PATH=$HOME/.venv/bin:$PATH" >> $GITHUB_ENV
+        echo "PATH=$(poetry env info --path)/bin:$PATH" >> $GITHUB_ENV
     - name: Test with pytest
       run: pytest
     - name: Run code quality checks
