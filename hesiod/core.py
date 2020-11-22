@@ -6,7 +6,7 @@ from omegaconf import OmegaConf
 
 _CFG = None
 T = TypeVar("T")
-Function = Callable[[], Any]
+Function = Callable[..., Any]
 
 
 def main(cfg_path: str = "cfg/run.yaml") -> Callable[[Function], Function]:
@@ -24,10 +24,10 @@ def main(cfg_path: str = "cfg/run.yaml") -> Callable[[Function], Function]:
 
     def decorator(fn: Function) -> Function:
         @functools.wraps(fn)
-        def decorated_fn() -> Any:
+        def decorated_fn(*args, **kwargs) -> Any:
             global _CFG
             _CFG = OmegaConf.load(cfg_path)
-            fn()
+            return fn(*args, **kwargs)
 
         return decorated_fn
 

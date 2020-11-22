@@ -1,3 +1,4 @@
+from typing import Any, Tuple
 import pytest
 from pathlib import Path
 
@@ -53,3 +54,17 @@ def test_get_param() -> None:
             hesiod.get_param("group_2.param_d", bool)
 
     test()
+
+
+def test_args_kwargs() -> None:
+    cwd = Path(".").absolute()
+    cfg_path = cwd / "tests/cfg/run.yaml"
+
+    @hesiod.main(str(cfg_path))
+    def test(a, b, c=10) -> Tuple[Any, Any, Any]:
+        return a, b, c
+
+    ra, rb, rc = test(2, 3.8, c=20)
+    assert ra == 2
+    assert rb == 3.8
+    assert rc == 20
