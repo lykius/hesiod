@@ -1,5 +1,5 @@
-from typing import Any, Tuple
 import pytest
+from typing import Tuple
 from pathlib import Path
 
 import hesiod
@@ -61,10 +61,10 @@ def test_args_kwargs() -> None:
     cfg_path = cwd / "tests/cfg/run.yaml"
 
     @hesiod.main(str(cfg_path))
-    def test(a, b, c=10) -> Tuple[Any, Any, Any]:
+    def test(a: int, b: str, c: float = 3.4) -> Tuple[int, str, float]:
         return a, b, c
 
-    ra, rb, rc = test(2, 3.8, c=20)
+    ra, rb, rc = test(2, "param_b", c=1.23456)
     assert ra == 2
-    assert rb == 3.8
-    assert rc == 20
+    assert rb == "param_b"
+    assert rc == 1.23456

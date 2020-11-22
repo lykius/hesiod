@@ -24,7 +24,7 @@ def main(cfg_path: str = "cfg/run.yaml") -> Callable[[Function], Function]:
 
     def decorator(fn: Function) -> Function:
         @functools.wraps(fn)
-        def decorated_fn(*args, **kwargs) -> Any:
+        def decorated_fn(*args: Any, **kwargs: Any) -> Any:
             global _CFG
             _CFG = OmegaConf.load(cfg_path)
             return fn(*args, **kwargs)
