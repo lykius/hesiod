@@ -9,14 +9,14 @@ T = TypeVar("T")
 Function = Callable[..., Any]
 
 
-def main(cfg_path: str = "cfg/run.yaml") -> Callable[[Function], Function]:
+def main(cfg_path: Optional[str] = None) -> Callable[[Function], Function]:
     """Decorator for a given function.
 
     The decorator loads the configuration with OmegaConf
     and runs the given function.
 
     Args:
-        fn : function to be wrapped.
+        cfg_path: the path to the cfg file created by the user (optional).
 
     Returns:
         Function wrapped in the decorator.
@@ -26,7 +26,8 @@ def main(cfg_path: str = "cfg/run.yaml") -> Callable[[Function], Function]:
         @functools.wraps(fn)
         def decorated_fn(*args: Any, **kwargs: Any) -> Any:
             global _CFG
-            _CFG = OmegaConf.load(cfg_path)
+            if cfg_path is not None:
+                _CFG = OmegaConf.load(cfg_path)
             return fn(*args, **kwargs)
 
         return decorated_fn
