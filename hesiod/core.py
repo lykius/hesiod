@@ -1,22 +1,24 @@
-from typing import Optional, cast, Callable, TypeVar, Type, Any
+from typing import Dict, Optional, cast, Callable, TypeVar, Type, Any
 import functools
+from pathlib import Path
 
-from omegaconf import OmegaConf
+from hesiod.cfgparse import get_parser
 
 
-_CFG = None
+_CFG: Dict[str, Any] = {}
 T = TypeVar("T")
 Function = Callable[..., Any]
 
 
-def main(cfg_path: Optional[str] = None) -> Callable[[Function], Function]:
+def main(cfg_dir: Path, run_cfg_path: Optional[Path] = None) -> Callable[[Function], Function]:
     """Decorator for a given function.
 
-    The decorator loads the configuration with OmegaConf
+    The decorator loads the configuration with the right parser
     and runs the given function.
 
     Args:
-        cfg_path: the path to the cfg file created by the user (optional).
+        cfg_dir: the path to the directory with all the config files.
+        run_cfg_path: the path to the config file created by the user for this run (optional).
 
     Returns:
         Function wrapped in the decorator.
@@ -26,8 +28,12 @@ def main(cfg_path: Optional[str] = None) -> Callable[[Function], Function]:
         @functools.wraps(fn)
         def decorated_fn(*args: Any, **kwargs: Any) -> Any:
             global _CFG
-            if cfg_path is not None:
-                _CFG = OmegaConf.load(cfg_path)
+
+            if run_cfg_path is not None:
+                ext = run_cfg_path.suffix
+                parser = get_parser(ext)(run_cfg_path, cfg_dir)
+                _CFG = parser.load_cfg()
+
             return fn(*args, **kwargs)
 
         return decorated_fn
@@ -50,7 +56,7 @@ def get_param(name: str, t: Optional[Type[T]] = None) -> T:
     """
     value = _CFG
     for n in name.split("."):
-        value = getattr(value, n)
+        value = value[n]
     if t is not None and not isinstance(value, t):
         raise ValueError(f"{name} is {type(value)} but requested {t}")
     return cast(T, value)

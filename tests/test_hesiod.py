@@ -13,7 +13,7 @@ def test_load_config() -> None:
     cwd = Path(".").absolute()
     cfg_path = cwd / "tests/cfg/run.yaml"
 
-    @hesiod.main(str(cfg_path))
+    @hesiod.main(cfg_path.parent, cfg_path)
     def test() -> None:
         assert hesiod.get_param("group_1.param_a") == 1
         assert hesiod.get_param("group_1.param_b") == 1.2
@@ -30,7 +30,7 @@ def test_get_param() -> None:
     cwd = Path(".").absolute()
     cfg_path = cwd / "tests/cfg/run.yaml"
 
-    @hesiod.main(str(cfg_path))
+    @hesiod.main(cfg_path.parent, cfg_path)
     def test() -> None:
         g1pa = hesiod.get_param("group_1.param_a", int)
         assert g1pa == 1 and isinstance(g1pa, int)
@@ -60,7 +60,7 @@ def test_args_kwargs() -> None:
     cwd = Path(".").absolute()
     cfg_path = cwd / "tests/cfg/run.yaml"
 
-    @hesiod.main(str(cfg_path))
+    @hesiod.main(cfg_path.parent, cfg_path)
     def test(a: int, b: str, c: float = 3.4) -> Tuple[int, str, float]:
         return a, b, c
 
