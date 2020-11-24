@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 
 class ConfigParser(ABC):
-    def __init__(self, run_cfg_path: Path, cfg_dir: Path) -> None:
+    def __init__(self, run_cfg_path: Path, cfg_dir_path: Path) -> None:
         """Create a config parser.
 
         Args:
@@ -12,7 +12,7 @@ class ConfigParser(ABC):
             cfg_dir : path to the configs directory.
         """
         self.run_cfg_path = run_cfg_path
-        self.cfg_dir = cfg_dir
+        self.cfg_dir_path = cfg_dir_path
 
     @abstractmethod
     def load_cfg(self) -> Dict[str, Any]:

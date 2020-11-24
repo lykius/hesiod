@@ -1,0 +1,5 @@
+path: "/path/to/cifar100"
+splits:
+  train: 80
+  val: 10
+  test: 10

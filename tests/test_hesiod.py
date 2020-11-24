@@ -11,7 +11,7 @@ def test_version() -> None:
 
 def test_load_config() -> None:
     cwd = Path(".").absolute()
-    cfg_path = cwd / "tests/cfg/run.yaml"
+    cfg_path = cwd / "tests/run_simple.yaml"
 
     @hesiod.main(cfg_path.parent, cfg_path)
     def test() -> None:
@@ -28,7 +28,7 @@ def test_load_config() -> None:
 
 def test_get_param() -> None:
     cwd = Path(".").absolute()
-    cfg_path = cwd / "tests/cfg/run.yaml"
+    cfg_path = cwd / "tests/run_simple.yaml"
 
     @hesiod.main(cfg_path.parent, cfg_path)
     def test() -> None:
@@ -58,7 +58,7 @@ def test_get_param() -> None:
 
 def test_args_kwargs() -> None:
     cwd = Path(".").absolute()
-    cfg_path = cwd / "tests/cfg/run.yaml"
+    cfg_path = cwd / "tests/run_simple.yaml"
 
     @hesiod.main(cfg_path.parent, cfg_path)
     def test(a: int, b: str, c: float = 3.4) -> Tuple[int, str, float]:

@@ -1,0 +1,2 @@
+num_layers: 20
+ckpt_path: "/path/to/efficientnet"
