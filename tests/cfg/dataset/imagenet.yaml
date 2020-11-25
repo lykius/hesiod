@@ -1,5 +1,6 @@
+name: "imagenet"
 path: "/path/to/imagenet"
 splits:
-  train: 80
-  val: 10
-  test: 10
+  - 80
+  - 10
+  - 10

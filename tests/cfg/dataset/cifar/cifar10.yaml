@@ -1,5 +1,6 @@
+name: "cifar10"
 path: "/path/to/cifar10"
 splits:
-  train: 80
-  val: 10
-  test: 10
+  - 70
+  - 20
+  - 10
