@@ -1,0 +1,6 @@
+name: "imagenet"
+path: "/path/to/imagenet"
+splits:
+  - 80
+  - 10
+  - 10

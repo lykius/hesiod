@@ -1,0 +1,3 @@
+name: "resnet18"
+num_layers: 18
+ckpt_path: "/path/to/resnet18"

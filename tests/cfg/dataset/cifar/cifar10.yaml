@@ -1,0 +1,6 @@
+name: "cifar10"
+path: "/path/to/cifar10"
+splits:
+  - 70
+  - 20
+  - 10

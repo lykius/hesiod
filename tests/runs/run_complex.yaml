@@ -1,0 +1,15 @@
+dataset:
+  base: "cifar.cifar10"
+  classes:
+    - 1
+    - 5
+    - 6
+
+run_name: "test"
+
+net:
+  base: "efficientnet"
+  freeze: false
+
+base: "var"
+lr: 0.005
