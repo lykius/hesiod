@@ -10,15 +10,15 @@ T = TypeVar("T")
 Function = Callable[..., Any]
 
 
-def main(cfg_dir: Path, run_cfg_path: Optional[Path] = None) -> Callable[[Function], Function]:
+def main(base_cfg_dir: Path, run_cfg_file: Optional[Path] = None) -> Callable[[Function], Function]:
     """Decorator for a given function.
 
     The decorator loads the configuration with the right parser
     and runs the given function.
 
     Args:
-        cfg_dir: the path to the directory with all the config files.
-        run_cfg_path: the path to the config file created by the user for this run (optional).
+        base_cfg_dir: the path to the directory with all the config files.
+        run_cfg_file: the path to the config file created by the user for this run (optional).
 
     Returns:
         Function wrapped in the decorator.
@@ -29,9 +29,9 @@ def main(cfg_dir: Path, run_cfg_path: Optional[Path] = None) -> Callable[[Functi
         def decorated_fn(*args: Any, **kwargs: Any) -> Any:
             global _CFG
 
-            if run_cfg_path is not None:
-                ext = run_cfg_path.suffix
-                parser = get_parser(ext)(run_cfg_path, cfg_dir)
+            if run_cfg_file is not None:
+                ext = run_cfg_file.suffix
+                parser = get_parser(ext)(run_cfg_file, base_cfg_dir)
                 _CFG = parser.load_cfg()
 
             return fn(*args, **kwargs)
@@ -45,8 +45,8 @@ def get_param(name: str, t: Optional[Type[T]] = None) -> T:
     """Get requested parameter from global configuration.
 
     Args:
-        name : name of the parameter.
-        t : type of the parameter.
+        name: name of the parameter.
+        t: type of the parameter.
 
     Raises:
         ValueError: if the requested parameter is not of the required type.
@@ -58,5 +58,5 @@ def get_param(name: str, t: Optional[Type[T]] = None) -> T:
     for n in name.split("."):
         value = value[n]
     if t is not None and not isinstance(value, t):
-        raise ValueError(f"{name} is {type(value)} but requested {t}")
+        raise ValueError(f"{name} is of type {type(value)} but requested {t}")
     return cast(T, value)

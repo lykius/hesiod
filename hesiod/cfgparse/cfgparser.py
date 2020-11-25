@@ -4,15 +4,15 @@ from typing import Any, Dict
 
 
 class ConfigParser(ABC):
-    def __init__(self, run_cfg_path: Path, cfg_dir_path: Path) -> None:
+    def __init__(self, run_cfg_file: Path, base_cfg_dir: Path) -> None:
         """Create a config parser.
 
         Args:
-            run_cfg_path : path to the run config file.
-            cfg_dir : path to the configs directory.
+            run_cfg_file: path to the run config file.
+            base_cfg_dir: path to the base configs directory.
         """
-        self.run_cfg_path = run_cfg_path
-        self.cfg_dir_path = cfg_dir_path
+        self.run_cfg_file = run_cfg_file
+        self.base_cfg_dir = base_cfg_dir
 
     @abstractmethod
     def load_cfg(self) -> Dict[str, Any]:
