@@ -123,8 +123,45 @@ def test_load_cfg() -> None:
 
 
 def test_replace_base() -> None:
-    pass
+    parser = YAMLConfigParser(Path(), Path())
+
+    cfg = {"base": "a.b.c", "p1": 5}
+    base_cfgs = {"cfg": {"a": {"b": {"c": {"p1": 1, "p2": 2, "p3": 3}}}}}
+    parser.base_cfgs = base_cfgs
+    new_cfg = parser.replace_base(cfg, "cfg")
+
+    expected_keys = ["p1", "p2", "p3"]
+    for key in expected_keys:
+        assert key in new_cfg
+    assert new_cfg["p1"] == 5
+    assert new_cfg["p2"] == 2
+    assert new_cfg["p3"] == 3
+
+    cfg = {"base": "cfg.a.b.c", "p1": 5}
+    base_cfgs = {"cfg": {"a": {"b": {"c": {"p1": 1, "p2": 2, "p3": 3}}}}}
+    parser.base_cfgs = base_cfgs
+    new_cfg = parser.replace_base(cfg, "")
+
+    expected_keys = ["p1", "p2", "p3"]
+    for key in expected_keys:
+        assert key in new_cfg
+    assert new_cfg["p1"] == 5
+    assert new_cfg["p2"] == 2
+    assert new_cfg["p3"] == 3
 
 
 def test_replace_base_exception() -> None:
-    pass
+    parser = YAMLConfigParser(Path(), Path())
+
+    cfg = {"base": "a.b.d", "p1": 5}
+    base_cfgs = {"cfg": {"a": {"b": {"c": {"p1": 1, "p2": 2, "p3": 3}}}}}
+    parser.base_cfgs = base_cfgs
+
+    with pytest.raises(ValueError):
+        parser.replace_base(cfg, "abc")
+
+    with pytest.raises(ValueError):
+        parser.replace_base(cfg, "cfg")
+
+    with pytest.raises(ValueError):
+        parser.replace_base(cfg, "")
