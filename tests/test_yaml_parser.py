@@ -5,20 +5,9 @@ from pathlib import Path
 from hesiod.cfgparse import YAMLConfigParser
 
 
-@pytest.fixture
-def paths() -> Tuple[Path, Path]:
-    cwd = Path(".").absolute()
-    base_cfg_dir = cwd / "tests/cfg"
-    runs_cfg_dir = cwd / "tests/runs"
-    return base_cfg_dir, runs_cfg_dir
-
-
-def test_load_cfg_file(paths: Tuple[Path, Path]) -> None:
-    base_cfg_dir = paths[0]
-    run_cfg_file = paths[0] / "dataset/cifar/cifar100.yaml"
-
-    parser = YAMLConfigParser(run_cfg_file, base_cfg_dir)
-    cfg = parser.load_cfg_file(run_cfg_file)
+def test_load_cfg_file(base_cfg_dir: Path, cifar10_cfg_file: Path) -> None:
+    parser = YAMLConfigParser(Path(), base_cfg_dir)
+    cfg = parser.load_cfg_file(cifar10_cfg_file)
 
     assert cfg["name"] == "cifar100"
     assert cfg["path"] == "/path/to/cifar100"
@@ -28,21 +17,15 @@ def test_load_cfg_file(paths: Tuple[Path, Path]) -> None:
     assert cfg["splits"][2] == 10
 
 
-def test_load_cfg_file_exception(paths: Tuple[Path, Path]) -> None:
-    base_cfg_dir = paths[0]
-    run_cfg_file = paths[1] / "run_wrong.yaml"
-
-    parser = YAMLConfigParser(run_cfg_file, base_cfg_dir)
+def test_load_cfg_file_exception(wrong_run_file: Path) -> None:
+    parser = YAMLConfigParser(Path(), Path())
 
     with pytest.raises(ValueError):
-        parser.load_cfg_file(run_cfg_file)
+        parser.load_cfg_file(wrong_run_file)
 
 
-def test_load_cfg_dir(paths: Tuple[Path, Path]) -> None:
-    base_cfg_dir = paths[0]
-    run_cfg_file = paths[1] / "run_simple.yaml"
-
-    parser = YAMLConfigParser(run_cfg_file, base_cfg_dir)
+def test_load_cfg_dir(base_cfg_dir: Path) -> None:
+    parser = YAMLConfigParser(Path(), Path())
     cfg = parser.load_cfg_dir(base_cfg_dir)
 
     assert isinstance(cfg, dict)
@@ -101,11 +84,8 @@ def test_load_cfg_dir(paths: Tuple[Path, Path]) -> None:
         assert cfg["net"]["resnet"][key]["ckpt_path"] == "/path/to/" + key
 
 
-def test_load_cfg(paths: Tuple[Path, Path]) -> None:
-    base_cfg_dir = paths[0]
-    run_cfg_file = paths[1] / "run_complex.yaml"
-
-    parser = YAMLConfigParser(run_cfg_file, base_cfg_dir)
+def test_load_cfg(base_cfg_dir: Path, complex_run_file: Path) -> None:
+    parser = YAMLConfigParser(complex_run_file, base_cfg_dir)
     cfg = parser.load_cfg()
 
     assert isinstance(cfg, dict)
