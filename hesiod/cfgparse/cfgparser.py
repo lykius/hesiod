@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractclassmethod, abstractmethod
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 from copy import deepcopy
 
 CFGT = Dict[str, Any]
@@ -16,6 +16,15 @@ class ConfigParser(ABC):
         """
         self.run_cfg_file = run_cfg_file
         self.base_cfg_dir = base_cfg_dir
+
+    @abstractclassmethod
+    def get_managed_extensions(cls) -> List[str]:
+        """Get file extensions managed by the parser.
+
+        Returns:
+            List of the managed extensions.
+        """
+        ...
 
     @abstractmethod
     def read_cfg(self, cfg_file: Path) -> CFGT:
