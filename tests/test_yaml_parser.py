@@ -1,13 +1,21 @@
+from typing import Tuple
 import pytest
 from pathlib import Path
 
 from hesiod.cfgparse import YAMLConfigParser
 
 
-def test_load_cfg_file() -> None:
+@pytest.fixture
+def paths() -> Tuple[Path, Path]:
     cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/cfg/dataset/cifar/cifar100.yaml"
     base_cfg_dir = cwd / "tests/cfg"
+    runs_cfg_dir = cwd / "tests/runs"
+    return base_cfg_dir, runs_cfg_dir
+
+
+def test_load_cfg_file(paths: Tuple[Path, Path]) -> None:
+    base_cfg_dir = paths[0]
+    run_cfg_file = paths[0] / "dataset/cifar/cifar100.yaml"
 
     parser = YAMLConfigParser(run_cfg_file, base_cfg_dir)
     cfg = parser.load_cfg_file(run_cfg_file)
@@ -20,10 +28,9 @@ def test_load_cfg_file() -> None:
     assert cfg["splits"][2] == 10
 
 
-def test_load_cfg_file_exception() -> None:
-    cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/runs/run_wrong.yaml"
-    base_cfg_dir = cwd / "tests/cfg"
+def test_load_cfg_file_exception(paths: Tuple[Path, Path]) -> None:
+    base_cfg_dir = paths[0]
+    run_cfg_file = paths[1] / "run_wrong.yaml"
 
     parser = YAMLConfigParser(run_cfg_file, base_cfg_dir)
 
@@ -31,10 +38,9 @@ def test_load_cfg_file_exception() -> None:
         parser.load_cfg_file(run_cfg_file)
 
 
-def test_load_cfg_dir() -> None:
-    cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/runs/run_simple.yaml"
-    base_cfg_dir = cwd / "tests/cfg"
+def test_load_cfg_dir(paths: Tuple[Path, Path]) -> None:
+    base_cfg_dir = paths[0]
+    run_cfg_file = paths[1] / "run_simple.yaml"
 
     parser = YAMLConfigParser(run_cfg_file, base_cfg_dir)
     cfg = parser.load_cfg_dir(base_cfg_dir)
@@ -95,10 +101,9 @@ def test_load_cfg_dir() -> None:
         assert cfg["net"]["resnet"][key]["ckpt_path"] == "/path/to/" + key
 
 
-def test_load_cfg() -> None:
-    cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/runs/run_complex.yaml"
-    base_cfg_dir = cwd / "tests/cfg"
+def test_load_cfg(paths: Tuple[Path, Path]) -> None:
+    base_cfg_dir = paths[0]
+    run_cfg_file = paths[1] / "run_complex.yaml"
 
     parser = YAMLConfigParser(run_cfg_file, base_cfg_dir)
     cfg = parser.load_cfg()

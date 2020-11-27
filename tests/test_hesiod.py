@@ -5,14 +5,21 @@ from pathlib import Path
 import hesiod
 
 
+@pytest.fixture
+def paths() -> Tuple[Path, Path]:
+    cwd = Path(".").absolute()
+    base_cfg_dir = cwd / "tests/cfg"
+    runs_cfg_dir = cwd / "tests/runs"
+    return base_cfg_dir, runs_cfg_dir
+
+
 def test_version() -> None:
     assert hesiod.__version__ == "0.1.0"
 
 
-def test_args_kwargs() -> None:
-    cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/runs/run_simple.yaml"
-    base_cfg_dir = cwd / "tests/cfg"
+def test_args_kwargs(paths: Tuple[Path, Path]) -> None:
+    base_cfg_dir = paths[0]
+    run_cfg_file = paths[1] / "run_simple.yaml"
 
     @hesiod.main(base_cfg_dir, run_cfg_file)
     def test(a: int, b: str, c: float = 3.4) -> Tuple[int, str, float]:
@@ -24,10 +31,9 @@ def test_args_kwargs() -> None:
     assert rc == 1.23456
 
 
-def test_load_config_simple() -> None:
-    cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/runs/run_simple.yaml"
-    base_cfg_dir = cwd / "tests/cfg"
+def test_load_config_simple(paths: Tuple[Path, Path]) -> None:
+    base_cfg_dir = paths[0]
+    run_cfg_file = paths[1] / "run_simple.yaml"
 
     @hesiod.main(base_cfg_dir, run_cfg_file)
     def test() -> None:
@@ -42,10 +48,9 @@ def test_load_config_simple() -> None:
     test()
 
 
-def test_load_config_complex() -> None:
-    cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/runs/run_complex.yaml"
-    base_cfg_dir = cwd / "tests/cfg"
+def test_load_config_complex(paths: Tuple[Path, Path]) -> None:
+    base_cfg_dir = paths[0]
+    run_cfg_file = paths[1] / "run_complex.yaml"
 
     @hesiod.main(base_cfg_dir, run_cfg_file)
     def test() -> None:
@@ -63,10 +68,9 @@ def test_load_config_complex() -> None:
     test()
 
 
-def test_load_config_wrong() -> None:
-    cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/runs/run_wrong.yaml"
-    base_cfg_dir = cwd / "tests/cfg"
+def test_load_config_wrong(paths: Tuple[Path, Path]) -> None:
+    base_cfg_dir = paths[0]
+    run_cfg_file = paths[1] / "run_wrong.yaml"
 
     @hesiod.main(base_cfg_dir, run_cfg_file)
     def test() -> None:
@@ -76,10 +80,9 @@ def test_load_config_wrong() -> None:
         test()
 
 
-def test_get_param() -> None:
-    cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/runs/run_simple.yaml"
-    base_cfg_dir = cwd / "tests/cfg"
+def test_get_param(paths: Tuple[Path, Path]) -> None:
+    base_cfg_dir = paths[0]
+    run_cfg_file = paths[1] / "run_simple.yaml"
 
     @hesiod.main(base_cfg_dir, run_cfg_file)
     def test() -> None:
