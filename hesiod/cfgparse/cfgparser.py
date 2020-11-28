@@ -15,7 +15,7 @@ class ConfigParser(ABC):
             run_cfg_file: path to the run config file.
             base_cfg_dir: path to the base configs directory.
         """
-commit        ABC.__init__(self)
+        ABC.__init__(self)
         self.run_cfg_file = run_cfg_file
         self.base_cfg_dir = base_cfg_dir
 
