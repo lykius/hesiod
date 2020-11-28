@@ -1,0 +1,5 @@
+base: "var"
+optimizer: "adamw"
+dataset: "@OPTIONS(dataset.cifar)"
+net:
+  base: "efficientnet"
