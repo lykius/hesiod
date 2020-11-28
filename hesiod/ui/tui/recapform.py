@@ -1,4 +1,4 @@
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 from npyscreen import Form, TitleText  # type: ignore
 
 if TYPE_CHECKING:

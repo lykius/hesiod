@@ -1,4 +1,3 @@
-from typing import Any
 from npyscreen import NPSAppManaged  # type: ignore
 from pathlib import Path
 
