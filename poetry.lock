@@ -145,6 +145,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "npyscreen"
+version = "4.10.5"
+description = "Writing user interfaces without all that ugly mucking about in hyperspace"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "packaging"
 version = "20.4"
 description = "Core utilities for Python packages"
@@ -296,7 +304,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "043ae26a5b53dcfdea324e2e81e86788ab0ace3563c68ce4c17f4727c0e64dc2"
+content-hash = "02c3ae0df2d3a659de57b930924d6b057e24aaa69ae2e690cdbae97cf570dd50"
 
 [metadata.files]
 appdirs = [
@@ -361,6 +369,9 @@ mypy = [
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
+]
+npyscreen = [
+    {file = "npyscreen-4.10.5.tar.gz", hash = "sha256:622ee0f9a5dae946e635b7c6e0f6d65e1ed3c9ea0d20b89dab7f58d580e5126e"},
 ]
 packaging = [
     {file = "packaging-20.4-py2.py3-none-any.whl", hash = "sha256:998416ba6962ae7fbd6596850b80e17859a5753ba17c32284f67bfff33784181"},
