@@ -1,4 +1,3 @@
-from typing import Tuple
 import pytest
 from pathlib import Path
 
