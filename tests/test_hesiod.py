@@ -2,15 +2,16 @@ import pytest
 from typing import Tuple
 from pathlib import Path
 
-import hesiod
+from hesiod import __version__, hmain, hcfg, get_cfg_copy
+import hesiod.core as hcore
 
 
 def test_version() -> None:
-    assert hesiod.__version__ == "0.1.0"
+    assert __version__ == "0.1.0"
 
 
 def test_args_kwargs(base_cfg_dir: Path, simple_run_file: Path) -> None:
-    @hesiod.main(base_cfg_dir, simple_run_file)
+    @hmain(base_cfg_dir, simple_run_file)
     def test(a: int, b: str, c: float = 3.4) -> Tuple[int, str, float]:
         return a, b, c
 
@@ -21,38 +22,38 @@ def test_args_kwargs(base_cfg_dir: Path, simple_run_file: Path) -> None:
 
 
 def test_load_config_simple(base_cfg_dir: Path, simple_run_file: Path) -> None:
-    @hesiod.main(base_cfg_dir, simple_run_file)
+    @hmain(base_cfg_dir, simple_run_file)
     def test() -> None:
-        assert hesiod.get_param("group_1.param_a") == 1
-        assert hesiod.get_param("group_1.param_b") == 1.2
-        assert hesiod.get_param("group_2.param_c") is True
-        assert hesiod.get_param("group_2.param_d") == "param_d"
-        assert hesiod.get_param("group_3.param_e.param_f") == "param_f"
-        assert hesiod.get_param("group_3.param_e.param_g") == 2
-        assert hesiod.get_param("group_3.param_e.param_h") == 4.56
+        assert hcfg("group_1.param_a") == 1
+        assert hcfg("group_1.param_b") == 1.2
+        assert hcfg("group_2.param_c") is True
+        assert hcfg("group_2.param_d") == "param_d"
+        assert hcfg("group_3.param_e.param_f") == "param_f"
+        assert hcfg("group_3.param_e.param_g") == 2
+        assert hcfg("group_3.param_e.param_h") == 4.56
 
     test()
 
 
 def test_load_config_complex(base_cfg_dir: Path, complex_run_file: Path) -> None:
-    @hesiod.main(base_cfg_dir, complex_run_file)
+    @hmain(base_cfg_dir, complex_run_file)
     def test() -> None:
-        assert hesiod.get_param("dataset.name") == "cifar10"
-        assert hesiod.get_param("dataset.path") == "/path/to/cifar10"
-        assert hesiod.get_param("dataset.splits") == [70, 20, 10]
-        assert hesiod.get_param("dataset.classes") == [1, 5, 6]
-        assert hesiod.get_param("net.name") == "efficientnet"
-        assert hesiod.get_param("net.num_layers") == 20
-        assert hesiod.get_param("net.ckpt_path") == "/path/to/efficientnet"
-        assert hesiod.get_param("run_name") == "test"
-        assert hesiod.get_param("lr") == 5e-3
-        assert hesiod.get_param("optimizer") == "adam"
+        assert hcfg("dataset.name") == "cifar10"
+        assert hcfg("dataset.path") == "/path/to/cifar10"
+        assert hcfg("dataset.splits") == [70, 20, 10]
+        assert hcfg("dataset.classes") == [1, 5, 6]
+        assert hcfg("net.name") == "efficientnet"
+        assert hcfg("net.num_layers") == 20
+        assert hcfg("net.ckpt_path") == "/path/to/efficientnet"
+        assert hcfg("run_name") == "test"
+        assert hcfg("lr") == 5e-3
+        assert hcfg("optimizer") == "adam"
 
     test()
 
 
 def test_load_config_wrong(base_cfg_dir: Path, wrong_run_file: Path) -> None:
-    @hesiod.main(base_cfg_dir, wrong_run_file)
+    @hmain(base_cfg_dir, wrong_run_file)
     def test() -> None:
         pass
 
@@ -60,28 +61,42 @@ def test_load_config_wrong(base_cfg_dir: Path, wrong_run_file: Path) -> None:
         test()
 
 
-def test_get_param(base_cfg_dir: Path, simple_run_file: Path) -> None:
-    @hesiod.main(base_cfg_dir, simple_run_file)
+def test_hcfg(base_cfg_dir: Path, simple_run_file: Path) -> None:
+    @hmain(base_cfg_dir, simple_run_file)
     def test() -> None:
-        g1pa = hesiod.get_param("group_1.param_a", int)
+        g1pa = hcfg("group_1.param_a", int)
         assert g1pa == 1 and isinstance(g1pa, int)
-        g1pb = hesiod.get_param("group_1.param_b", float)
+        g1pb = hcfg("group_1.param_b", float)
         assert g1pb == 1.2 and isinstance(g1pb, float)
-        g2pc = hesiod.get_param("group_2.param_c", bool)
+        g2pc = hcfg("group_2.param_c", bool)
         assert g2pc is True and isinstance(g2pc, bool)
-        g2pd = hesiod.get_param("group_2.param_d", str)
+        g2pd = hcfg("group_2.param_d", str)
         assert g2pd == "param_d" and isinstance(g2pd, str)
 
         with pytest.raises(ValueError):
-            hesiod.get_param("group_1.param_a", float)
+            hcfg("group_1.param_a", float)
 
         with pytest.raises(ValueError):
-            hesiod.get_param("group_1.param_b", int)
+            hcfg("group_1.param_b", int)
 
         with pytest.raises(ValueError):
-            hesiod.get_param("group_2.param_c", str)
+            hcfg("group_2.param_c", str)
 
         with pytest.raises(ValueError):
-            hesiod.get_param("group_2.param_d", bool)
+            hcfg("group_2.param_d", bool)
+
+    test()
+
+
+def test_cfg_copy(base_cfg_dir: Path, complex_run_file: Path) -> None:
+    @hmain(base_cfg_dir, complex_run_file)
+    def test() -> None:
+        cfg_copy = get_cfg_copy()
+        assert cfg_copy == hcore._CFG
+        assert id(cfg_copy) != id(hcore._CFG)
+
+        cfg_copy["dataset"]["name"] = "new_dataset"
+        assert hcore._CFG["dataset"]["name"] == "cifar10"
+        assert cfg_copy != hcore._CFG
 
     test()
