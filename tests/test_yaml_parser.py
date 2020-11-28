@@ -4,13 +4,9 @@ from pathlib import Path
 from hesiod.cfgparse import YAMLConfigParser
 
 
-def test_load_cfg_file() -> None:
-    cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/cfg/dataset/cifar/cifar100.yaml"
-    base_cfg_dir = cwd / "tests/cfg"
-
-    parser = YAMLConfigParser(run_cfg_file, base_cfg_dir)
-    cfg = parser.load_cfg_file(run_cfg_file)
+def test_load_cfg_file(base_cfg_dir: Path, cifar10_cfg_file: Path) -> None:
+    parser = YAMLConfigParser(Path(), base_cfg_dir)
+    cfg = parser.load_cfg_file(cifar10_cfg_file)
 
     assert cfg["name"] == "cifar100"
     assert cfg["path"] == "/path/to/cifar100"
@@ -20,23 +16,15 @@ def test_load_cfg_file() -> None:
     assert cfg["splits"][2] == 10
 
 
-def test_load_cfg_file_exception() -> None:
-    cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/runs/run_wrong.yaml"
-    base_cfg_dir = cwd / "tests/cfg"
-
-    parser = YAMLConfigParser(run_cfg_file, base_cfg_dir)
+def test_load_cfg_file_exception(wrong_run_file: Path) -> None:
+    parser = YAMLConfigParser(Path(), Path())
 
     with pytest.raises(ValueError):
-        parser.load_cfg_file(run_cfg_file)
+        parser.load_cfg_file(wrong_run_file)
 
 
-def test_load_cfg_dir() -> None:
-    cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/runs/run_simple.yaml"
-    base_cfg_dir = cwd / "tests/cfg"
-
-    parser = YAMLConfigParser(run_cfg_file, base_cfg_dir)
+def test_load_cfg_dir(base_cfg_dir: Path) -> None:
+    parser = YAMLConfigParser(Path(), Path())
     cfg = parser.load_cfg_dir(base_cfg_dir)
 
     assert isinstance(cfg, dict)
@@ -95,12 +83,8 @@ def test_load_cfg_dir() -> None:
         assert cfg["net"]["resnet"][key]["ckpt_path"] == "/path/to/" + key
 
 
-def test_load_cfg() -> None:
-    cwd = Path(".").absolute()
-    run_cfg_file = cwd / "tests/runs/run_complex.yaml"
-    base_cfg_dir = cwd / "tests/cfg"
-
-    parser = YAMLConfigParser(run_cfg_file, base_cfg_dir)
+def test_load_cfg(base_cfg_dir: Path, complex_run_file: Path) -> None:
+    parser = YAMLConfigParser(complex_run_file, base_cfg_dir)
     cfg = parser.load_cfg()
 
     assert isinstance(cfg, dict)

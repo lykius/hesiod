@@ -1,9 +1,10 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractclassmethod, abstractmethod
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 from copy import deepcopy
 
 CFGT = Dict[str, Any]
+BASE_KEY = "base"
 
 
 class ConfigParser(ABC):
@@ -16,6 +17,15 @@ class ConfigParser(ABC):
         """
         self.run_cfg_file = run_cfg_file
         self.base_cfg_dir = base_cfg_dir
+
+    @abstractclassmethod
+    def get_managed_extensions(cls) -> List[str]:
+        """Get file extensions managed by the parser.
+
+        Returns:
+            List of the managed extensions.
+        """
+        ...
 
     @abstractmethod
     def read_cfg(self, cfg_file: Path) -> CFGT:
@@ -45,11 +55,11 @@ class ConfigParser(ABC):
         for cfg_dir in cfg_dirs:
             self.base_cfgs[cfg_dir.name] = self.load_cfg_dir(cfg_dir)
 
-        if "base" in cfg:
+        if BASE_KEY in cfg:
             cfg = self.replace_base(cfg, "")
 
         for cfg_key in cfg:
-            if isinstance(cfg[cfg_key], dict) and "base" in cfg[cfg_key]:
+            if isinstance(cfg[cfg_key], dict) and BASE_KEY in cfg[cfg_key]:
                 cfg[cfg_key] = self.replace_base(cfg[cfg_key], cfg_key)
 
         return cfg
@@ -119,7 +129,7 @@ class ConfigParser(ABC):
             base_cfg = self.base_cfgs
 
         new_cfg = deepcopy(cfg)
-        base_key = new_cfg["base"]
+        base_key = new_cfg[BASE_KEY]
 
         for k in base_key.split("."):
             if k not in base_cfg:
@@ -131,6 +141,6 @@ class ConfigParser(ABC):
             if k not in new_cfg:
                 new_cfg[k] = base_cfg[k]
 
-        del new_cfg["base"]
+        del new_cfg[BASE_KEY]
 
         return new_cfg

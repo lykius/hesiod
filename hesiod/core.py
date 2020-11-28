@@ -1,16 +1,19 @@
-from typing import Dict, Optional, cast, Callable, TypeVar, Type, Any
+from typing import Optional, cast, Callable, TypeVar, Type, Any
 import functools
 from pathlib import Path
+from copy import deepcopy
 
-from hesiod.cfgparse import get_parser
+from hesiod.cfgparse import CFGT, get_parser
 
 
-_CFG: Dict[str, Any] = {}
+_CFG: CFGT = {}
 T = TypeVar("T")
 Function = Callable[..., Any]
 
 
-def main(base_cfg_dir: Path, run_cfg_file: Optional[Path] = None) -> Callable[[Function], Function]:
+def hmain(
+    base_cfg_dir: Path, run_cfg_file: Optional[Path] = None
+) -> Callable[[Function], Function]:
     """Decorator for a given function.
 
     The decorator loads the configuration with the right parser
@@ -41,7 +44,7 @@ def main(base_cfg_dir: Path, run_cfg_file: Optional[Path] = None) -> Callable[[F
     return decorator
 
 
-def get_param(name: str, t: Optional[Type[T]] = None) -> T:
+def hcfg(name: str, t: Optional[Type[T]] = None) -> T:
     """Get requested parameter from global configuration.
 
     Args:
@@ -60,3 +63,12 @@ def get_param(name: str, t: Optional[Type[T]] = None) -> T:
     if t is not None and not isinstance(value, t):
         raise ValueError(f"{name} is of type {type(value)} but requested {t}")
     return cast(T, value)
+
+
+def get_cfg_copy() -> CFGT:
+    """Return a copy of the global configuration.
+
+    Returns:
+        A copy of the global configuration.
+    """
+    return deepcopy(_CFG)
