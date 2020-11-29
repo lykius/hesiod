@@ -8,12 +8,12 @@ from hesiod.cfgparse import CFGT, get_parser
 
 _CFG: CFGT = {}
 T = TypeVar("T")
-Function = Callable[..., Any]
+FUNCTION_T = Callable[..., Any]
 
 
 def hmain(
     base_cfg_dir: Path, run_cfg_file: Optional[Path] = None
-) -> Callable[[Function], Function]:
+) -> Callable[[FUNCTION_T], FUNCTION_T]:
     """Decorator for a given function.
 
     The decorator loads the configuration with the right parser
@@ -27,7 +27,7 @@ def hmain(
         Function wrapped in the decorator.
     """
 
-    def decorator(fn: Function) -> Function:
+    def decorator(fn: FUNCTION_T) -> FUNCTION_T:
         @functools.wraps(fn)
         def decorated_fn(*args: Any, **kwargs: Any) -> Any:
             global _CFG
