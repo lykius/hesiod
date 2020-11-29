@@ -6,9 +6,9 @@ net:
 group:
   subgroupa:
     p1: 2
-    p2: "test"
+    p2: "@FILE"
   subgroupb:
     p1: 5
     p2:
-      ca: "a"
+      ca: "@DATE"
       cb: "b"
