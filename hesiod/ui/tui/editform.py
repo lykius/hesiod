@@ -1,5 +1,4 @@
 from typing import Any, TYPE_CHECKING
-from npyscreen import TitleText, TitleFixedText, FixedText  # type: ignore
 
 from hesiod.ui.tui.baseform import BaseForm
 from hesiod.ui.tui.recapform import RecapForm
@@ -28,4 +27,5 @@ class EditForm(BaseForm):
         widgets = WidgetFactory.get_widgets(self.parent_app.template_cfg)
         for widget in widgets:
             self.add(widget[0], **widget[1])
-        self.add(FixedText, value="^S: save and show recap", rely=BaseForm.LAST_ROW)
+
+        self.set_hint("^S: save and show recap")

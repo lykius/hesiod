@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
+from npyscreen import FixedText  # type: ignore
 from npyscreen.fmForm import FormBaseNew  # type: ignore
 
 if TYPE_CHECKING:
@@ -22,13 +23,21 @@ class BaseForm(ABC, FormBaseNew):
         self.next_form = next_form
         FormBaseNew.__init__(self, **kwargs)
 
-    def define_key_bindings(self, key_bindings: Dict[str, Callable[[Any], Any]]) -> None:
+    def define_key_bindings(self, key_bindings: Dict[str, Callable]) -> None:
         """Define form key bindings.
 
         Args:
             key_bindings: dictionary with key bindings.
         """
         self.add_handlers(key_bindings)
+
+    def set_hint(self, s: str) -> None:
+        """Set hint text at the bottom of the form.
+
+        Args:
+            s: the text to be shown.
+        """
+        self.add(FixedText, value=s, editable=False, rely=BaseForm.LAST_ROW)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         """Save configuration and move to the next form."""
