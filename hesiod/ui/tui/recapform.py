@@ -2,6 +2,7 @@ from typing import Any, TYPE_CHECKING
 from npyscreen import FixedText  # type: ignore
 
 from hesiod.ui.tui.baseform import BaseForm
+from hesiod.ui.tui.wgtfactory import WidgetFactory
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI
@@ -23,4 +24,7 @@ class RecapForm(BaseForm):
 
     def create(self) -> None:
         """Add widgets to the form."""
+        widgets = WidgetFactory.get_widgets(self.parent_app.template_cfg)
+        for widget in widgets:
+            self.add(widget[0], editable=False, **widget[1])
         self.add(FixedText, value="^B: back - ^S: save", rely=BaseForm.LAST_ROW)
