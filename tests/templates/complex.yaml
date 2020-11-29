@@ -3,3 +3,12 @@ optimizer: "adamw"
 dataset: "@OPTIONS(dataset.cifar)"
 net:
   base: "efficientnet"
+group:
+  subgroupa:
+    p1: 2
+    p2: "test"
+  subgroupb:
+    p1: 5
+    p2:
+      ca: "a"
+      cb: "b"
