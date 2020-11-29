@@ -1,12 +1,15 @@
 from typing import Any, TYPE_CHECKING
-from npyscreen import Form, TitleText  # type: ignore
+from npyscreen import FixedText  # type: ignore
+
+from hesiod.ui.tui.baseform import BaseForm
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI
 
 
-class RecapForm(Form):
+class RecapForm(BaseForm):
     NAME = "RECAP"
+    TITLE = "Recap"
 
     def __init__(self, parent_app: "TUI", **kwargs: Any) -> None:
         """Create new form that show a recap of the run config.
@@ -14,21 +17,10 @@ class RecapForm(Form):
         Args:
             parent_app: the parent TUI.
         """
-        self.parent_app = parent_app
-        Form.__init__(self, **kwargs)
-        key_bindings = {"^B": self.back}
-        self.add_handlers(key_bindings)
+        BaseForm.__init__(self, parent_app, None, name=RecapForm.TITLE, **kwargs)
+        key_bindings = {"^B": self.back, "^S": self.save}
+        self.define_key_bindings(key_bindings)
 
     def create(self) -> None:
         """Add widgets to the form."""
-        self.add(TitleText, name="cfg:", value="test")
-
-    def back(self, *args: Any, **kwargs: Any) -> None:
-        self.going_back = True
-        self.parent_app.back()
-
-    def afterEditing(self) -> None:
-        """Set form to be shown when this one is closed."""
-        if not self.going_back:
-            self.parentApp.setNextForm(None)
-        self.going_back = False
+        self.add(FixedText, value="^B: back - ^S: save", rely=BaseForm.LAST_ROW)

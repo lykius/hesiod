@@ -21,11 +21,8 @@ class TUI(UI, NPSAppManaged):
 
     def onStart(self) -> None:
         """Register interface forms following npyscreen protocol."""
-        self.registerForm("MAIN", EditForm(self, name="Edit run config"))
-        self.registerForm(RecapForm.NAME, RecapForm(self, name="Recap (^B to go back)"))
-
-    def back(self) -> None:
-        self.switchFormPrevious()
+        self.registerForm("MAIN", EditForm(self))
+        self.registerForm(RecapForm.NAME, RecapForm(self))
 
     def show(self) -> CFGT:
         """Show the terminal user interface.
