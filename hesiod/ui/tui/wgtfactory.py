@@ -31,17 +31,6 @@ class WidgetParser(ABC):
     @staticmethod
     @abstractmethod
     def can_handle(x: Any) -> bool:
-        ...
-
-    @staticmethod
-    @abstractmethod
-    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
-        ...
-
-
-class LiteralWidgetParser(WidgetParser):
-    @staticmethod
-    def can_handle(x: Any) -> bool:
         """Check if the input config can be handled by this parser.
 
         Args:
@@ -50,11 +39,12 @@ class LiteralWidgetParser(WidgetParser):
         Returns:
             True if the input config is int, float, str or list.
         """
-        return type(x) in [int, float, str, list]
+        ...
 
     @staticmethod
+    @abstractmethod
     def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
-        """Parse a literal config and return a TitleText widget.
+        """Parse a literal config and return a list with the needed widgets.
 
         Args:
             cfg_key: name of the config.
@@ -62,8 +52,18 @@ class LiteralWidgetParser(WidgetParser):
             cfg_value: literal value of the config.
 
         Returns:
-            A list with the TitleText widget for the given config.
+            A list with the widgets for the given config.
         """
+        ...
+
+
+class LiteralWidgetParser(WidgetParser):
+    @staticmethod
+    def can_handle(x: Any) -> bool:
+        return type(x) in [int, float, str, list]
+
+    @staticmethod
+    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
         widgets: List[WIDGET_T] = []
 
         name = f"{prefix}{cfg_key}:"
@@ -75,28 +75,10 @@ class LiteralWidgetParser(WidgetParser):
 class DateWidgetParser(WidgetParser):
     @staticmethod
     def can_handle(x: Any) -> bool:
-        """Check if the input config can be handled by this parser.
-
-        Args:
-            x: the input config.
-
-        Returns:
-            True if the input config is a str that matches the DATE pattern.
-        """
         return isinstance(x, str) and WidgetParser.match(x, WidgetParser.DATE_PATTERN)
 
     @staticmethod
     def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
-        """Parse date config and returns a TitleDateCombo widget.
-
-        Args:
-            cfg_key: name of the config.
-            prefix: prefix for the name of the config.
-            cfg_value: the date config to be parsed.
-
-        Returns:
-            A list with the TitleDateCombo widget for the given config.
-        """
         widgets: List[WIDGET_T] = []
 
         name = f"{prefix}{cfg_key} (ENTER to select one):"
@@ -114,28 +96,10 @@ class DateWidgetParser(WidgetParser):
 class FileWidgetParser(WidgetParser):
     @staticmethod
     def can_handle(x: Any) -> bool:
-        """Check if the input config can be handled by this parser.
-
-        Args:
-            x: the input config.
-
-        Returns:
-            True if the input config is a str that matches the FILE pattern.
-        """
         return isinstance(x, str) and WidgetParser.match(x, WidgetParser.FILE_PATTERN)
 
     @staticmethod
     def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
-        """Parse file config and returns a TitleDateCombo widget.
-
-        Args:
-            cfg_key: name of the config.
-            prefix: prefix for the name of the config.
-            cfg_value: the date config to be parsed.
-
-        Returns:
-            A list with the TitleDateCombo widget for the given config.
-        """
         widgets: List[WIDGET_T] = []
 
         name = f"{prefix}{cfg_key} (TAB for autocompletion):"
@@ -153,28 +117,10 @@ class FileWidgetParser(WidgetParser):
 class OptionsWidgetParser(WidgetParser):
     @staticmethod
     def can_handle(x: Any) -> bool:
-        """Check if the input config can be handled by this parser.
-
-        Args:
-            x: the input config.
-
-        Returns:
-            True if the input config is a str that matches the OPTIONS pattern.
-        """
         return isinstance(x, str) and WidgetParser.match(x, WidgetParser.OPTIONS_PATTERN)
 
     @staticmethod
     def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
-        """Parse options config and returns a TitleSelectOne widget.
-
-        Args:
-            cfg_key: name of the config.
-            prefix: prefix for the name of the config.
-            cfg_value: the options config to be parsed.
-
-        Returns:
-            A list with the TitleSelectOne widget for the given config.
-        """
         widgets: List[WIDGET_T] = []
 
         name = f"{prefix}{cfg_key}:"
@@ -196,28 +142,10 @@ class OptionsWidgetParser(WidgetParser):
 class RecursiveWidgetParser(WidgetParser):
     @staticmethod
     def can_handle(x: Any) -> bool:
-        """Check if the input config can be handled by this parser.
-
-        Args:
-            x: the input config.
-
-        Returns:
-            True if the input config is a dict.
-        """
         return isinstance(x, dict)
 
     @staticmethod
     def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
-        """Parse a recursive config and returns the list of widgets associated to it.
-
-        Args:
-            cfg_key: name of the config.
-            prefix: prefix for the name of the config (used for recursive calls).
-            cfg_value: a dictionary with the config associated to cfg_key.
-
-        Returns:
-            A list with the widgets associated to the given recursive config.
-        """
         widgets: List[WIDGET_T] = []
 
         kwargs = {"name": f"{prefix}{cfg_key}:", "use_two_lines": False, "editable": False}
@@ -246,12 +174,11 @@ class WidgetFactory:
         parsers.append(DateWidgetParser)
         parsers.append(FileWidgetParser)
         parsers.append(OptionsWidgetParser)
-
         # recursive
         parsers.append(RecursiveWidgetParser)
-
         # literal
         parsers.append(LiteralWidgetParser)
+
         return parsers
 
     @staticmethod
