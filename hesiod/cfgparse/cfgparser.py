@@ -19,8 +19,9 @@ class ConfigParser(ABC):
         self.run_cfg_file = run_cfg_file
         self.base_cfg_dir = base_cfg_dir
 
-    @abstractclassmethod
-    def get_managed_extensions(cls) -> List[str]:
+    @staticmethod
+    @abstractmethod
+    def get_managed_extensions() -> List[str]:
         """Get file extensions managed by the parser.
 
         Returns:
@@ -29,7 +30,7 @@ class ConfigParser(ABC):
         ...
 
     @abstractmethod
-    def read_cfg(self, cfg_file: Path) -> CFGT:
+    def read_cfg_file(self, cfg_file: Path) -> CFGT:
         """Read config from a file using a specific protocol.
 
         Args:
@@ -77,7 +78,7 @@ class ConfigParser(ABC):
         Returns:
             The loaded config.
         """
-        cfg = self.read_cfg(cfg_file)
+        cfg = self.read_cfg_file(cfg_file)
 
         if not isinstance(cfg, dict):
             raise ValueError(f"Error in {cfg_file.name}: Config should be a dictionary.")

@@ -7,11 +7,11 @@ from hesiod.cfgparse.cfgparser import ConfigParser, CFGT
 
 
 class YAMLConfigParser(ConfigParser):
-    @classmethod
-    def get_managed_extensions(cls) -> List[str]:
+    @staticmethod
+    def get_managed_extensions() -> List[str]:
         return ["yaml"]
 
-    def read_cfg(self, cfg_file: Path) -> CFGT:
+    def read_cfg_file(self, cfg_file: Path) -> CFGT:
         with open(cfg_file, "rt") as f:
             cfg = yaml.safe_load(f)
         return cfg
