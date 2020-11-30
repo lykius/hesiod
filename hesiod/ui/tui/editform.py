@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 class EditForm(BaseForm):
     NAME = "MAIN"
     TITLE = "Edit configuration"
+    HINT = "^S: save and show recap"
 
     def __init__(self, parent_app: "TUI", **kwargs: Any) -> None:
         """Create new form that allows editing the run configuration.
@@ -28,4 +29,4 @@ class EditForm(BaseForm):
         for widget in widgets:
             self.add(widget[0], **widget[1])
 
-        self.set_hint("^S: save and show recap")
+        self.set_hint(EditForm.HINT)

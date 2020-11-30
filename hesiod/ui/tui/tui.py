@@ -21,7 +21,7 @@ class TUI(UI, NPSAppManaged):
 
     def onStart(self) -> None:
         """Register interface forms following npyscreen protocol."""
-        self.registerForm("MAIN", EditForm(self))
+        self.registerForm(EditForm.NAME, EditForm(self))
         self.registerForm(RecapForm.NAME, RecapForm(self))
 
     def show(self) -> CFGT:

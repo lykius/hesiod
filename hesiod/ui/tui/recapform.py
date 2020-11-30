@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 class RecapForm(BaseForm):
     NAME = "RECAP"
     TITLE = "Recap"
+    HINT = "^B: back - ^S: save"
 
     def __init__(self, parent_app: "TUI", **kwargs: Any) -> None:
         """Create new form that show a recap of the run config.
@@ -34,4 +35,4 @@ class RecapForm(BaseForm):
         run_name_widget = WidgetFactory.get_literal_widget("RUN NAME:", "")
         self.add(run_name_widget[0], **run_name_widget[1])
 
-        self.set_hint("^B: back - ^S: save")
+        self.set_hint(RecapForm.HINT)
