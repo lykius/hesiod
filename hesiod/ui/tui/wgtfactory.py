@@ -1,17 +1,15 @@
-from typing import Any, Callable, Dict, List, Tuple, Union
-from npyscreen.wgwidget import Widget  # type: ignore
-from npyscreen import TitleText, TitleDateCombo, TitleFilename, TitleSelectOne  # type: ignore
+from abc import ABC, abstractmethod
+from typing import Any, Callable, Dict, List, Tuple, Type, Union
 import re
+from npyscreen import TitleText, TitleDateCombo, TitleFilename, TitleSelectOne  # type: ignore
+from npyscreen.wgwidget import Widget  # type: ignore
 
 from hesiod.cfgparse import CFGT
 
 WIDGET_T = Tuple[Callable[..., Widget], Dict[str, Any]]
-PARSER_CONDITION_T = Callable[[Any], bool]
-PARSER_T = Callable[[str, str, Any], List[WIDGET_T]]
-PARSERS_T = List[Tuple[PARSER_CONDITION_T, PARSER_T]]
 
 
-class WidgetFactory:
+class WidgetParser(ABC):
     PREFIX = "    "
     DATE_PATTERN = "@DATE"
     FILE_PATTERN = "@FILE"
@@ -31,88 +29,31 @@ class WidgetFactory:
         return bool(re.match(pattern, s))
 
     @staticmethod
-    def get_parsers() -> PARSERS_T:
-        """Create a list of parsers, along with the conditions to trigger them.
-
-        Important: conditions are checked in the same order in which they
-        are inserted into the list.
-
-        Returns:
-            The list of parsers and their conditions.
-        """
-        parsers: PARSERS_T = []
-
-        # specials
-        condition = lambda x: (
-            isinstance(x, str) and WidgetFactory.match(x, WidgetFactory.DATE_PATTERN)
-        )
-        parsers.append((condition, WidgetFactory.parse_date))
-
-        condition = lambda x: (
-            isinstance(x, str) and WidgetFactory.match(x, WidgetFactory.FILE_PATTERN)
-        )
-        parsers.append((condition, WidgetFactory.parse_file))
-
-        condition = lambda x: (
-            isinstance(x, str) and WidgetFactory.match(x, WidgetFactory.OPTIONS_PATTERN)
-        )
-        parsers.append((condition, WidgetFactory.parse_options))
-
-        # recursive
-        condition = lambda x: isinstance(x, dict)
-        parsers.append((condition, WidgetFactory.parse_recursive))
-
-        # literal
-        condition = lambda x: type(x) in [int, float, str, list]
-        parsers.append((condition, WidgetFactory.parse_literal))
-        return parsers
+    @abstractmethod
+    def can_handle(x: Any) -> bool:
+        ...
 
     @staticmethod
-    def get_widgets(cfg: CFGT, prefix: str = "") -> List[WIDGET_T]:
-        """Prepare widgets for a given config.
+    @abstractmethod
+    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
+        ...
+
+
+class LiteralWidgetParser(WidgetParser):
+    @staticmethod
+    def can_handle(x: Any) -> bool:
+        """Check if the input config can be handled by this parser.
 
         Args:
-            cfg: the config.
-            prefix: prefix for the name of the returned widgets.
+            x: the input config.
 
         Returns:
-            The list of the widgets for the given config.
+            True if the input config is int, float, str or list.
         """
-        widgets: List[WIDGET_T] = []
-        parsers = WidgetFactory.get_parsers()
-
-        for k in cfg:
-            for condition, parser in parsers:
-                if condition(cfg[k]):
-                    widgets.extend(parser(k, prefix, cfg[k]))
-                    break
-
-        return widgets
+        return type(x) in [int, float, str, list]
 
     @staticmethod
-    def get_literal_widget(name: str, value: Union[int, float, str, list]) -> WIDGET_T:
-        """Get a TitleText widget for a literal config.
-
-        Args:
-            name: name of the config.
-            value: value for the config.
-
-        Returns:
-            The TitleText widget for the given config.
-        """
-        begin_entry_at = len(name) + 1
-        kwargs = {
-            "name": name,
-            "value": str(value),
-            "begin_entry_at": begin_entry_at,
-            "use_two_lines": False,
-        }
-        return (TitleText, kwargs)
-
-    @staticmethod
-    def parse_literal(
-        cfg_key: str, prefix: str, cfg_value: Union[int, float, str, list]
-    ) -> List[WIDGET_T]:
+    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
         """Parse a literal config and return a TitleText widget.
 
         Args:
@@ -130,30 +71,22 @@ class WidgetFactory:
 
         return widgets
 
+
+class DateWidgetParser(WidgetParser):
     @staticmethod
-    def parse_recursive(cfg_key: str, prefix: str, cfg_value: CFGT) -> List[WIDGET_T]:
-        """Parse a recursive config and returns the list of widgets associated to it.
+    def can_handle(x: Any) -> bool:
+        """Check if the input config can be handled by this parser.
 
         Args:
-            cfg_key: name of the config.
-            prefix: prefix for the name of the config (used for recursive calls).
-            cfg_value: a dictionary with the config associated to cfg_key.
+            x: the input config.
 
         Returns:
-            A list with the widgets associated to the given recursive config.
+            True if the input config is a str that matches the DATE pattern.
         """
-        widgets: List[WIDGET_T] = []
-
-        kwargs = {"name": f"{prefix}{cfg_key}:", "use_two_lines": False, "editable": False}
-        widgets.append((TitleText, kwargs))
-
-        children_prefix = f"{prefix}{WidgetFactory.PREFIX}"
-        widgets.extend(WidgetFactory.get_widgets(cfg_value, prefix=children_prefix))
-
-        return widgets
+        return isinstance(x, str) and WidgetParser.match(x, WidgetParser.DATE_PATTERN)
 
     @staticmethod
-    def parse_date(cfg_key: str, prefix: str, cfg_value: str) -> List[WIDGET_T]:
+    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
         """Parse date config and returns a TitleDateCombo widget.
 
         Args:
@@ -177,8 +110,22 @@ class WidgetFactory:
 
         return widgets
 
+
+class FileWidgetParser(WidgetParser):
     @staticmethod
-    def parse_file(cfg_key: str, prefix: str, cfg_value: str) -> List[WIDGET_T]:
+    def can_handle(x: Any) -> bool:
+        """Check if the input config can be handled by this parser.
+
+        Args:
+            x: the input config.
+
+        Returns:
+            True if the input config is a str that matches the FILE pattern.
+        """
+        return isinstance(x, str) and WidgetParser.match(x, WidgetParser.FILE_PATTERN)
+
+    @staticmethod
+    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
         """Parse file config and returns a TitleDateCombo widget.
 
         Args:
@@ -202,8 +149,22 @@ class WidgetFactory:
 
         return widgets
 
+
+class OptionsWidgetParser(WidgetParser):
     @staticmethod
-    def parse_options(cfg_key: str, prefix: str, cfg_value: str) -> List[WIDGET_T]:
+    def can_handle(x: Any) -> bool:
+        """Check if the input config can be handled by this parser.
+
+        Args:
+            x: the input config.
+
+        Returns:
+            True if the input config is a str that matches the OPTIONS pattern.
+        """
+        return isinstance(x, str) and WidgetParser.match(x, WidgetParser.OPTIONS_PATTERN)
+
+    @staticmethod
+    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
         """Parse options config and returns a TitleSelectOne widget.
 
         Args:
@@ -230,3 +191,107 @@ class WidgetFactory:
         widgets.append((TitleSelectOne, kwargs))
 
         return widgets
+
+
+class RecursiveWidgetParser(WidgetParser):
+    @staticmethod
+    def can_handle(x: Any) -> bool:
+        """Check if the input config can be handled by this parser.
+
+        Args:
+            x: the input config.
+
+        Returns:
+            True if the input config is a dict.
+        """
+        return isinstance(x, dict)
+
+    @staticmethod
+    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
+        """Parse a recursive config and returns the list of widgets associated to it.
+
+        Args:
+            cfg_key: name of the config.
+            prefix: prefix for the name of the config (used for recursive calls).
+            cfg_value: a dictionary with the config associated to cfg_key.
+
+        Returns:
+            A list with the widgets associated to the given recursive config.
+        """
+        widgets: List[WIDGET_T] = []
+
+        kwargs = {"name": f"{prefix}{cfg_key}:", "use_two_lines": False, "editable": False}
+        widgets.append((TitleText, kwargs))
+
+        children_prefix = f"{prefix}{WidgetParser.PREFIX}"
+        widgets.extend(WidgetFactory.get_widgets(cfg_value, prefix=children_prefix))
+
+        return widgets
+
+
+class WidgetFactory:
+    @staticmethod
+    def get_parsers() -> List[Type[WidgetParser]]:
+        """Create a list of widget parsers.
+
+        Important: parsers are checked in the same order in which they
+        are inserted into the list.
+
+        Returns:
+            The list of widget parsers.
+        """
+        parsers: List[Type[WidgetParser]] = []
+
+        # specials
+        parsers.append(DateWidgetParser)
+        parsers.append(FileWidgetParser)
+        parsers.append(OptionsWidgetParser)
+
+        # recursive
+        parsers.append(RecursiveWidgetParser)
+
+        # literal
+        parsers.append(LiteralWidgetParser)
+        return parsers
+
+    @staticmethod
+    def get_widgets(cfg: CFGT, prefix: str = "") -> List[WIDGET_T]:
+        """Prepare widgets for a given config.
+
+        Args:
+            cfg: the config.
+            prefix: prefix for the name of the returned widgets.
+
+        Returns:
+            The list of the widgets for the given config.
+        """
+        widgets: List[WIDGET_T] = []
+        parsers = WidgetFactory.get_parsers()
+
+        for k in cfg:
+            for parser in parsers:
+                if parser.can_handle(cfg[k]):
+                    widgets.extend(parser.parse(k, prefix, cfg[k]))
+                    break
+
+        return widgets
+
+    @staticmethod
+    def get_literal_widget(name: str, value: Union[int, float, str, list]) -> WIDGET_T:
+        """Get a TitleText widget for a literal config.
+
+        Args:
+            name: name of the config.
+            value: value for the config.
+
+        Returns:
+            The TitleText widget for the given config.
+        """
+        begin_entry_at = len(name) + 1
+        kwargs = {
+            "name": name,
+            "value": str(value),
+            "begin_entry_at": begin_entry_at,
+            "use_two_lines": False,
+        }
+        return (TitleText, kwargs)
