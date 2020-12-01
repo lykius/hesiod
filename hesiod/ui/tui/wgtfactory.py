@@ -147,7 +147,7 @@ class OptionsWidgetParser(WidgetParser):
 
         base_key = cfg_value.split("(")[-1].split(")")[0]
         if len(base_key) == 0:
-            raise ValueError(f"Base key inside @OPTIONS cannot be empty.")
+            raise ValueError("Base key inside @OPTIONS cannot be empty.")
         base_keys = base_key.split(".")
 
         root = base_cfg_dir
