@@ -58,11 +58,11 @@ class ConfigParser(ABC):
             self.base_cfgs[cfg_dir.name] = self.load_cfg_dir(cfg_dir)
 
         if BASE_KEY in cfg:
-            cfg = self.replace_base(cfg, "")
+            cfg = self.replace_base(cfg)
 
         for cfg_key in cfg:
             if isinstance(cfg[cfg_key], dict) and BASE_KEY in cfg[cfg_key]:
-                cfg[cfg_key] = self.replace_base(cfg[cfg_key], cfg_key)
+                cfg[cfg_key] = self.replace_base(cfg[cfg_key])
 
         return cfg
 
@@ -110,12 +110,11 @@ class ConfigParser(ABC):
 
         return cfg
 
-    def replace_base(self, cfg: CFGT, cfg_name: str) -> CFGT:
+    def replace_base(self, cfg: CFGT) -> CFGT:
         """Replace base placeholder in a given config.
 
         Args:
             cfg: config with base placeholder.
-            cfg_name: name of the config.
 
         Raises:
             ValueError: if it is not possible to retrieve the base config.
@@ -123,20 +122,13 @@ class ConfigParser(ABC):
         Returns:
             The config with the base placeholder replaced.
         """
-        if len(cfg_name) > 0:
-            if cfg_name not in self.base_cfgs:
-                raise ValueError(f"Config error: cannot find base {cfg_name}")
-            base_cfg = self.base_cfgs[cfg_name]
-        else:
-            base_cfg = self.base_cfgs
-
         new_cfg = deepcopy(cfg)
         base_key = new_cfg[BASE_KEY]
+        base_cfg = self.base_cfgs
 
         for k in base_key.split("."):
             if k not in base_cfg:
-                base_name = f"{cfg_name}.{base_key}" if len(cfg_name) > 0 else base_key
-                raise ValueError(f"Config error: cannot find base {base_name}")
+                raise ValueError(f"Config error: cannot find base {base_key}")
             base_cfg = base_cfg[k]
 
         for k in base_cfg:

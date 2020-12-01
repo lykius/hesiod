@@ -2,7 +2,7 @@ base: "var"
 optimizer: "adamw"
 dataset: "@OPTIONS(dataset.cifar)"
 net:
-  base: "efficientnet"
+  base: "net.efficientnet"
 group:
   subgroupa:
     p1: 2

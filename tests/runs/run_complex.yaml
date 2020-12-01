@@ -1,5 +1,5 @@
 dataset:
-  base: "cifar.cifar10"
+  base: "dataset.cifar.cifar10"
   classes:
     - 1
     - 5
@@ -8,7 +8,7 @@ dataset:
 run_name: "test"
 
 net:
-  base: "efficientnet"
+  base: "net.efficientnet"
   freeze: false
 
 base: "var"
