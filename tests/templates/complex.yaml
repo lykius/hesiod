@@ -1,6 +1,6 @@
 base: "var"
 optimizer: "adamw"
-dataset: "@OPTIONS(dataset.cifar)"
+dataset: "@OPTIONS(dataset)"
 net:
   base: "net.efficientnet"
 group:

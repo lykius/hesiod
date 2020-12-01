@@ -25,7 +25,9 @@ class EditForm(BaseForm):
 
     def create(self) -> None:
         """Add widgets to the form."""
-        widgets = WidgetFactory.get_widgets(self.parent_app.template_cfg)
+        template_cfg = self.parent_app.template_cfg
+        base_cfg_dir = self.parent_app.base_cfg_dir
+        widgets = WidgetFactory.get_widgets(template_cfg, base_cfg_dir)
         for widget in widgets:
             self.add(widget[0], **widget[1])
 

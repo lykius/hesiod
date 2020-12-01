@@ -10,6 +10,7 @@ class UI(ABC):
         ext = template_file.name.split(".")[-1]
         self.parser = get_parser(ext)(template_file, base_cfg_dir)
         self.template_cfg = self.parser.load_cfg()
+        self.base_cfg_dir = base_cfg_dir
 
     @abstractmethod
     def show(self) -> CFGT:

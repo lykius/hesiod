@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Tuple, Type, Union
+from pathlib import Path
 import re
 from npyscreen import TitleText, TitleDateCombo, TitleFilename, TitleSelectOne  # type: ignore
 from npyscreen.wgwidget import Widget  # type: ignore
@@ -43,13 +44,14 @@ class WidgetParser(ABC):
 
     @staticmethod
     @abstractmethod
-    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
+    def parse(cfg_key: str, prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
         """Parse a literal config and return a list with the needed widgets.
 
         Args:
             cfg_key: name of the config.
             prefix: prefix for the name of the config.
             cfg_value: literal value of the config.
+            base_cfg_dir: path to the base configs directory.
 
         Returns:
             A list with the widgets for the given config.
@@ -63,7 +65,7 @@ class LiteralWidgetParser(WidgetParser):
         return type(x) in [int, float, str, list]
 
     @staticmethod
-    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
+    def parse(cfg_key: str, prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
         widgets: List[WIDGET_T] = []
 
         name = f"{prefix}{cfg_key}:"
@@ -78,7 +80,7 @@ class DateWidgetParser(WidgetParser):
         return isinstance(x, str) and WidgetParser.match(x, WidgetParser.DATE_PATTERN)
 
     @staticmethod
-    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
+    def parse(cfg_key: str, prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
         widgets: List[WIDGET_T] = []
 
         name = f"{prefix}{cfg_key} (ENTER to select one):"
@@ -99,7 +101,7 @@ class FileWidgetParser(WidgetParser):
         return isinstance(x, str) and WidgetParser.match(x, WidgetParser.FILE_PATTERN)
 
     @staticmethod
-    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
+    def parse(cfg_key: str, prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
         widgets: List[WIDGET_T] = []
 
         name = f"{prefix}{cfg_key} (TAB for autocompletion):"
@@ -120,11 +122,47 @@ class OptionsWidgetParser(WidgetParser):
         return isinstance(x, str) and WidgetParser.match(x, WidgetParser.OPTIONS_PATTERN)
 
     @staticmethod
-    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
+    def get_files_list(dir: Path) -> List[Path]:
+        """Returns the list of files contained in the given directory
+        and in all its subdirectories.
+
+        Args:
+            dir: the directory to be searched.
+
+        Returns:
+            The list of files.
+        """
+        files: List[Path] = []
+        children = [p for p in dir.glob("*")]
+        for p in children:
+            if p.is_file():
+                files.append(p)
+            elif p.is_dir():
+                files.extend(OptionsWidgetParser.get_files_list(p))
+        return files
+
+    @staticmethod
+    def parse(cfg_key: str, prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
         widgets: List[WIDGET_T] = []
 
+        base_key = cfg_value.split("(")[-1].split(")")[0]
+        if len(base_key) == 0:
+            raise ValueError(f"Base key inside @OPTIONS cannot be empty.")
+        base_keys = base_key.split(".")
+
+        root = base_cfg_dir
+        for k in base_keys:
+            subdirs = [d for d in root.glob(k) if d.is_dir()]
+            if len(subdirs) != 1:
+                raise ValueError(f"Cannot find base key {base_key}")
+            root = subdirs[0]
+
+        files = sorted(OptionsWidgetParser.get_files_list(root))
+        values = [f.stem for f in files]
+        if len(values) == 0:
+            raise ValueError(f"Cannot find any option for the base key {base_key}")
+
         name = f"{prefix}{cfg_key}:"
-        values = ["option1", "option2", "option3"]
         kwargs = {
             "name": name,
             "values": values,
@@ -145,14 +183,14 @@ class RecursiveWidgetParser(WidgetParser):
         return isinstance(x, dict)
 
     @staticmethod
-    def parse(cfg_key: str, prefix: str, cfg_value: Any) -> List[WIDGET_T]:
+    def parse(cfg_key: str, prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
         widgets: List[WIDGET_T] = []
 
         kwargs = {"name": f"{prefix}{cfg_key}:", "use_two_lines": False, "editable": False}
         widgets.append((TitleText, kwargs))
 
         children_prefix = f"{prefix}{WidgetParser.PREFIX}"
-        widgets.extend(WidgetFactory.get_widgets(cfg_value, prefix=children_prefix))
+        widgets.extend(WidgetFactory.get_widgets(cfg_value, base_cfg_dir, prefix=children_prefix))
 
         return widgets
 
@@ -182,11 +220,12 @@ class WidgetFactory:
         return parsers
 
     @staticmethod
-    def get_widgets(cfg: CFGT, prefix: str = "") -> List[WIDGET_T]:
+    def get_widgets(cfg: CFGT, base_cfg_dir: Path, prefix: str = "") -> List[WIDGET_T]:
         """Prepare widgets for a given config.
 
         Args:
             cfg: the config.
+            base_cfg_dir: path to the base configs directory.
             prefix: prefix for the name of the returned widgets.
 
         Returns:
@@ -198,7 +237,7 @@ class WidgetFactory:
         for k in cfg:
             for parser in parsers:
                 if parser.can_handle(cfg[k]):
-                    widgets.extend(parser.parse(k, prefix, cfg[k]))
+                    widgets.extend(parser.parse(k, prefix, cfg[k], base_cfg_dir))
                     break
 
         return widgets
