@@ -1,7 +1,7 @@
-from npyscreen import NPSAppManaged  # type: ignore
 from pathlib import Path
+from npyscreen import NPSAppManaged  # type: ignore
 
-from hesiod.cfgparse import CFGT
+from hesiod.cfgparse import CFG_T
 from hesiod.ui.ui import UI
 from hesiod.ui.tui.editform import EditForm
 from hesiod.ui.tui.recapform import RecapForm
@@ -17,14 +17,14 @@ class TUI(UI, NPSAppManaged):
         """
         UI.__init__(self, template_file, base_cfg_dir)
         NPSAppManaged.__init__(self)
-        self.run_cfg: CFGT = {}
+        self.run_cfg: CFG_T = {}
 
     def onStart(self) -> None:
         """Register interface forms following npyscreen protocol."""
-        self.registerForm(EditForm.NAME, EditForm(self))
-        self.registerForm(RecapForm.NAME, RecapForm(self))
+        self.addForm(EditForm.NAME, EditForm, self)
+        self.addFormClass(RecapForm.NAME, RecapForm, self)
 
-    def show(self) -> CFGT:
+    def show(self) -> CFG_T:
         """Show the terminal user interface.
 
         Returns:

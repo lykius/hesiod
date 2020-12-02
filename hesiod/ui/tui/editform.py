@@ -1,8 +1,12 @@
-from typing import Any, TYPE_CHECKING
+from typing import Any, List, Optional, TYPE_CHECKING, Tuple
+from weakref import CallableProxyType
 
+from hesiod.cfgparse.cfgparser import CFG_T
 from hesiod.ui.tui.baseform import BaseForm
 from hesiod.ui.tui.recapform import RecapForm
 from hesiod.ui.tui.wgtfactory import WidgetFactory
+from hesiod.ui.tui.wgthandler import WidgetHandler
+
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI
@@ -27,8 +31,21 @@ class EditForm(BaseForm):
         """Add widgets to the form."""
         template_cfg = self.parent_app.template_cfg
         base_cfg_dir = self.parent_app.base_cfg_dir
-        widgets = WidgetFactory.get_widgets(template_cfg, base_cfg_dir)
-        for widget in widgets:
-            self.add(widget[0], **widget[1])
+        self.widgets: List[Tuple[Optional[WidgetHandler], CallableProxyType]] = []
+        for handler, widget, wargs in WidgetFactory.get_widgets(template_cfg, base_cfg_dir):
+            w = self.add(widget, **wargs)
+            self.widgets.append((handler, w))
 
         self.set_hint(EditForm.HINT)
+
+    def before_exit(self) -> None:
+        """Save the config edited by the user in the parent app
+        when exiting the form.
+        """
+        edited_cfg: CFG_T = {}
+
+        for handler, widget in self.widgets:
+            if handler is not None:
+                edited_cfg = handler.update_cfg(edited_cfg, widget)
+
+        self.parent_app.run_cfg.update(edited_cfg)

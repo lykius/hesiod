@@ -39,8 +39,13 @@ class BaseForm(ABC, FormBaseNew):
         """
         self.add(FixedText, value=s, editable=False, rely=BaseForm.LAST_ROW)
 
+    def before_exit(self) -> None:
+        """Perform final operations when exiting the form."""
+        pass
+
     def save(self, *args: Any, **kwargs: Any) -> None:
-        """Save configuration and move to the next form."""
+        """Exit this form and move to the next one."""
+        self.before_exit()
         self.parent_app.switchFormNow()
 
     def back(self, *args: Any, **kwargs: Any) -> None:
