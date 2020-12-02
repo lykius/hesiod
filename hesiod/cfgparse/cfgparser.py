@@ -3,8 +3,9 @@ from pathlib import Path
 from typing import Any, Dict, List
 from copy import deepcopy
 
-CFGT = Dict[str, Any]
+CFG_T = Dict[str, Any]
 BASE_KEY = "base"
+RUN_NAME_KEY = "run_name"
 
 
 class ConfigParser(ABC):
@@ -30,7 +31,7 @@ class ConfigParser(ABC):
         ...
 
     @abstractmethod
-    def read_cfg_file(self, cfg_file: Path) -> CFGT:
+    def read_cfg_file(self, cfg_file: Path) -> CFG_T:
         """Read config from a file using a specific protocol.
 
         Args:
@@ -41,7 +42,7 @@ class ConfigParser(ABC):
         """
         ...
 
-    def load_cfg(self) -> CFGT:
+    def load_cfg(self) -> CFG_T:
         """Load config replacing "bases" with proper values.
 
         Returns:
@@ -49,7 +50,7 @@ class ConfigParser(ABC):
         """
         cfg = self.load_cfg_file(self.run_cfg_file)
 
-        self.base_cfgs: Dict[str, CFGT] = {}
+        self.base_cfgs: Dict[str, CFG_T] = {}
         cfg_files = [p for p in self.base_cfg_dir.glob("*.yaml")]
         for cfg_file in cfg_files:
             self.base_cfgs[cfg_file.stem] = self.load_cfg_file(cfg_file)
@@ -66,7 +67,7 @@ class ConfigParser(ABC):
 
         return cfg
 
-    def load_cfg_file(self, cfg_file: Path) -> CFGT:
+    def load_cfg_file(self, cfg_file: Path) -> CFG_T:
         """Load config from a given file.
 
         Args:
@@ -89,7 +90,7 @@ class ConfigParser(ABC):
 
         return cfg
 
-    def load_cfg_dir(self, cfg_dir: Path) -> Dict[str, CFGT]:
+    def load_cfg_dir(self, cfg_dir: Path) -> Dict[str, CFG_T]:
         """Load configs recursively from a given directory.
 
         Args:
@@ -110,7 +111,7 @@ class ConfigParser(ABC):
 
         return cfg
 
-    def replace_base(self, cfg: CFGT) -> CFGT:
+    def replace_base(self, cfg: CFG_T) -> CFG_T:
         """Replace base placeholder in a given config.
 
         Args:

@@ -1,6 +1,6 @@
 from typing import Callable, Dict
 
-from hesiod.cfgparse.cfgparser import ConfigParser, CFGT
+from hesiod.cfgparse.cfgparser import ConfigParser, CFG_T, BASE_KEY, RUN_NAME_KEY
 from hesiod.cfgparse.yamlparser import YAMLConfigParser
 
 
@@ -16,4 +16,4 @@ def get_parser(ext: str) -> Callable[..., ConfigParser]:
     return parsers_table[ext]
 
 
-__all__ = ["get_parser", "CFGT"]
+__all__ = ["get_parser", "CFG_T", "BASE_KEY", "RUN_NAME_KEY"]

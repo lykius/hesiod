@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from hesiod.cfgparse import CFGT, get_parser
+from hesiod.cfgparse import CFG_T, get_parser
 
 
 class UI(ABC):
@@ -13,5 +13,5 @@ class UI(ABC):
         self.base_cfg_dir = base_cfg_dir
 
     @abstractmethod
-    def show(self) -> CFGT:
+    def show(self) -> CFG_T:
         ...

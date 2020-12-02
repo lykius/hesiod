@@ -3,10 +3,10 @@ import functools
 from pathlib import Path
 from copy import deepcopy
 
-from hesiod.cfgparse import CFGT, get_parser
+from hesiod.cfgparse import CFG_T, get_parser
 
 
-_CFG: CFGT = {}
+_CFG: CFG_T = {}
 T = TypeVar("T")
 FUNCTION_T = Callable[..., Any]
 
@@ -65,7 +65,7 @@ def hcfg(name: str, t: Optional[Type[T]] = None) -> T:
     return cast(T, value)
 
 
-def get_cfg_copy() -> CFGT:
+def get_cfg_copy() -> CFG_T:
     """Return a copy of the global configuration.
 
     Returns:
