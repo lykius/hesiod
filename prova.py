@@ -8,7 +8,7 @@ base_cfg_dir = Path("tests/cfg")
 
 
 @hmain(base_cfg_dir, template_cfg_file=template_file)
-def test():
+def test() -> None:
     cfg = get_cfg_copy()
     pprint(cfg)
 
