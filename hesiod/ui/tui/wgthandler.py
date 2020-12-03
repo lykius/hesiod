@@ -1,8 +1,8 @@
-from typing import Any, Dict, Type, Union
 from copy import deepcopy
+from typing import Any, Dict, Type, Union
 from weakref import CallableProxyType
 
-from hesiod.cfgparse import CFG_T, BASE_KEY
+from hesiod.cfgparse import BASE_KEY, CFG_T
 
 
 class WidgetHandler:

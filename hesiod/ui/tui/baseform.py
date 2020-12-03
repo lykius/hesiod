@@ -1,5 +1,6 @@
 from abc import ABC
-from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
+
 from npyscreen import FixedText  # type: ignore
 from npyscreen.fmForm import FormBaseNew  # type: ignore
 

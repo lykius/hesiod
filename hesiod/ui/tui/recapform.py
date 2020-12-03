@@ -1,4 +1,4 @@
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from hesiod.cfgparse import RUN_NAME_KEY
 from hesiod.ui.tui.baseform import BaseForm

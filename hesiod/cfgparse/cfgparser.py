@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, List
-from copy import deepcopy
 
 CFG_T = Dict[str, Any]
 BASE_KEY = "base"

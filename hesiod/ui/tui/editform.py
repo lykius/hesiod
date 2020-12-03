@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 from weakref import CallableProxyType
 
 from hesiod.cfgparse.cfgparser import CFG_T
@@ -6,7 +6,6 @@ from hesiod.ui.tui.baseform import BaseForm
 from hesiod.ui.tui.recapform import RecapForm
 from hesiod.ui.tui.wgtfactory import WidgetFactory
 from hesiod.ui.tui.wgthandler import WidgetHandler
-
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI

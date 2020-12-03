@@ -1,10 +1,9 @@
-from typing import Optional, cast, Callable, TypeVar, Type, Any
 import functools
-from pathlib import Path
 from copy import deepcopy
+from pathlib import Path
+from typing import Any, Callable, Optional, Type, TypeVar, cast
 
 from hesiod.cfgparse import CFG_T, get_parser
-
 
 _CFG: CFG_T = {}
 T = TypeVar("T")

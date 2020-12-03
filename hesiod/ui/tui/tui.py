@@ -1,10 +1,11 @@
 from pathlib import Path
+
 from npyscreen import NPSAppManaged  # type: ignore
 
 from hesiod.cfgparse import CFG_T
-from hesiod.ui.ui import UI
 from hesiod.ui.tui.editform import EditForm
 from hesiod.ui.tui.recapform import RecapForm
+from hesiod.ui.ui import UI
 
 
 class TUI(UI, NPSAppManaged):

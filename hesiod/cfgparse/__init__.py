@@ -1,6 +1,6 @@
 from typing import Callable, Dict
 
-from hesiod.cfgparse.cfgparser import ConfigParser, CFG_T, BASE_KEY, RUN_NAME_KEY
+from hesiod.cfgparse.cfgparser import BASE_KEY, CFG_T, RUN_NAME_KEY, ConfigParser
 from hesiod.cfgparse.yamlparser import YAMLConfigParser
 
 

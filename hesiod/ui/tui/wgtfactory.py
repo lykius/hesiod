@@ -1,13 +1,14 @@
+import re
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 from pathlib import Path
-import re
-from npyscreen import TitleText, TitleDateCombo, TitleFilename, TitleSelectOne  # type: ignore
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+
+from npyscreen import TitleDateCombo, TitleFilename, TitleSelectOne, TitleText  # type: ignore
 from npyscreen.wgwidget import Widget  # type: ignore
 
 from hesiod.cfgparse import CFG_T
-from hesiod.ui.tui.wgthandler import WidgetHandler, LiteralWidgetHandler, OptionsWidgetHandler
+from hesiod.ui.tui.wgthandler import LiteralWidgetHandler, OptionsWidgetHandler, WidgetHandler
 
 WIDGET_T = Tuple[Optional[WidgetHandler], Callable[..., Widget], Dict[str, Any]]
 

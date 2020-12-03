@@ -1,9 +1,10 @@
-import pytest
-from typing import Tuple
 from pathlib import Path
+from typing import Tuple
 
-from hesiod import __version__, hmain, hcfg, get_cfg_copy
+import pytest
+
 import hesiod.core as hcore
+from hesiod import __version__, get_cfg_copy, hcfg, hmain
 
 
 def test_version() -> None:

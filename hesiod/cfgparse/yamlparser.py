@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import List
+
 import yaml
 
-
-from hesiod.cfgparse.cfgparser import ConfigParser, CFG_T
+from hesiod.cfgparse.cfgparser import CFG_T, ConfigParser
 
 
 class YAMLConfigParser(ConfigParser):
