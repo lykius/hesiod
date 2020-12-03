@@ -47,4 +47,8 @@ class EditForm(BaseForm):
             if handler is not None:
                 edited_cfg = handler.update_cfg(edited_cfg, widget)
 
-        self.parent_app.run_cfg.update(edited_cfg)
+        parser = self.parent_app.cfgparser
+        base_cfgs = parser.load_base_cfgs(self.parent_app.base_cfg_dir)
+        run_cfg = parser.replace_bases(edited_cfg, base_cfgs)
+
+        self.parent_app.run_cfg.update(run_cfg)
