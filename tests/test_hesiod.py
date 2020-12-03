@@ -74,16 +74,16 @@ def test_hcfg(base_cfg_dir: Path, simple_run_file: Path) -> None:
         g2pd = hcfg("group_2.param_d", str)
         assert g2pd == "param_d" and isinstance(g2pd, str)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             hcfg("group_1.param_a", float)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             hcfg("group_1.param_b", int)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             hcfg("group_2.param_c", str)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             hcfg("group_2.param_d", bool)
 
     test()
