@@ -180,6 +180,7 @@ class OptionsWidgetParser(WidgetParser):
 
         base_keys = [str(f.relative_to(base_cfg_dir)) for f in files]
         base_keys = [k.split(".")[0] for k in base_keys]
+        base_keys = [k.replace("/", ".") for k in base_keys]
         options = {files[i].stem: base_keys[i] for i in range(len(files))}
         handler = OptionsWidgetHandler(cfg_key, options)
 
