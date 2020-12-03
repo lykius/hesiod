@@ -3,15 +3,20 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable, Optional, Type, TypeVar, cast
 
-from hesiod.cfgparse import CFG_T, get_parser
+from hesiod.cfgparse import CFG_T, RUN_NAME_KEY, get_parser
+from hesiod.ui import TUI
 
-_CFG: CFG_T = {}
 T = TypeVar("T")
 FUNCTION_T = Callable[..., Any]
+_CFG: CFG_T = {}
+RUN_FILE_NAME = "run.yaml"
 
 
 def hmain(
-    base_cfg_dir: Path, run_cfg_file: Optional[Path] = None
+    base_cfg_dir: Path,
+    template_cfg_file: Optional[Path] = None,
+    run_cfg_file: Optional[Path] = None,
+    create_out_dir: bool = True,
 ) -> Callable[[FUNCTION_T], FUNCTION_T]:
     """Decorator for a given function.
 
@@ -20,7 +25,9 @@ def hmain(
 
     Args:
         base_cfg_dir: the path to the directory with all the config files.
+        template_cfg_file: the path to the template config file for this run (optional).
         run_cfg_file: the path to the config file created by the user for this run (optional).
+        create_out_dir: flag that indicates whether hesiod should create an output directory or not.
 
     Returns:
         Function wrapped in the decorator.
@@ -31,10 +38,30 @@ def hmain(
         def decorated_fn(*args: Any, **kwargs: Any) -> Any:
             global _CFG
 
+            if run_cfg_file is None and template_cfg_file is None:
+                msg = "Either a valid run file or a template file must be passed to hesiod."
+                raise ValueError(msg)
+
             if run_cfg_file is not None:
-                ext = run_cfg_file.suffix
-                parser = get_parser(ext)(run_cfg_file, base_cfg_dir)
-                _CFG = parser.load_cfg()
+                parser = get_parser(run_cfg_file.suffix)
+                _CFG = parser.load_cfg(run_cfg_file, base_cfg_dir)
+            elif template_cfg_file is not None:
+                parser = get_parser(template_cfg_file.suffix)
+                template_cfg = parser.load_cfg(template_cfg_file, base_cfg_dir)
+                tui = TUI(template_cfg, base_cfg_dir)
+                _CFG = tui.show()
+
+            if create_out_dir:
+                run_name = _CFG.get(RUN_NAME_KEY, "")
+                if len(run_name) == 0:
+                    msg = f"The run file must contain a valid name for the run ({RUN_NAME_KEY})."
+                    raise ValueError(msg)
+
+                run_dir = Path(run_name)
+                run_dir.mkdir(parents=True, exist_ok=False)
+                run_file = run_dir / RUN_FILE_NAME
+                parser = get_parser(run_file.suffix)
+                parser.save_cfg(_CFG, run_file)
 
             return fn(*args, **kwargs)
 

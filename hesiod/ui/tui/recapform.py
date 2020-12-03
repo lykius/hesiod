@@ -48,5 +48,5 @@ class RecapForm(BaseForm):
         """
         run_name = self.run_name_widget.get_value()
         if len(run_name) == 0:
-            raise ValueError("Run name cannot be empty!")
+            raise ValueError("Run name cannot be empty.")
         self.parent_app.run_cfg[RUN_NAME_KEY] = run_name

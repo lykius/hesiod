@@ -9,14 +9,14 @@ from hesiod.ui.ui import UI
 
 
 class TUI(UI, NPSAppManaged):
-    def __init__(self, template_file: Path, base_cfg_dir: Path) -> None:
+    def __init__(self, template_cfg: CFG_T, base_cfg_dir: Path) -> None:
         """Create a new terminal user interface (TUI).
 
         Args:
             template_file: path to the config template file.
             base_cfg_dir: path to the base configs directory.
         """
-        UI.__init__(self, template_file, base_cfg_dir)
+        UI.__init__(self, template_cfg, base_cfg_dir)
         NPSAppManaged.__init__(self)
         self.run_cfg: CFG_T = {}
 
