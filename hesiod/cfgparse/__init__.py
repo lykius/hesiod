@@ -1,12 +1,12 @@
-from typing import Callable, Dict
+from typing import Dict, Type
 
 from hesiod.cfgparse.cfgparser import BASE_KEY, CFG_T, RUN_NAME_KEY, ConfigParser
 from hesiod.cfgparse.yamlparser import YAMLConfigParser
 
 
-def get_parser(ext: str) -> Callable[..., ConfigParser]:
+def get_parser(ext: str) -> Type[ConfigParser]:
     parsers = [YAMLConfigParser]
-    parsers_table: Dict[str, Callable[..., ConfigParser]] = {}
+    parsers_table: Dict[str, Type[ConfigParser]] = {}
     for parser in parsers:
         for managed_ext in parser.get_managed_extensions():
             parsers_table[managed_ext] = parser
