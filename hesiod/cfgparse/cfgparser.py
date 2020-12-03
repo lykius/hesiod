@@ -56,20 +56,9 @@ class ConfigParser(ABC):
         """
         cfg = cls.load_cfg_file(run_cfg_file)
 
-        base_cfgs: Dict[str, CFG_T] = {}
-        cfg_files = [p for p in base_cfg_dir.glob("*.yaml")]
-        for cfg_file in cfg_files:
-            base_cfgs[cfg_file.stem] = cls.load_cfg_file(cfg_file)
-        cfg_dirs = [p for p in base_cfg_dir.glob("*") if p.is_dir()]
-        for cfg_dir in cfg_dirs:
-            base_cfgs[cfg_dir.name] = cls.load_cfg_dir(cfg_dir)
+        base_cfgs = cls.load_base_cfgs(base_cfg_dir)
 
-        if BASE_KEY in cfg:
-            cfg = cls.replace_base(cfg, base_cfgs)
-
-        for cfg_key in cfg:
-            if isinstance(cfg[cfg_key], dict) and BASE_KEY in cfg[cfg_key]:
-                cfg[cfg_key] = cls.replace_base(cfg[cfg_key], base_cfgs)
+        cfg = cls.replace_bases(cfg, base_cfgs)
 
         return cfg
 
@@ -120,7 +109,19 @@ class ConfigParser(ABC):
         return cfg
 
     @classmethod
-    def replace_base(cls, cfg: CFG_T, base_cfgs: Dict[str, CFG_T]) -> CFG_T:
+    def load_base_cfgs(cls, base_cfg_dir: Path) -> Dict[str, CFG_T]:
+        base_cfgs: Dict[str, CFG_T] = {}
+        cfg_files = [p for p in base_cfg_dir.glob("*.yaml")]
+        for cfg_file in cfg_files:
+            base_cfgs[cfg_file.stem] = cls.load_cfg_file(cfg_file)
+        cfg_dirs = [p for p in base_cfg_dir.glob("*") if p.is_dir()]
+        for cfg_dir in cfg_dirs:
+            base_cfgs[cfg_dir.name] = cls.load_cfg_dir(cfg_dir)
+
+        return base_cfgs
+
+    @staticmethod
+    def replace_base(cfg: CFG_T, base_cfgs: Dict[str, CFG_T]) -> CFG_T:
         """Replace base placeholder in a given config.
 
         Args:
@@ -147,5 +148,18 @@ class ConfigParser(ABC):
                 new_cfg[k] = base_cfg[k]
 
         del new_cfg[BASE_KEY]
+
+        return new_cfg
+
+    @classmethod
+    def replace_bases(cls, cfg: CFG_T, base_cfgs: Dict[str, CFG_T]) -> CFG_T:
+        new_cfg = deepcopy(cfg)
+
+        if BASE_KEY in cfg:
+            new_cfg = cls.replace_base(new_cfg, base_cfgs)
+
+        for cfg_key in new_cfg:
+            if isinstance(new_cfg[cfg_key], dict) and BASE_KEY in new_cfg[cfg_key]:
+                new_cfg[cfg_key] = cls.replace_base(new_cfg[cfg_key], base_cfgs)
 
         return new_cfg
