@@ -1,25 +1,17 @@
-from abc import ABC, abstractclassmethod, abstractmethod
+from abc import ABC, abstractmethod
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, List
-from copy import deepcopy
 
-CFGT = Dict[str, Any]
+CFG_T = Dict[str, Any]
 BASE_KEY = "base"
+RUN_NAME_KEY = "run_name"
 
 
 class ConfigParser(ABC):
-    def __init__(self, run_cfg_file: Path, base_cfg_dir: Path) -> None:
-        """Create a config parser.
-
-        Args:
-            run_cfg_file: path to the run config file.
-            base_cfg_dir: path to the base configs directory.
-        """
-        self.run_cfg_file = run_cfg_file
-        self.base_cfg_dir = base_cfg_dir
-
-    @abstractclassmethod
-    def get_managed_extensions(cls) -> List[str]:
+    @staticmethod
+    @abstractmethod
+    def get_managed_extensions() -> List[str]:
         """Get file extensions managed by the parser.
 
         Returns:
@@ -27,8 +19,9 @@ class ConfigParser(ABC):
         """
         ...
 
+    @staticmethod
     @abstractmethod
-    def read_cfg(self, cfg_file: Path) -> CFGT:
+    def read_cfg_file(cfg_file: Path) -> CFG_T:
         """Read config from a file using a specific protocol.
 
         Args:
@@ -39,32 +32,38 @@ class ConfigParser(ABC):
         """
         ...
 
-    def load_cfg(self) -> CFGT:
+    @staticmethod
+    @abstractmethod
+    def save_cfg(cfg: CFG_T, cfg_file: Path) -> None:
+        """Save config into the given file using a specific protocol.
+
+        Args:
+            cfg: the config to be saved.
+            cfg_file: the path to the output file.
+        """
+        ...
+
+    @classmethod
+    def load_cfg(cls, run_cfg_file: Path, base_cfg_dir: Path) -> CFG_T:
         """Load config replacing "bases" with proper values.
+
+        Args:
+            run_cfg_file: path to the run config file.
+            base_cfg_dir: path to the base configs directory.
 
         Returns:
             The loaded config.
         """
-        cfg = self.load_cfg_file(self.run_cfg_file)
+        cfg = cls.load_cfg_file(run_cfg_file)
 
-        self.base_cfgs: Dict[str, CFGT] = {}
-        cfg_files = [p for p in self.base_cfg_dir.glob("*.yaml")]
-        for cfg_file in cfg_files:
-            self.base_cfgs[cfg_file.stem] = self.load_cfg_file(cfg_file)
-        cfg_dirs = [p for p in self.base_cfg_dir.glob("*") if p.is_dir()]
-        for cfg_dir in cfg_dirs:
-            self.base_cfgs[cfg_dir.name] = self.load_cfg_dir(cfg_dir)
+        base_cfgs = cls.load_base_cfgs(base_cfg_dir)
 
-        if BASE_KEY in cfg:
-            cfg = self.replace_base(cfg, "")
-
-        for cfg_key in cfg:
-            if isinstance(cfg[cfg_key], dict) and BASE_KEY in cfg[cfg_key]:
-                cfg[cfg_key] = self.replace_base(cfg[cfg_key], cfg_key)
+        cfg = cls.replace_bases(cfg, base_cfgs)
 
         return cfg
 
-    def load_cfg_file(self, cfg_file: Path) -> CFGT:
+    @classmethod
+    def load_cfg_file(cls, cfg_file: Path) -> CFG_T:
         """Load config from a given file.
 
         Args:
@@ -76,7 +75,7 @@ class ConfigParser(ABC):
         Returns:
             The loaded config.
         """
-        cfg = self.read_cfg(cfg_file)
+        cfg = cls.read_cfg_file(cfg_file)
 
         if not isinstance(cfg, dict):
             raise ValueError(f"Error in {cfg_file.name}: Config should be a dictionary.")
@@ -87,7 +86,8 @@ class ConfigParser(ABC):
 
         return cfg
 
-    def load_cfg_dir(self, cfg_dir: Path) -> Dict[str, CFGT]:
+    @classmethod
+    def load_cfg_dir(cls, cfg_dir: Path) -> Dict[str, CFG_T]:
         """Load configs recursively from a given directory.
 
         Args:
@@ -100,20 +100,33 @@ class ConfigParser(ABC):
 
         cfg_files = [p for p in cfg_dir.glob("*.yaml")]
         for cfg_file in cfg_files:
-            cfg[cfg_file.stem] = self.load_cfg_file(cfg_file)
+            cfg[cfg_file.stem] = cls.load_cfg_file(cfg_file)
 
         cfg_subdirs = [p for p in cfg_dir.glob("*") if p.is_dir()]
         for cfg_subdir in cfg_subdirs:
-            cfg[cfg_subdir.name] = self.load_cfg_dir(cfg_subdir)
+            cfg[cfg_subdir.name] = cls.load_cfg_dir(cfg_subdir)
 
         return cfg
 
-    def replace_base(self, cfg: CFGT, cfg_name: str) -> CFGT:
+    @classmethod
+    def load_base_cfgs(cls, base_cfg_dir: Path) -> Dict[str, CFG_T]:
+        base_cfgs: Dict[str, CFG_T] = {}
+        cfg_files = [p for p in base_cfg_dir.glob("*.yaml")]
+        for cfg_file in cfg_files:
+            base_cfgs[cfg_file.stem] = cls.load_cfg_file(cfg_file)
+        cfg_dirs = [p for p in base_cfg_dir.glob("*") if p.is_dir()]
+        for cfg_dir in cfg_dirs:
+            base_cfgs[cfg_dir.name] = cls.load_cfg_dir(cfg_dir)
+
+        return base_cfgs
+
+    @staticmethod
+    def replace_base(cfg: CFG_T, base_cfgs: Dict[str, CFG_T]) -> CFG_T:
         """Replace base placeholder in a given config.
 
         Args:
             cfg: config with base placeholder.
-            cfg_name: name of the config.
+            base_cfgs: base configs.
 
         Raises:
             ValueError: if it is not possible to retrieve the base config.
@@ -121,20 +134,13 @@ class ConfigParser(ABC):
         Returns:
             The config with the base placeholder replaced.
         """
-        if len(cfg_name) > 0:
-            if cfg_name not in self.base_cfgs:
-                raise ValueError(f"Config error: cannot find base {cfg_name}")
-            base_cfg = self.base_cfgs[cfg_name]
-        else:
-            base_cfg = self.base_cfgs
-
         new_cfg = deepcopy(cfg)
         base_key = new_cfg[BASE_KEY]
+        base_cfg = base_cfgs
 
         for k in base_key.split("."):
             if k not in base_cfg:
-                base_name = f"{cfg_name}.{base_key}" if len(cfg_name) > 0 else base_key
-                raise ValueError(f"Config error: cannot find base {base_name}")
+                raise ValueError(f"Config error: cannot find base {base_key}")
             base_cfg = base_cfg[k]
 
         for k in base_cfg:
@@ -142,5 +148,18 @@ class ConfigParser(ABC):
                 new_cfg[k] = base_cfg[k]
 
         del new_cfg[BASE_KEY]
+
+        return new_cfg
+
+    @classmethod
+    def replace_bases(cls, cfg: CFG_T, base_cfgs: Dict[str, CFG_T]) -> CFG_T:
+        new_cfg = deepcopy(cfg)
+
+        if BASE_KEY in cfg:
+            new_cfg = cls.replace_base(new_cfg, base_cfgs)
+
+        for cfg_key in new_cfg:
+            if isinstance(new_cfg[cfg_key], dict) and BASE_KEY in new_cfg[cfg_key]:
+                new_cfg[cfg_key] = cls.replace_base(new_cfg[cfg_key], base_cfgs)
 
         return new_cfg

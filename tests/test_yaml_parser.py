@@ -1,11 +1,12 @@
-import pytest
 from pathlib import Path
+
+import pytest
 
 from hesiod.cfgparse import YAMLConfigParser
 
 
-def test_load_cfg_file(base_cfg_dir: Path, cifar10_cfg_file: Path) -> None:
-    parser = YAMLConfigParser(Path(), base_cfg_dir)
+def test_load_cfg_file(cifar10_cfg_file: Path) -> None:
+    parser = YAMLConfigParser
     cfg = parser.load_cfg_file(cifar10_cfg_file)
 
     assert cfg["name"] == "cifar100"
@@ -17,14 +18,14 @@ def test_load_cfg_file(base_cfg_dir: Path, cifar10_cfg_file: Path) -> None:
 
 
 def test_load_cfg_file_exception(wrong_run_file: Path) -> None:
-    parser = YAMLConfigParser(Path(), Path())
+    parser = YAMLConfigParser
 
     with pytest.raises(ValueError):
         parser.load_cfg_file(wrong_run_file)
 
 
 def test_load_cfg_dir(base_cfg_dir: Path) -> None:
-    parser = YAMLConfigParser(Path(), Path())
+    parser = YAMLConfigParser
     cfg = parser.load_cfg_dir(base_cfg_dir)
 
     assert isinstance(cfg, dict)
@@ -84,8 +85,8 @@ def test_load_cfg_dir(base_cfg_dir: Path) -> None:
 
 
 def test_load_cfg(base_cfg_dir: Path, complex_run_file: Path) -> None:
-    parser = YAMLConfigParser(complex_run_file, base_cfg_dir)
-    cfg = parser.load_cfg()
+    parser = YAMLConfigParser
+    cfg = parser.load_cfg(complex_run_file, base_cfg_dir)
 
     assert isinstance(cfg, dict)
     expected_keys = ["dataset", "run_name", "net", "optimizer", "lr"]
@@ -107,12 +108,11 @@ def test_load_cfg(base_cfg_dir: Path, complex_run_file: Path) -> None:
 
 
 def test_replace_base() -> None:
-    parser = YAMLConfigParser(Path(), Path())
+    parser = YAMLConfigParser
 
-    cfg = {"base": "a.b.c", "p1": 5}
+    cfg = {"base": "cfg.a.b.c", "p1": 5}
     base_cfgs = {"cfg": {"a": {"b": {"c": {"p1": 1, "p2": 2, "p3": 3}}}}}
-    parser.base_cfgs = base_cfgs
-    new_cfg = parser.replace_base(cfg, "cfg")
+    new_cfg = parser.replace_base(cfg, base_cfgs)
 
     expected_keys = ["p1", "p2", "p3"]
     for key in expected_keys:
@@ -123,8 +123,7 @@ def test_replace_base() -> None:
 
     cfg = {"base": "cfg.a.b.c", "p1": 5}
     base_cfgs = {"cfg": {"a": {"b": {"c": {"p1": 1, "p2": 2, "p3": 3}}}}}
-    parser.base_cfgs = base_cfgs
-    new_cfg = parser.replace_base(cfg, "")
+    new_cfg = parser.replace_base(cfg, base_cfgs)
 
     expected_keys = ["p1", "p2", "p3"]
     for key in expected_keys:
@@ -135,17 +134,16 @@ def test_replace_base() -> None:
 
 
 def test_replace_base_exception() -> None:
-    parser = YAMLConfigParser(Path(), Path())
+    parser = YAMLConfigParser
 
-    cfg = {"base": "a.b.d", "p1": 5}
+    cfg = {"base": "cfg.a.b.d", "p1": 5}
     base_cfgs = {"cfg": {"a": {"b": {"c": {"p1": 1, "p2": 2, "p3": 3}}}}}
-    parser.base_cfgs = base_cfgs
 
     with pytest.raises(ValueError):
-        parser.replace_base(cfg, "abc")
+        parser.replace_base(cfg, base_cfgs)
 
     with pytest.raises(ValueError):
-        parser.replace_base(cfg, "cfg")
+        parser.replace_base(cfg, base_cfgs)
 
     with pytest.raises(ValueError):
-        parser.replace_base(cfg, "")
+        parser.replace_base(cfg, base_cfgs)

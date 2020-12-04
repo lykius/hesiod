@@ -1,9 +1,10 @@
-import pytest
-from typing import Tuple
 from pathlib import Path
+from typing import Tuple
 
-from hesiod import __version__, hmain, hcfg, get_cfg_copy
+import pytest
+
 import hesiod.core as hcore
+from hesiod import __version__, get_cfg_copy, hcfg, hmain
 
 
 def test_version() -> None:
@@ -11,7 +12,7 @@ def test_version() -> None:
 
 
 def test_args_kwargs(base_cfg_dir: Path, simple_run_file: Path) -> None:
-    @hmain(base_cfg_dir, simple_run_file)
+    @hmain(base_cfg_dir, run_cfg_file=simple_run_file, create_out_dir=False)
     def test(a: int, b: str, c: float = 3.4) -> Tuple[int, str, float]:
         return a, b, c
 
@@ -22,7 +23,7 @@ def test_args_kwargs(base_cfg_dir: Path, simple_run_file: Path) -> None:
 
 
 def test_load_config_simple(base_cfg_dir: Path, simple_run_file: Path) -> None:
-    @hmain(base_cfg_dir, simple_run_file)
+    @hmain(base_cfg_dir, run_cfg_file=simple_run_file, create_out_dir=False)
     def test() -> None:
         assert hcfg("group_1.param_a") == 1
         assert hcfg("group_1.param_b") == 1.2
@@ -36,7 +37,7 @@ def test_load_config_simple(base_cfg_dir: Path, simple_run_file: Path) -> None:
 
 
 def test_load_config_complex(base_cfg_dir: Path, complex_run_file: Path) -> None:
-    @hmain(base_cfg_dir, complex_run_file)
+    @hmain(base_cfg_dir, run_cfg_file=complex_run_file, create_out_dir=False)
     def test() -> None:
         assert hcfg("dataset.name") == "cifar10"
         assert hcfg("dataset.path") == "/path/to/cifar10"
@@ -53,7 +54,7 @@ def test_load_config_complex(base_cfg_dir: Path, complex_run_file: Path) -> None
 
 
 def test_load_config_wrong(base_cfg_dir: Path, wrong_run_file: Path) -> None:
-    @hmain(base_cfg_dir, wrong_run_file)
+    @hmain(base_cfg_dir, run_cfg_file=wrong_run_file, create_out_dir=False)
     def test() -> None:
         pass
 
@@ -62,7 +63,7 @@ def test_load_config_wrong(base_cfg_dir: Path, wrong_run_file: Path) -> None:
 
 
 def test_hcfg(base_cfg_dir: Path, simple_run_file: Path) -> None:
-    @hmain(base_cfg_dir, simple_run_file)
+    @hmain(base_cfg_dir, run_cfg_file=simple_run_file, create_out_dir=False)
     def test() -> None:
         g1pa = hcfg("group_1.param_a", int)
         assert g1pa == 1 and isinstance(g1pa, int)
@@ -73,23 +74,23 @@ def test_hcfg(base_cfg_dir: Path, simple_run_file: Path) -> None:
         g2pd = hcfg("group_2.param_d", str)
         assert g2pd == "param_d" and isinstance(g2pd, str)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             hcfg("group_1.param_a", float)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             hcfg("group_1.param_b", int)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             hcfg("group_2.param_c", str)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             hcfg("group_2.param_d", bool)
 
     test()
 
 
 def test_cfg_copy(base_cfg_dir: Path, complex_run_file: Path) -> None:
-    @hmain(base_cfg_dir, complex_run_file)
+    @hmain(base_cfg_dir, run_cfg_file=complex_run_file, create_out_dir=False)
     def test() -> None:
         cfg_copy = get_cfg_copy()
         assert cfg_copy == hcore._CFG
