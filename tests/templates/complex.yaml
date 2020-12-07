@@ -1,6 +1,6 @@
 base: "var"
 optimizer: "adamw"
-dataset: "@OPTIONS(dataset)"
+dataset: "@BASE(dataset)"
 net:
   base: "net.efficientnet"
 group:
@@ -8,7 +8,7 @@ group:
     p1: 2
     p2: "@FILE"
   subgroupb:
-    p1: 5
+    p1: "@OPTIONS(1,p1value,3.2)"
     p2:
       ca: "@DATE"
       cb: "b"

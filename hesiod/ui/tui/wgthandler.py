@@ -1,5 +1,6 @@
+from ast import literal_eval
 from copy import deepcopy
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict
 from weakref import CallableProxyType
 
 from hesiod.cfgparse import BASE_KEY, CFG_T
@@ -23,7 +24,12 @@ class WidgetHandler:
         Returns:
             The value extracted from the given widget.
         """
-        return widget.get_value()
+        try:
+            value = literal_eval(widget.get_value())
+        except (ValueError, SyntaxError):
+            value = widget.get_value()
+
+        return value
 
     def update_cfg(self, cfg: CFG_T, widget: CallableProxyType) -> CFG_T:
         """Update the given config by adding the value extracted
@@ -51,16 +57,16 @@ class WidgetHandler:
         return updated_cfg
 
 
-class LiteralWidgetHandler(WidgetHandler):
-    def __init__(self, cfg_key: str, t: Type[Union[int, float, str]]) -> None:
+class OptionsWidgetHandler(WidgetHandler):
+    def __init__(self, cfg_key: str) -> None:
         WidgetHandler.__init__(self, cfg_key)
-        self.t = t
 
     def get_value(self, widget: CallableProxyType) -> Any:
-        return self.t(widget.get_value())
+        selected_value = widget.get_selected_objects()[0]
+        return selected_value
 
 
-class OptionsWidgetHandler(WidgetHandler):
+class BaseWidgetHandler(WidgetHandler):
     def __init__(self, cfg_key: str, options: Dict[str, str]) -> None:
         WidgetHandler.__init__(self, cfg_key)
         self.options = options
