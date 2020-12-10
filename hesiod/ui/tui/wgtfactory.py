@@ -1,7 +1,7 @@
 import re
 from abc import ABC, abstractmethod
 from ast import literal_eval
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
@@ -18,6 +18,7 @@ WIDGET_T = Tuple[Optional[WidgetHandler], Callable[..., Widget], Dict[str, Any]]
 class WidgetParser(ABC):
     PREFIX = "    "
     DATE_PATTERN = r"^@DATE?"
+    DEFAULT_DATE_PATTERN = r"^@DATE\((today|Today|TODAY|\d{4}-\d{2}-\d{2})\)?"
     FILE_PATTERN = r"^@FILE?"
     DEFAULT_FILE_PATTERN = r"^@FILE\(.+\)?"
     BASE_PATTERN = r"^@BASE\([0-9A-Za-z_]+\)?"
@@ -88,9 +89,16 @@ class LiteralWidgetParser(WidgetParser):
 
 
 class DateWidgetParser(WidgetParser):
+    TODAY = "today"
+    FORMAT = r"%Y-%M-%d"
+
     @staticmethod
     def can_handle(x: Any) -> bool:
-        return isinstance(x, str) and WidgetParser.match(x, WidgetParser.DATE_PATTERN)
+        if isinstance(x, str):
+            can_handle = WidgetParser.match(x, WidgetParser.DATE_PATTERN)
+            can_handle = can_handle or WidgetParser.match(x, WidgetParser.DEFAULT_DATE_PATTERN)
+            return can_handle
+        return False
 
     @staticmethod
     def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
@@ -100,12 +108,26 @@ class DateWidgetParser(WidgetParser):
 
         name = cfg_key.split(".")[-1]
         name = f"{name_prefix}{name} (ENTER to select a date):"
+
         begin_entry_at = len(name) + 1
         kwargs = {
             "name": name,
             "begin_entry_at": begin_entry_at,
             "use_two_lines": False,
         }
+
+        if WidgetParser.match(cfg_value, WidgetParser.DEFAULT_DATE_PATTERN):
+            default = cfg_value.split("(")[-1].split(")")[0]
+            default = default.lower()
+
+            value = None
+            if default == DateWidgetParser.TODAY:
+                value = date.today()
+            else:
+                value = datetime.strptime(default, DateWidgetParser.FORMAT).date()
+
+            if value is not None:
+                kwargs["value"] = value
 
         widgets.append((handler, TitleDateCombo, kwargs))
 

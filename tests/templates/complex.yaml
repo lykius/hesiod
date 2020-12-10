@@ -15,3 +15,5 @@ group:
       cb: "b"
       cc: !!python/tuple [1, 2, 3]
       cd: "@BOOL(true)"
+today: "@DATE(today)"
+date: "@DATE(2020-01-01)"
