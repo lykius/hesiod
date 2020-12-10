@@ -9,7 +9,8 @@ from npyscreen import TitleDateCombo, TitleFilename, TitleSelectOne, TitleText  
 from npyscreen.wgwidget import Widget  # type: ignore
 
 from hesiod.cfgparse import CFG_T
-from hesiod.ui.tui.wgthandler import BaseWidgetHandler, OptionsWidgetHandler, WidgetHandler
+from hesiod.ui.tui.wgthandler import BaseWidgetHandler, BoolWidgetHandler, OptionsWidgetHandler
+from hesiod.ui.tui.wgthandler import WidgetHandler
 
 WIDGET_T = Tuple[Optional[WidgetHandler], Callable[..., Widget], Dict[str, Any]]
 
@@ -20,6 +21,7 @@ class WidgetParser(ABC):
     FILE_PATTERN = "^@FILE?"
     BASE_PATTERN = "^@BASE([0-9A-Za-z_]+)?"
     OPTIONS_PATTERN = "^@OPTIONS(.+)?"
+    BOOL_PATTERN = "^@BOOL(true|True|TRUE|false|False|FALSE)?"
 
     @staticmethod
     def match(s: str, pattern: str) -> bool:
@@ -67,7 +69,7 @@ class WidgetParser(ABC):
 class LiteralWidgetParser(WidgetParser):
     @staticmethod
     def can_handle(x: Any) -> bool:
-        return type(x) in [int, float, str, list, date]
+        return type(x) in [int, float, str, bool, list, tuple, set, date]
 
     @staticmethod
     def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
@@ -130,6 +132,38 @@ class FileWidgetParser(WidgetParser):
         }
 
         widgets.append((handler, TitleFilename, kwargs))
+
+        return widgets
+
+
+class BoolWidgetParser(WidgetParser):
+    @staticmethod
+    def can_handle(x: Any) -> bool:
+        return isinstance(x, str) and WidgetParser.match(x, WidgetParser.BOOL_PATTERN)
+
+    @staticmethod
+    def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
+        widgets: List[WIDGET_T] = []
+
+        handler = BoolWidgetHandler(cfg_key)
+
+        default = cfg_value.split("(")[-1].split(")")[0]
+        default = str(default).lower()
+        values: List[str] = [BoolWidgetHandler.TRUE, BoolWidgetHandler.FALSE]
+
+        name = cfg_key.split(".")[-1]
+        name = f"{name_prefix}{name}:"
+        kwargs = {
+            "name": name,
+            "values": values,
+            "value": [0 if default == BoolWidgetHandler.TRUE else 1],
+            "max_height": len(values),
+            "begin_entry_at": len(name) + 1,
+            "use_two_lines": False,
+            "scroll_exit": True,
+        }
+
+        widgets.append((handler, TitleSelectOne, kwargs))
 
         return widgets
 
@@ -275,6 +309,7 @@ class WidgetFactory:
         parsers: List[Type[WidgetParser]] = []
 
         # specials
+        parsers.append(BoolWidgetParser)
         parsers.append(DateWidgetParser)
         parsers.append(FileWidgetParser)
         parsers.append(OptionsWidgetParser)

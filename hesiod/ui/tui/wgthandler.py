@@ -57,6 +57,18 @@ class WidgetHandler:
         return updated_cfg
 
 
+class BoolWidgetHandler(WidgetHandler):
+    TRUE = "true"
+    FALSE = "false"
+
+    def __init__(self, cfg_key: str) -> None:
+        WidgetHandler.__init__(self, cfg_key)
+
+    def get_value(self, widget: CallableProxyType) -> Any:
+        selected_value = widget.get_selected_objects()[0]
+        return selected_value == BoolWidgetHandler.TRUE
+
+
 class OptionsWidgetHandler(WidgetHandler):
     def __init__(self, cfg_key: str) -> None:
         WidgetHandler.__init__(self, cfg_key)

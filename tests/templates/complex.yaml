@@ -12,3 +12,5 @@ group:
     p2:
       ca: "@DATE"
       cb: "b"
+      cc: !!python/tuple [1, 2, 3]
+      cd: "@BOOL(true)"
