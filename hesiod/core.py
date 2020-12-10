@@ -123,3 +123,19 @@ def get_out_dir() -> Path:
     """
     out_dir = deepcopy(_CFG[OUT_DIR_KEY])
     return Path(out_dir)
+
+
+def get_run_name() -> str:
+    """Get the name of the current run.
+
+    Raises:
+        ValueError: if the current run has no name (it should never happen).
+
+    Returns:
+        The name of the current run.
+    """
+    run_name = _CFG.get(RUN_NAME_KEY, "")
+    if run_name == "":
+        raise ValueError("Something went wrong: current run has no name.")
+
+    return run_name
