@@ -17,11 +17,12 @@ WIDGET_T = Tuple[Optional[WidgetHandler], Callable[..., Widget], Dict[str, Any]]
 
 class WidgetParser(ABC):
     PREFIX = "    "
-    DATE_PATTERN = "^@DATE?"
-    FILE_PATTERN = "^@FILE?"
-    BASE_PATTERN = "^@BASE([0-9A-Za-z_]+)?"
-    OPTIONS_PATTERN = "^@OPTIONS(.+)?"
-    BOOL_PATTERN = "^@BOOL(true|True|TRUE|false|False|FALSE)?"
+    DATE_PATTERN = r"^@DATE?"
+    FILE_PATTERN = r"^@FILE?"
+    DEFAULT_FILE_PATTERN = r"^@FILE\(.+\)?"
+    BASE_PATTERN = r"^@BASE\([0-9A-Za-z_]+\)?"
+    OPTIONS_PATTERN = r"^@OPTIONS\(.+\)?"
+    BOOL_PATTERN = r"^@BOOL\(true|True|TRUE|false|False|FALSE\)?"
 
     @staticmethod
     def match(s: str, pattern: str) -> bool:
@@ -114,7 +115,11 @@ class DateWidgetParser(WidgetParser):
 class FileWidgetParser(WidgetParser):
     @staticmethod
     def can_handle(x: Any) -> bool:
-        return isinstance(x, str) and WidgetParser.match(x, WidgetParser.FILE_PATTERN)
+        if isinstance(x, str):
+            can_handle = WidgetParser.match(x, WidgetParser.FILE_PATTERN)
+            can_handle = can_handle or WidgetParser.match(x, WidgetParser.DEFAULT_FILE_PATTERN)
+            return can_handle
+        return False
 
     @staticmethod
     def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
@@ -124,12 +129,18 @@ class FileWidgetParser(WidgetParser):
 
         name = cfg_key.split(".")[-1]
         name = f"{name_prefix}{name} (TAB for autocompletion):"
+
         begin_entry_at = len(name) + 1
         kwargs = {
             "name": name,
             "begin_entry_at": begin_entry_at,
             "use_two_lines": False,
         }
+
+        if WidgetParser.match(cfg_value, WidgetParser.DEFAULT_FILE_PATTERN):
+            default = cfg_value.split("(")[-1].split(")")[0]
+            value = default.lower()
+            kwargs["value"] = value
 
         widgets.append((handler, TitleFilename, kwargs))
 
