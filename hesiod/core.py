@@ -68,11 +68,13 @@ def hmain(
                     raise ValueError(msg)
 
                 run_dir = Path(out_dir_root) / Path(run_name)
-                run_dir.mkdir(parents=True, exist_ok=False)
-                _CFG[OUT_DIR_KEY] = str(run_dir.absolute())
                 run_file = run_dir / RUN_FILE_NAME
-                parser = get_parser(run_file.suffix)
-                parser.save_cfg(_CFG, run_file)
+
+                if not run_file.exists():
+                    run_dir.mkdir(parents=True, exist_ok=False)
+                    _CFG[OUT_DIR_KEY] = str(run_dir.absolute())
+                    parser = get_parser(run_file.suffix)
+                    parser.save_cfg(_CFG, run_file)
 
             return fn(*args, **kwargs)
 
