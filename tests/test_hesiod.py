@@ -8,7 +8,7 @@ from hesiod import __version__, get_cfg_copy, hcfg, hmain
 
 
 def test_version() -> None:
-    assert __version__ == "0.1.0"
+    assert __version__ == "0.1.1"
 
 
 def test_args_kwargs(base_cfg_dir: Path, simple_run_file: Path) -> None:
