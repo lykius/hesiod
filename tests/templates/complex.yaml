@@ -1,14 +1,19 @@
 base: "var"
 optimizer: "adamw"
-dataset: "@OPTIONS(dataset)"
+dataset: "@BASE(dataset)"
 net:
   base: "net.efficientnet"
 group:
   subgroupa:
     p1: 2
     p2: "@FILE"
+    p3: "@FILE(hesiod/ui/tui/)"
   subgroupb:
-    p1: 5
+    p1: "@OPTIONS(1,p1value,3.2)"
     p2:
       ca: "@DATE"
       cb: "b"
+      cc: !!python/tuple [1, 2, 3]
+      cd: "@BOOL(true)"
+today: "@DATE(today)"
+date: "@DATE(2020-01-01)"

@@ -1,7 +1,7 @@
 import functools
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Callable, Optional, Type, TypeVar, cast
+from typing import Any, Callable, Optional, Type, TypeVar, Union, cast
 
 from hesiod.cfgparse import CFG_T, RUN_NAME_KEY, get_parser
 from hesiod.ui import TUI
@@ -14,9 +14,9 @@ OUT_DIR_KEY = "***hesiod_out_dir***"
 
 
 def hmain(
-    base_cfg_dir: Path,
-    template_cfg_file: Optional[Path] = None,
-    run_cfg_file: Optional[Path] = None,
+    base_cfg_dir: Union[str, Path],
+    template_cfg_file: Optional[Union[str, Path]] = None,
+    run_cfg_file: Optional[Union[str, Path]] = None,
     create_out_dir: bool = True,
     out_dir_root: str = "logs",
 ) -> Callable[[FUNCTION_T], FUNCTION_T]:
@@ -45,18 +45,21 @@ def hmain(
         def decorated_fn(*args: Any, **kwargs: Any) -> Any:
             global _CFG
 
-            if run_cfg_file is None and template_cfg_file is None:
+            bcfg_path = Path(base_cfg_dir)
+            run_cfg_path = Path(run_cfg_file) if run_cfg_file else None
+            template_cfg_path = Path(template_cfg_file) if template_cfg_file else None
+
+            if run_cfg_path is not None:
+                parser = get_parser(run_cfg_path.suffix)
+                _CFG = parser.load_cfg(run_cfg_path, bcfg_path)
+            elif template_cfg_path is not None:
+                parser = get_parser(template_cfg_path.suffix)
+                template_cfg = parser.load_cfg(template_cfg_path, bcfg_path)
+                tui = TUI(template_cfg, bcfg_path, parser)
+                _CFG = tui.show()
+            else:
                 msg = "Either a valid run file or a template file must be passed to hesiod."
                 raise ValueError(msg)
-
-            if run_cfg_file is not None:
-                parser = get_parser(run_cfg_file.suffix)
-                _CFG = parser.load_cfg(run_cfg_file, base_cfg_dir)
-            elif template_cfg_file is not None:
-                parser = get_parser(template_cfg_file.suffix)
-                template_cfg = parser.load_cfg(template_cfg_file, base_cfg_dir)
-                tui = TUI(template_cfg, base_cfg_dir, parser)
-                _CFG = tui.show()
 
             if create_out_dir:
                 run_name = _CFG.get(RUN_NAME_KEY, "")
@@ -65,11 +68,13 @@ def hmain(
                     raise ValueError(msg)
 
                 run_dir = Path(out_dir_root) / Path(run_name)
-                run_dir.mkdir(parents=True, exist_ok=False)
-                _CFG[OUT_DIR_KEY] = str(run_dir.absolute())
                 run_file = run_dir / RUN_FILE_NAME
-                parser = get_parser(run_file.suffix)
-                parser.save_cfg(_CFG, run_file)
+
+                if not run_file.exists():
+                    run_dir.mkdir(parents=True, exist_ok=False)
+                    _CFG[OUT_DIR_KEY] = str(run_dir.absolute())
+                    parser = get_parser(run_file.suffix)
+                    parser.save_cfg(_CFG, run_file)
 
             return fn(*args, **kwargs)
 
@@ -120,3 +125,19 @@ def get_out_dir() -> Path:
     """
     out_dir = deepcopy(_CFG[OUT_DIR_KEY])
     return Path(out_dir)
+
+
+def get_run_name() -> str:
+    """Get the name of the current run.
+
+    Raises:
+        ValueError: if the current run has no name (it should never happen).
+
+    Returns:
+        The name of the current run.
+    """
+    run_name = _CFG.get(RUN_NAME_KEY, "")
+    if run_name == "":
+        raise ValueError("Something went wrong: current run has no name.")
+
+    return run_name

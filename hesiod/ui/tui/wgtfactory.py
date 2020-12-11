@@ -1,6 +1,7 @@
 import re
 from abc import ABC, abstractmethod
-from datetime import date
+from ast import literal_eval
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
@@ -8,16 +9,21 @@ from npyscreen import TitleDateCombo, TitleFilename, TitleSelectOne, TitleText  
 from npyscreen.wgwidget import Widget  # type: ignore
 
 from hesiod.cfgparse import CFG_T
-from hesiod.ui.tui.wgthandler import LiteralWidgetHandler, OptionsWidgetHandler, WidgetHandler
+from hesiod.ui.tui.wgthandler import BaseWidgetHandler, BoolWidgetHandler, OptionsWidgetHandler
+from hesiod.ui.tui.wgthandler import WidgetHandler
 
 WIDGET_T = Tuple[Optional[WidgetHandler], Callable[..., Widget], Dict[str, Any]]
 
 
 class WidgetParser(ABC):
     PREFIX = "    "
-    DATE_PATTERN = "@DATE"
-    FILE_PATTERN = "@FILE"
-    OPTIONS_PATTERN = "@OPTION([0-9A-Za-z_]+)"
+    DATE_PATTERN = r"^@DATE?"
+    DEFAULT_DATE_PATTERN = r"^@DATE\((today|Today|TODAY|\d{4}-\d{2}-\d{2})\)?"
+    FILE_PATTERN = r"^@FILE?"
+    DEFAULT_FILE_PATTERN = r"^@FILE\(.+\)?"
+    BASE_PATTERN = r"^@BASE\([0-9A-Za-z_]+\)?"
+    OPTIONS_PATTERN = r"^@OPTIONS\(.+\)?"
+    BOOL_PATTERN = r"^@BOOL\(true|True|TRUE|false|False|FALSE\)?"
 
     @staticmethod
     def match(s: str, pattern: str) -> bool:
@@ -65,13 +71,13 @@ class WidgetParser(ABC):
 class LiteralWidgetParser(WidgetParser):
     @staticmethod
     def can_handle(x: Any) -> bool:
-        return type(x) in [int, float, str, list, date]
+        return type(x) in [int, float, str, bool, list, tuple, set, date]
 
     @staticmethod
     def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
         widgets: List[WIDGET_T] = []
 
-        handler = LiteralWidgetHandler(cfg_key, type(cfg_value))
+        handler = WidgetHandler(cfg_key)
 
         name = cfg_key.split(".")[-1]
         name = f"{name_prefix}{name}:"
@@ -83,9 +89,16 @@ class LiteralWidgetParser(WidgetParser):
 
 
 class DateWidgetParser(WidgetParser):
+    TODAY = "today"
+    FORMAT = r"%Y-%M-%d"
+
     @staticmethod
     def can_handle(x: Any) -> bool:
-        return isinstance(x, str) and WidgetParser.match(x, WidgetParser.DATE_PATTERN)
+        if isinstance(x, str):
+            can_handle = WidgetParser.match(x, WidgetParser.DATE_PATTERN)
+            can_handle = can_handle or WidgetParser.match(x, WidgetParser.DEFAULT_DATE_PATTERN)
+            return can_handle
+        return False
 
     @staticmethod
     def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
@@ -95,12 +108,26 @@ class DateWidgetParser(WidgetParser):
 
         name = cfg_key.split(".")[-1]
         name = f"{name_prefix}{name} (ENTER to select a date):"
+
         begin_entry_at = len(name) + 1
         kwargs = {
             "name": name,
             "begin_entry_at": begin_entry_at,
             "use_two_lines": False,
         }
+
+        if WidgetParser.match(cfg_value, WidgetParser.DEFAULT_DATE_PATTERN):
+            default = cfg_value.split("(")[-1].split(")")[0]
+            default = default.lower()
+
+            value = None
+            if default == DateWidgetParser.TODAY:
+                value = date.today()
+            else:
+                value = datetime.strptime(default, DateWidgetParser.FORMAT).date()
+
+            if value is not None:
+                kwargs["value"] = value
 
         widgets.append((handler, TitleDateCombo, kwargs))
 
@@ -110,7 +137,11 @@ class DateWidgetParser(WidgetParser):
 class FileWidgetParser(WidgetParser):
     @staticmethod
     def can_handle(x: Any) -> bool:
-        return isinstance(x, str) and WidgetParser.match(x, WidgetParser.FILE_PATTERN)
+        if isinstance(x, str):
+            can_handle = WidgetParser.match(x, WidgetParser.FILE_PATTERN)
+            can_handle = can_handle or WidgetParser.match(x, WidgetParser.DEFAULT_FILE_PATTERN)
+            return can_handle
+        return False
 
     @staticmethod
     def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
@@ -120,6 +151,7 @@ class FileWidgetParser(WidgetParser):
 
         name = cfg_key.split(".")[-1]
         name = f"{name_prefix}{name} (TAB for autocompletion):"
+
         begin_entry_at = len(name) + 1
         kwargs = {
             "name": name,
@@ -127,7 +159,44 @@ class FileWidgetParser(WidgetParser):
             "use_two_lines": False,
         }
 
+        if WidgetParser.match(cfg_value, WidgetParser.DEFAULT_FILE_PATTERN):
+            default = cfg_value.split("(")[-1].split(")")[0]
+            value = default.lower()
+            kwargs["value"] = value
+
         widgets.append((handler, TitleFilename, kwargs))
+
+        return widgets
+
+
+class BoolWidgetParser(WidgetParser):
+    @staticmethod
+    def can_handle(x: Any) -> bool:
+        return isinstance(x, str) and WidgetParser.match(x, WidgetParser.BOOL_PATTERN)
+
+    @staticmethod
+    def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
+        widgets: List[WIDGET_T] = []
+
+        handler = BoolWidgetHandler(cfg_key)
+
+        default = cfg_value.split("(")[-1].split(")")[0]
+        default = str(default).lower()
+        values: List[str] = [BoolWidgetHandler.TRUE, BoolWidgetHandler.FALSE]
+
+        name = cfg_key.split(".")[-1]
+        name = f"{name_prefix}{name}:"
+        kwargs = {
+            "name": name,
+            "values": values,
+            "value": [0 if default == BoolWidgetHandler.TRUE else 1],
+            "max_height": len(values),
+            "begin_entry_at": len(name) + 1,
+            "use_two_lines": False,
+            "scroll_exit": True,
+        }
+
+        widgets.append((handler, TitleSelectOne, kwargs))
 
         return widgets
 
@@ -136,6 +205,43 @@ class OptionsWidgetParser(WidgetParser):
     @staticmethod
     def can_handle(x: Any) -> bool:
         return isinstance(x, str) and WidgetParser.match(x, WidgetParser.OPTIONS_PATTERN)
+
+    @staticmethod
+    def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
+        widgets: List[WIDGET_T] = []
+
+        handler = OptionsWidgetHandler(cfg_key)
+
+        options = cfg_value.split("(")[-1].split(")")[0]
+        values: List[Any] = []
+        for option in options.split(","):
+            try:
+                value = literal_eval(option.strip())
+            except ValueError:
+                value = option.strip()
+            values.append(value)
+
+        name = cfg_key.split(".")[-1]
+        name = f"{name_prefix}{name}:"
+        kwargs = {
+            "name": name,
+            "values": values,
+            "value": [0],
+            "max_height": len(values),
+            "begin_entry_at": len(name) + 1,
+            "use_two_lines": False,
+            "scroll_exit": True,
+        }
+
+        widgets.append((handler, TitleSelectOne, kwargs))
+
+        return widgets
+
+
+class BaseWidgetParser(WidgetParser):
+    @staticmethod
+    def can_handle(x: Any) -> bool:
+        return isinstance(x, str) and WidgetParser.match(x, WidgetParser.BASE_PATTERN)
 
     @staticmethod
     def get_files_list(dir: Path) -> List[Path]:
@@ -154,7 +260,7 @@ class OptionsWidgetParser(WidgetParser):
             if p.is_file():
                 files.append(p)
             elif p.is_dir():
-                files.extend(OptionsWidgetParser.get_files_list(p))
+                files.extend(BaseWidgetParser.get_files_list(p))
         return files
 
     @staticmethod
@@ -162,8 +268,6 @@ class OptionsWidgetParser(WidgetParser):
         widgets: List[WIDGET_T] = []
 
         base_key = cfg_value.split("(")[-1].split(")")[0]
-        if len(base_key) == 0:
-            raise ValueError("Base key inside @OPTIONS cannot be empty.")
         base_keys = base_key.split(".")
 
         root = base_cfg_dir
@@ -173,7 +277,7 @@ class OptionsWidgetParser(WidgetParser):
                 raise ValueError(f"Cannot find base key {base_key}")
             root = subdirs[0]
 
-        files = sorted(OptionsWidgetParser.get_files_list(root))
+        files = sorted(BaseWidgetParser.get_files_list(root))
         values = [f.stem for f in files]
         if len(values) == 0:
             raise ValueError(f"Cannot find any option for the base key {base_key}")
@@ -182,7 +286,7 @@ class OptionsWidgetParser(WidgetParser):
         base_keys = [k.split(".")[0] for k in base_keys]
         base_keys = [k.replace("/", ".") for k in base_keys]
         options = {files[i].stem: base_keys[i] for i in range(len(files))}
-        handler = OptionsWidgetHandler(cfg_key, options)
+        handler = BaseWidgetHandler(cfg_key, options)
 
         name = cfg_key.split(".")[-1]
         name = f"{name_prefix}{name}:"
@@ -238,11 +342,15 @@ class WidgetFactory:
         parsers: List[Type[WidgetParser]] = []
 
         # specials
+        parsers.append(BoolWidgetParser)
         parsers.append(DateWidgetParser)
         parsers.append(FileWidgetParser)
         parsers.append(OptionsWidgetParser)
+        parsers.append(BaseWidgetParser)
+
         # recursive
         parsers.append(RecursiveWidgetParser)
+
         # literal
         parsers.append(LiteralWidgetParser)
 
