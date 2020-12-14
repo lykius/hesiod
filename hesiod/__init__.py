@@ -1,4 +1,4 @@
-from hesiod.core import get_cfg_copy, get_out_dir, hcfg, hmain
+from hesiod.core import get_cfg_copy, get_out_dir, get_run_name, hcfg, hmain
 
 __version__ = "0.1.1"
-__all__ = ["__version__", "hmain", "hcfg", "get_cfg_copy", "get_out_dir"]
+__all__ = ["__version__", "hmain", "hcfg", "get_cfg_copy", "get_out_dir", "get_run_name"]
