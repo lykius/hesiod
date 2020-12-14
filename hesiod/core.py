@@ -70,7 +70,11 @@ def hmain(
                 run_dir = Path(out_dir_root) / Path(run_name)
                 run_file = run_dir / RUN_FILE_NAME
 
-                if not run_file.exists():
+                create_dir = True
+                if run_cfg_path is not None:
+                    create_dir = run_file.absolute() != run_cfg_path.absolute()
+
+                if create_dir:
                     run_dir.mkdir(parents=True, exist_ok=False)
                     _CFG[OUT_DIR_KEY] = str(run_dir.absolute())
                     parser = get_parser(run_file.suffix)
