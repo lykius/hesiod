@@ -1,10 +1,11 @@
+import shutil
 from pathlib import Path
 from typing import Tuple
 
 import pytest
 
 import hesiod.core as hcore
-from hesiod import __version__, get_cfg_copy, hcfg, hmain
+from hesiod import __version__, get_cfg_copy, get_out_dir, get_run_name, hcfg, hmain
 
 
 def test_version() -> None:
@@ -101,3 +102,29 @@ def test_cfg_copy(base_cfg_dir: Path, complex_run_file: Path) -> None:
         assert cfg_copy != hcore._CFG
 
     test()
+
+
+def test_out_dir(base_cfg_dir: Path, complex_run_file: Path) -> None:
+    @hmain(base_cfg_dir, run_cfg_file=complex_run_file)
+    def test1() -> None:
+        out_dir = get_out_dir()
+        assert out_dir.absolute() == Path("logs/test").absolute()
+
+    @hmain(base_cfg_dir, run_cfg_file="logs/test/run.yaml")
+    def test2() -> None:
+        out_dir = get_out_dir()
+        assert out_dir.absolute() == Path("logs/test").absolute()
+
+    test1()
+    test2()
+    shutil.rmtree("logs")
+
+
+def test_run_name(base_cfg_dir: Path, complex_run_file: Path) -> None:
+    @hmain(base_cfg_dir, run_cfg_file=complex_run_file)
+    def test() -> None:
+        run_name = get_run_name()
+        assert run_name == "test"
+
+    test()
+    shutil.rmtree("logs")
