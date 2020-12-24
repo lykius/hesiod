@@ -15,17 +15,17 @@ def base_cfg_dir(cwd: Path) -> Path:
 
 @pytest.fixture
 def simple_run_file(cwd: Path) -> Path:
-    return cwd / "tests/runs/run_simple.yaml"
+    return cwd / "tests/runs/simple.yaml"
 
 
 @pytest.fixture
 def complex_run_file(cwd: Path) -> Path:
-    return cwd / "tests/runs/run_complex.yaml"
+    return cwd / "tests/runs/complex.yaml"
 
 
 @pytest.fixture
 def wrong_run_file(cwd: Path) -> Path:
-    return cwd / "tests/runs/run_wrong.yaml"
+    return cwd / "tests/runs/wrong.yaml"
 
 
 @pytest.fixture
