@@ -135,6 +135,15 @@ def test_out_dir(base_cfg_dir: Path, complex_run_file: Path) -> None:
     shutil.rmtree("logs")
 
 
+def test_no_run_name(no_run_name_run_file: Path) -> None:
+    @hmain("", run_cfg_file=no_run_name_run_file)
+    def test() -> None:
+        pass
+
+    with pytest.raises(ValueError):
+        test()
+
+
 def test_run_name(base_cfg_dir: Path, complex_run_file: Path) -> None:
     @hmain(base_cfg_dir, run_cfg_file=complex_run_file)
     def test() -> None:
