@@ -3,6 +3,8 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable, Optional, Type, TypeVar, Union, cast
 
+from typeguard import check_type
+
 from hesiod.cfgparse import CFG_T, RUN_NAME_KEY, get_parser
 from hesiod.ui import TUI
 
@@ -104,8 +106,8 @@ def hcfg(name: str, t: Optional[Type[T]] = None) -> T:
     for n in name.split("."):
         value = value[n]
 
-    if t is not None and not isinstance(value, t):
-        raise TypeError(f"{name} is of type {type(value)} but requested {t}")
+    if t is not None:
+        check_type(name, value, t)
 
     value = deepcopy(value)
 

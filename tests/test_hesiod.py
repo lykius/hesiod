@@ -1,6 +1,6 @@
 import shutil
 from pathlib import Path
-from typing import Tuple
+from typing import Any, Dict, List, Tuple
 
 import pytest
 
@@ -74,9 +74,15 @@ def test_hcfg(base_cfg_dir: Path, simple_run_file: Path) -> None:
         assert g2pc is True and isinstance(g2pc, bool)
         g2pd = hcfg("group_2.param_d", str)
         assert g2pd == "param_d" and isinstance(g2pd, str)
+        g3 = hcfg("group_3", Dict[str, Any])
+        assert isinstance(g3, dict)
+        g4 = hcfg("group_4", Tuple[int, bool, str])  # type: ignore
+        assert g4 == (1, True, "test") and isinstance(g4, tuple)
+        g5 = hcfg("group_5", List[float])
+        assert g5 == [0.1, 0.1, 0.1] and isinstance(g5, list)
 
         with pytest.raises(TypeError):
-            hcfg("group_1.param_a", float)
+            hcfg("group_1.param_a", str)
 
         with pytest.raises(TypeError):
             hcfg("group_1.param_b", int)
@@ -86,6 +92,15 @@ def test_hcfg(base_cfg_dir: Path, simple_run_file: Path) -> None:
 
         with pytest.raises(TypeError):
             hcfg("group_2.param_d", bool)
+
+        with pytest.raises(TypeError):
+            hcfg("group_3", Dict[str, int])
+
+        with pytest.raises(TypeError):
+            hcfg("group_4", Tuple[int, float, int])  # type: ignore
+
+        with pytest.raises(TypeError):
+            hcfg("group_5", List[str])
 
     test()
 
