@@ -6,7 +6,7 @@ from npyscreen import TitleDateCombo, TitleFilename, TitleSelectOne, TitleText
 
 from hesiod.ui.tui.wgtfactory import BaseWidgetParser, BoolWidgetParser, DateWidgetParser
 from hesiod.ui.tui.wgtfactory import FileWidgetParser, LiteralWidgetParser, OptionsWidgetParser
-from hesiod.ui.tui.wgtfactory import RecursiveWidgetParser
+from hesiod.ui.tui.wgtfactory import RecursiveWidgetParser, WidgetParser
 from hesiod.ui.tui.wgthandler import BaseWidgetHandler, BoolWidgetHandler, OptionsWidgetHandler
 from hesiod.ui.tui.wgthandler import WidgetHandler
 
@@ -182,5 +182,78 @@ def test_base_widget_parser(base_cfg_dir: Path) -> None:
             assert cast(dict, w[2])["scroll_exit"] is True
 
 
-def test_recursive_widget_parser() -> None:
-    pass
+def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
+    assert RecursiveWidgetParser.can_handle(1) is False
+    assert RecursiveWidgetParser.can_handle(1.2) is False
+    assert RecursiveWidgetParser.can_handle(True) is False
+    assert RecursiveWidgetParser.can_handle("test") is False
+    assert RecursiveWidgetParser.can_handle((1, 2, 3)) is False
+    assert RecursiveWidgetParser.can_handle([1, 2, 3]) is False
+    assert RecursiveWidgetParser.can_handle(set((1, 2, 3))) is False
+
+    cfg = {
+        "group": {
+            "subgroup1": {
+                "param1": 1,
+                "param2": 1.234,
+                "param3": False,
+                "param4": "test",
+                "param5": [1, 2, 3],
+                "param6": (1, 2, 3),
+                "param7": set((1, 2, 3)),
+            },
+            "subgroup2": {
+                "subsubgroup": {
+                    "param1": "@DATE(today)",
+                    "param2": "@FILE(/path/to/default)",
+                    "param3": "@BOOL(False)",
+                    "param4": "@OPTIONS(1, 2, 3)",
+                    "param5": "@BASE(dataset.cifar)",
+                }
+            },
+        }
+    }
+
+    assert RecursiveWidgetParser.can_handle(cfg)
+
+    widgets = RecursiveWidgetParser.parse("test", "", cfg, base_cfg_dir)
+    assert len(widgets) == 17
+
+    prefix = WidgetParser.PREFIX
+    date_hint = DateWidgetParser.HINT
+    file_hint = FileWidgetParser.HINT
+    expected = [
+        (None, TitleText.__class__, "test:"),
+        (None, TitleText.__class__, f"{prefix}group:"),
+        (None, TitleText.__class__, f"{prefix}{prefix}subgroup1:"),
+        (WidgetHandler, TitleText.__class__, f"{prefix}{prefix}{prefix}param1:"),
+        (WidgetHandler, TitleText.__class__, f"{prefix}{prefix}{prefix}param2:"),
+        (WidgetHandler, TitleText.__class__, f"{prefix}{prefix}{prefix}param3:"),
+        (WidgetHandler, TitleText.__class__, f"{prefix}{prefix}{prefix}param4:"),
+        (WidgetHandler, TitleText.__class__, f"{prefix}{prefix}{prefix}param5:"),
+        (WidgetHandler, TitleText.__class__, f"{prefix}{prefix}{prefix}param6:"),
+        (WidgetHandler, TitleText.__class__, f"{prefix}{prefix}{prefix}param7:"),
+        (None, TitleText.__class__, f"{prefix}{prefix}subgroup2:"),
+        (None, TitleText.__class__, f"{prefix}{prefix}{prefix}subsubgroup:"),
+        (
+            WidgetHandler,
+            TitleText.__class__,
+            f"{prefix}{prefix}{prefix}{prefix}param1 {date_hint}:",
+        ),
+        (
+            WidgetHandler,
+            TitleText.__class__,
+            f"{prefix}{prefix}{prefix}{prefix}param2 {file_hint}:",
+        ),
+        (BoolWidgetHandler, TitleText.__class__, f"{prefix}{prefix}{prefix}{prefix}param3:"),
+        (OptionsWidgetHandler, TitleText.__class__, f"{prefix}{prefix}{prefix}{prefix}param4:"),
+        (BaseWidgetHandler, TitleText.__class__, f"{prefix}{prefix}{prefix}{prefix}param5:"),
+    ]
+
+    for i in range(len(widgets)):
+        if expected[i][0] is None:
+            assert widgets[i][0] is None
+        else:
+            assert isinstance(widgets[i][0], expected[i][0])
+        assert isinstance(widgets[i][1], expected[i][1])
+        assert widgets[i][2]["name"] == expected[i][2]
