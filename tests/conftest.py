@@ -34,5 +34,5 @@ def no_run_name_run_file(cwd: Path) -> Path:
 
 
 @pytest.fixture
-def cifar10_cfg_file(cwd: Path) -> Path:
+def cifar100_cfg_file(cwd: Path) -> Path:
     return cwd / "tests/cfg/dataset/cifar/cifar100.yaml"
