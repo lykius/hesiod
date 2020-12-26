@@ -36,3 +36,8 @@ def no_run_name_run_file(cwd: Path) -> Path:
 @pytest.fixture
 def cifar100_cfg_file(cwd: Path) -> Path:
     return cwd / "tests/cfg/dataset/cifar/cifar100.yaml"
+
+
+@pytest.fixture
+def complex_template_file(cwd: Path) -> Path:
+    return cwd / "tests/templates/complex.yaml"
