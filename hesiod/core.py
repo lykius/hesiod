@@ -3,6 +3,8 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable, Optional, Type, TypeVar, Union, cast
 
+from typeguard import check_type
+
 from hesiod.cfgparse import CFG_T, RUN_NAME_KEY, get_parser
 from hesiod.ui import TUI
 
@@ -11,6 +13,70 @@ FUNCTION_T = Callable[..., Any]
 _CFG: CFG_T = {}
 RUN_FILE_NAME = "run.yaml"
 OUT_DIR_KEY = "***hesiod_out_dir***"
+
+
+def _get_cfg(
+    base_cfg_path: Path,
+    template_cfg_path: Optional[Path],
+    run_cfg_path: Optional[Path],
+) -> CFG_T:
+    """Load config either from template file or from run file.
+
+    Args:
+        base_cfg_path: the path to the directory with all the config files.
+        template_cfg_path : the path to the template config file for this run (optional).
+        run_cfg_path : the path to the config file created by the user for this run (optional).
+
+    Raises:
+        ValueError: if both template_cfg_path and run_cfg_path are None.
+
+    Returns:
+        The loaded config.
+    """
+    if run_cfg_path is not None:
+        parser = get_parser(run_cfg_path.suffix)
+        return parser.load_cfg(run_cfg_path, base_cfg_path)
+    elif template_cfg_path is not None:
+        parser = get_parser(template_cfg_path.suffix)
+        template_cfg = parser.load_cfg(template_cfg_path, base_cfg_path)
+        tui = TUI(template_cfg, base_cfg_path, parser)
+        return tui.show()
+    else:
+        msg = "Either a valid run file or a template file must be passed to hesiod."
+        raise ValueError(msg)
+
+
+def _create_out_dir_and_save_run_file(
+    cfg: CFG_T, out_dir_root: str, run_cfg_path: Optional[Path]
+) -> None:
+    """Create output directory for the current run and save the run file
+    in it (if needed).
+
+    Args:
+        cfg : the loaded config.
+        out_dir_root : root for output directories.
+        run_cfg_path : the path to the config file created by the user for this run (optional).
+
+    Raises:
+        ValueError: if the run name is not specified in the given config.
+    """
+    run_name = cfg.get(RUN_NAME_KEY, "")
+    if len(run_name) == 0:
+        msg = f"The run file must contain a valid name for the run ({RUN_NAME_KEY})."
+        raise ValueError(msg)
+
+    run_dir = Path(out_dir_root) / Path(run_name)
+    run_file = run_dir / RUN_FILE_NAME
+
+    create_dir = True
+    if run_cfg_path is not None:
+        create_dir = run_file.absolute() != run_cfg_path.absolute()
+
+    if create_dir:
+        run_dir.mkdir(parents=True, exist_ok=False)
+        cfg[OUT_DIR_KEY] = str(run_dir.absolute())
+        parser = get_parser(run_file.suffix)
+        parser.save_cfg(cfg, run_file)
 
 
 def hmain(
@@ -49,32 +115,10 @@ def hmain(
             run_cfg_path = Path(run_cfg_file) if run_cfg_file else None
             template_cfg_path = Path(template_cfg_file) if template_cfg_file else None
 
-            if run_cfg_path is not None:
-                parser = get_parser(run_cfg_path.suffix)
-                _CFG = parser.load_cfg(run_cfg_path, bcfg_path)
-            elif template_cfg_path is not None:
-                parser = get_parser(template_cfg_path.suffix)
-                template_cfg = parser.load_cfg(template_cfg_path, bcfg_path)
-                tui = TUI(template_cfg, bcfg_path, parser)
-                _CFG = tui.show()
-            else:
-                msg = "Either a valid run file or a template file must be passed to hesiod."
-                raise ValueError(msg)
+            _CFG = _get_cfg(bcfg_path, template_cfg_path, run_cfg_path)
 
             if create_out_dir:
-                run_name = _CFG.get(RUN_NAME_KEY, "")
-                if len(run_name) == 0:
-                    msg = f"The run file must contain a valid name for the run ({RUN_NAME_KEY})."
-                    raise ValueError(msg)
-
-                run_dir = Path(out_dir_root) / Path(run_name)
-                run_file = run_dir / RUN_FILE_NAME
-
-                if not run_file.exists():
-                    run_dir.mkdir(parents=True, exist_ok=False)
-                    _CFG[OUT_DIR_KEY] = str(run_dir.absolute())
-                    parser = get_parser(run_file.suffix)
-                    parser.save_cfg(_CFG, run_file)
+                _create_out_dir_and_save_run_file(_CFG, out_dir_root, run_cfg_path)
 
             return fn(*args, **kwargs)
 
@@ -100,8 +144,8 @@ def hcfg(name: str, t: Optional[Type[T]] = None) -> T:
     for n in name.split("."):
         value = value[n]
 
-    if t is not None and not isinstance(value, t):
-        raise TypeError(f"{name} is of type {type(value)} but requested {t}")
+    if t is not None:
+        check_type(name, value, t)
 
     value = deepcopy(value)
 

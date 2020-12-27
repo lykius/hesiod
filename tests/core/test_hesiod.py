@@ -1,10 +1,11 @@
+import shutil
 from pathlib import Path
-from typing import Tuple
+from typing import Any, Dict, List, Tuple
 
 import pytest
 
 import hesiod.core as hcore
-from hesiod import __version__, get_cfg_copy, hcfg, hmain
+from hesiod import __version__, get_cfg_copy, get_out_dir, get_run_name, hcfg, hmain
 
 
 def test_version() -> None:
@@ -73,9 +74,15 @@ def test_hcfg(base_cfg_dir: Path, simple_run_file: Path) -> None:
         assert g2pc is True and isinstance(g2pc, bool)
         g2pd = hcfg("group_2.param_d", str)
         assert g2pd == "param_d" and isinstance(g2pd, str)
+        g3 = hcfg("group_3", Dict[str, Any])
+        assert isinstance(g3, dict)
+        g4 = hcfg("group_4", Tuple[int, bool, str])  # type: ignore
+        assert g4 == (1, True, "test") and isinstance(g4, tuple)
+        g5 = hcfg("group_5", List[float])
+        assert g5 == [0.1, 0.1, 0.1] and isinstance(g5, list)
 
         with pytest.raises(TypeError):
-            hcfg("group_1.param_a", float)
+            hcfg("group_1.param_a", str)
 
         with pytest.raises(TypeError):
             hcfg("group_1.param_b", int)
@@ -85,6 +92,15 @@ def test_hcfg(base_cfg_dir: Path, simple_run_file: Path) -> None:
 
         with pytest.raises(TypeError):
             hcfg("group_2.param_d", bool)
+
+        with pytest.raises(TypeError):
+            hcfg("group_3", Dict[str, int])
+
+        with pytest.raises(TypeError):
+            hcfg("group_4", Tuple[int, float, int])  # type: ignore
+
+        with pytest.raises(TypeError):
+            hcfg("group_5", List[str])
 
     test()
 
@@ -101,3 +117,38 @@ def test_cfg_copy(base_cfg_dir: Path, complex_run_file: Path) -> None:
         assert cfg_copy != hcore._CFG
 
     test()
+
+
+def test_out_dir(base_cfg_dir: Path, complex_run_file: Path) -> None:
+    @hmain(base_cfg_dir, run_cfg_file=complex_run_file)
+    def test1() -> None:
+        out_dir = get_out_dir()
+        assert out_dir.absolute() == Path("logs/test").absolute()
+
+    @hmain(base_cfg_dir, run_cfg_file="logs/test/run.yaml")
+    def test2() -> None:
+        out_dir = get_out_dir()
+        assert out_dir.absolute() == Path("logs/test").absolute()
+
+    test1()
+    test2()
+    shutil.rmtree("logs")
+
+
+def test_no_run_name(no_run_name_run_file: Path) -> None:
+    @hmain("", run_cfg_file=no_run_name_run_file)
+    def test() -> None:
+        pass
+
+    with pytest.raises(ValueError):
+        test()
+
+
+def test_run_name(base_cfg_dir: Path, complex_run_file: Path) -> None:
+    @hmain(base_cfg_dir, run_cfg_file=complex_run_file)
+    def test() -> None:
+        run_name = get_run_name()
+        assert run_name == "test"
+
+    test()
+    shutil.rmtree("logs")

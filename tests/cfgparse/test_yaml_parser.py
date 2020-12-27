@@ -5,9 +5,9 @@ import pytest
 from hesiod.cfgparse import YAMLConfigParser
 
 
-def test_load_cfg_file(cifar10_cfg_file: Path) -> None:
+def test_load_cfg_file(cifar100_cfg_file: Path) -> None:
     parser = YAMLConfigParser
-    cfg = parser.load_cfg_file(cifar10_cfg_file)
+    cfg = parser.load_cfg_file(cifar100_cfg_file)
 
     assert cfg["name"] == "cifar100"
     assert cfg["path"] == "/path/to/cifar100"

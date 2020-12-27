@@ -17,13 +17,13 @@ WIDGET_T = Tuple[Optional[WidgetHandler], Callable[..., Widget], Dict[str, Any]]
 
 class WidgetParser(ABC):
     PREFIX = "    "
-    DATE_PATTERN = r"^@DATE?"
-    DEFAULT_DATE_PATTERN = r"^@DATE\((today|Today|TODAY|\d{4}-\d{2}-\d{2})\)?"
-    FILE_PATTERN = r"^@FILE?"
-    DEFAULT_FILE_PATTERN = r"^@FILE\(.+\)?"
-    BASE_PATTERN = r"^@BASE\([0-9A-Za-z_]+\)?"
-    OPTIONS_PATTERN = r"^@OPTIONS\(.+\)?"
-    BOOL_PATTERN = r"^@BOOL\(true|True|TRUE|false|False|FALSE\)?"
+    DATE_PATTERN = r"^@DATE$"
+    DEFAULT_DATE_PATTERN = r"^@DATE\((today|Today|TODAY|\d{4}-\d{2}-\d{2})\)$"
+    FILE_PATTERN = r"^@FILE$"
+    DEFAULT_FILE_PATTERN = r"^@FILE\(.+\)$"
+    BASE_PATTERN = r"^@BASE\([0-9A-Za-z_.]+\)$"
+    OPTIONS_PATTERN = r"^@OPTIONS\(.+\)$"
+    BOOL_PATTERN = r"^@BOOL\((true|True|TRUE|false|False|FALSE)\)$"
 
     @staticmethod
     def match(s: str, pattern: str) -> bool:
@@ -91,6 +91,7 @@ class LiteralWidgetParser(WidgetParser):
 class DateWidgetParser(WidgetParser):
     TODAY = "today"
     FORMAT = r"%Y-%M-%d"
+    HINT = "(ENTER to select a date)"
 
     @staticmethod
     def can_handle(x: Any) -> bool:
@@ -107,7 +108,7 @@ class DateWidgetParser(WidgetParser):
         handler = WidgetHandler(cfg_key)
 
         name = cfg_key.split(".")[-1]
-        name = f"{name_prefix}{name} (ENTER to select a date):"
+        name = f"{name_prefix}{name} {DateWidgetParser.HINT}:"
 
         begin_entry_at = len(name) + 1
         kwargs = {
@@ -135,6 +136,8 @@ class DateWidgetParser(WidgetParser):
 
 
 class FileWidgetParser(WidgetParser):
+    HINT = "(TAB for autocompletion)"
+
     @staticmethod
     def can_handle(x: Any) -> bool:
         if isinstance(x, str):
@@ -150,7 +153,7 @@ class FileWidgetParser(WidgetParser):
         handler = WidgetHandler(cfg_key)
 
         name = cfg_key.split(".")[-1]
-        name = f"{name_prefix}{name} (TAB for autocompletion):"
+        name = f"{name_prefix}{name} {FileWidgetParser.HINT}:"
 
         begin_entry_at = len(name) + 1
         kwargs = {

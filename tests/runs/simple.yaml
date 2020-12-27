@@ -9,3 +9,5 @@ group_3:
     param_f: "param_f"
     param_g: 2
     param_h: 4.56
+group_4: !!python/tuple [1, true, "test"]
+group_5: [0.1, 0.1, 0.1]
