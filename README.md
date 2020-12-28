@@ -1,10 +1,23 @@
-# hesiod
+<p align="center">
+    <img src="images/hesiod.svg" alt="logo" width="80%"/>
+</p>
 
-[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
-[![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/)
-[![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
-[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
-[![CI](https://github.com/lykius/hesiod/workflows/CI/badge.svg)](https://github.com/lykius/hesiod)
+---
 
-A simple tool to manage configurations.
+<p align="center">
+    <a href="https://pypi.org/project/hesiod/">
+        <img src="https://img.shields.io/pypi/v/hesiod" alt="PyPI" />
+    </a>
+    <a href="#">
+        <img src="https://img.shields.io/pypi/pyversions/hesiod" alt="PyPI - Python Version" />
+    </a>
+    <a href="https://github.com/psf/black">
+        <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="code style: black" />
+    </a>
+    <a href="http://mypy-lang.org/">
+        <img src="http://www.mypy-lang.org/static/mypy_badge.svg" alt="mypy checked" />
+    </a>
+    <a href="https://github.com/lykius/hesiod">
+        <img src="https://github.com/lykius/hesiod/workflows/CI/badge.svg" alt="CI" />
+    </a>
+</p>
