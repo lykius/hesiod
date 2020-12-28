@@ -319,8 +319,9 @@ class RecursiveWidgetParser(WidgetParser):
 
         name = cfg_key.split(".")[-1]
         name = f"{name_prefix}{name}:"
-        kwargs = {"name": name, "use_two_lines": False, "editable": False}
-        widgets.append((None, TitleText, kwargs))
+        _, w, wargs = WidgetFactory.get_literal_widget(name, "")
+        wargs["editable"] = False
+        widgets.append((None, w, wargs))
 
         children_prefix = f"{name_prefix}{WidgetParser.PREFIX}"
         children = WidgetFactory.get_widgets(
