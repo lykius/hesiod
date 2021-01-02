@@ -5,14 +5,13 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
-from npyscreen import TitleDateCombo, TitleFilename, TitleSelectOne, TitleText  # type: ignore
-from npyscreen.wgwidget import Widget  # type: ignore
+from asciimatics.widgets import DatePicker, DropdownList, FileBrowser, Label, RadioButtons, Text
+from asciimatics.widgets import Widget
 
 from hesiod.cfgparse import CFG_T
-from hesiod.ui.tui.wgthandler import BaseWidgetHandler, BoolWidgetHandler, OptionsWidgetHandler
-from hesiod.ui.tui.wgthandler import WidgetHandler
 
-WIDGET_T = Tuple[Optional[WidgetHandler], Callable[..., Widget], Dict[str, Any]]
+# from hesiod.ui.tui.wgthandler import BaseWidgetHandler, BoolWidgetHandler, OptionsWidgetHandler
+# from hesiod.ui.tui.wgthandler import WidgetHandler
 
 
 class WidgetParser(ABC):
@@ -53,12 +52,12 @@ class WidgetParser(ABC):
 
     @staticmethod
     @abstractmethod
-    def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
+    def parse(cfg_key: str, label_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[Widget]:
         """Parse a literal config and return a list with the needed widgets.
 
         Args:
             cfg_key: name of the config.
-            name_prefix: prefix for the name of the config.
+            label_prefix: prefix for the name of the config.
             cfg_value: literal value of the config.
             base_cfg_dir: path to the base configs directory.
 
@@ -74,18 +73,15 @@ class LiteralWidgetParser(WidgetParser):
         return type(x) in [int, float, str, bool, list, tuple, set, date]
 
     @staticmethod
-    def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
-        widgets: List[WIDGET_T] = []
+    def parse(cfg_key: str, label_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[Widget]:
+        # handler = WidgetHandler(cfg_key)
 
-        handler = WidgetHandler(cfg_key)
+        label = cfg_key.split(".")[-1]
+        label = f"{label_prefix}{label}:"
+        widget = Text(label=label, name=cfg_key)
+        widget.value = str(cfg_value)
 
-        name = cfg_key.split(".")[-1]
-        name = f"{name_prefix}{name}:"
-        widget = WidgetFactory.get_literal_widget(name, cfg_value)
-
-        widgets.append((handler, widget[1], widget[2]))
-
-        return widgets
+        return [widget]
 
 
 class DateWidgetParser(WidgetParser):
@@ -102,20 +98,13 @@ class DateWidgetParser(WidgetParser):
         return False
 
     @staticmethod
-    def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
-        widgets: List[WIDGET_T] = []
+    def parse(cfg_key: str, label_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[Widget]:
+        # handler = WidgetHandler(cfg_key)
 
-        handler = WidgetHandler(cfg_key)
+        label = cfg_key.split(".")[-1]
+        label = f"{label_prefix}{label} {DateWidgetParser.HINT}:"
 
-        name = cfg_key.split(".")[-1]
-        name = f"{name_prefix}{name} {DateWidgetParser.HINT}:"
-
-        begin_entry_at = len(name) + 1
-        kwargs = {
-            "name": name,
-            "begin_entry_at": begin_entry_at,
-            "use_two_lines": False,
-        }
+        widget = DatePicker(label=label, name=cfg_key)
 
         if WidgetParser.match(cfg_value, WidgetParser.DEFAULT_DATE_PATTERN):
             default = cfg_value.split("(")[-1].split(")")[0]
@@ -128,11 +117,9 @@ class DateWidgetParser(WidgetParser):
                 value = datetime.strptime(default, DateWidgetParser.FORMAT).date()
 
             if value is not None:
-                kwargs["value"] = value
+                widget.value = value
 
-        widgets.append((handler, TitleDateCombo, kwargs))
-
-        return widgets
+        return [widget]
 
 
 class FileWidgetParser(WidgetParser):
@@ -147,61 +134,45 @@ class FileWidgetParser(WidgetParser):
         return False
 
     @staticmethod
-    def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
-        widgets: List[WIDGET_T] = []
+    def parse(cfg_key: str, label_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[Widget]:
+        # handler = WidgetHandler(cfg_key)
 
-        handler = WidgetHandler(cfg_key)
-
-        name = cfg_key.split(".")[-1]
-        name = f"{name_prefix}{name} {FileWidgetParser.HINT}:"
-
-        begin_entry_at = len(name) + 1
-        kwargs = {
-            "name": name,
-            "begin_entry_at": begin_entry_at,
-            "use_two_lines": False,
-        }
+        label = cfg_key.split(".")[-1]
+        label = f"{label_prefix}{label} {FileWidgetParser.HINT}:"
 
         if WidgetParser.match(cfg_value, WidgetParser.DEFAULT_FILE_PATTERN):
             default = cfg_value.split("(")[-1].split(")")[0]
             value = default.lower()
-            kwargs["value"] = value
+        else:
+            value = str(Path(".").absolute())
 
-        widgets.append((handler, TitleFilename, kwargs))
+        widget = FileBrowser(2, value, name=cfg_key)
 
-        return widgets
+        return [widget]
 
 
 class BoolWidgetParser(WidgetParser):
+    TRUE = "true"
+    FALSE = "false"
+
     @staticmethod
     def can_handle(x: Any) -> bool:
         return isinstance(x, str) and WidgetParser.match(x, WidgetParser.BOOL_PATTERN)
 
     @staticmethod
-    def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
-        widgets: List[WIDGET_T] = []
-
-        handler = BoolWidgetHandler(cfg_key)
+    def parse(cfg_key: str, label_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[Widget]:
+        # handler = BoolWidgetHandler(cfg_key)
 
         default = cfg_value.split("(")[-1].split(")")[0]
         default = str(default).lower()
-        values: List[str] = [BoolWidgetHandler.TRUE, BoolWidgetHandler.FALSE]
+        values = [(BoolWidgetParser.TRUE, 0), (BoolWidgetParser.FALSE, 1)]
 
-        name = cfg_key.split(".")[-1]
-        name = f"{name_prefix}{name}:"
-        kwargs = {
-            "name": name,
-            "values": values,
-            "value": [0 if default == BoolWidgetHandler.TRUE else 1],
-            "max_height": len(values),
-            "begin_entry_at": len(name) + 1,
-            "use_two_lines": False,
-            "scroll_exit": True,
-        }
+        label = cfg_key.split(".")[-1]
+        label = f"{label_prefix}{label}:"
 
-        widgets.append((handler, TitleSelectOne, kwargs))
+        widget = RadioButtons(values, label=label, name=cfg_key)
 
-        return widgets
+        return [widget]
 
 
 class OptionsWidgetParser(WidgetParser):
@@ -210,35 +181,18 @@ class OptionsWidgetParser(WidgetParser):
         return isinstance(x, str) and WidgetParser.match(x, WidgetParser.OPTIONS_PATTERN)
 
     @staticmethod
-    def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
-        widgets: List[WIDGET_T] = []
-
-        handler = OptionsWidgetHandler(cfg_key)
+    def parse(cfg_key: str, label_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[Widget]:
+        # handler = OptionsWidgetHandler(cfg_key)
 
         options = cfg_value.split("(")[-1].split(")")[0]
-        values: List[Any] = []
-        for option in options.split(","):
-            try:
-                value = literal_eval(option.strip())
-            except ValueError:
-                value = option.strip()
-            values.append(value)
+        values = [(option.strip(), i) for i, option in enumerate(options.split(","))]
 
-        name = cfg_key.split(".")[-1]
-        name = f"{name_prefix}{name}:"
-        kwargs = {
-            "name": name,
-            "values": values,
-            "value": [0],
-            "max_height": len(values),
-            "begin_entry_at": len(name) + 1,
-            "use_two_lines": False,
-            "scroll_exit": True,
-        }
+        label = cfg_key.split(".")[-1]
+        label = f"{label_prefix}{label}:"
 
-        widgets.append((handler, TitleSelectOne, kwargs))
+        widget = RadioButtons(values, label=label, name=cfg_key)
 
-        return widgets
+        return [widget]
 
 
 class BaseWidgetParser(WidgetParser):
@@ -267,9 +221,7 @@ class BaseWidgetParser(WidgetParser):
         return files
 
     @staticmethod
-    def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
-        widgets: List[WIDGET_T] = []
-
+    def parse(cfg_key: str, label_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[Widget]:
         base_key = cfg_value.split("(")[-1].split(")")[0]
         base_keys = base_key.split(".")
 
@@ -281,7 +233,7 @@ class BaseWidgetParser(WidgetParser):
             root = subdirs[0]
 
         files = sorted(BaseWidgetParser.get_files_list(root))
-        values = [f.stem for f in files]
+        values = [(f.stem, i) for i, f in enumerate(files)]
         if len(values) == 0:
             raise ValueError(f"Cannot find any option for the base key {base_key}")
 
@@ -289,23 +241,15 @@ class BaseWidgetParser(WidgetParser):
         base_keys = [k.split(".")[0] for k in base_keys]
         base_keys = [k.replace("/", ".") for k in base_keys]
         options = {files[i].stem: base_keys[i] for i in range(len(files))}
-        handler = BaseWidgetHandler(cfg_key, options)
 
-        name = cfg_key.split(".")[-1]
-        name = f"{name_prefix}{name}:"
-        kwargs = {
-            "name": name,
-            "values": values,
-            "value": [0],
-            "max_height": len(values),
-            "begin_entry_at": len(name) + 1,
-            "use_two_lines": False,
-            "scroll_exit": True,
-        }
+        # handler = BaseWidgetHandler(cfg_key, options)
 
-        widgets.append((handler, TitleSelectOne, kwargs))
+        label = cfg_key.split(".")[-1]
+        label = f"{label_prefix}{label}:"
 
-        return widgets
+        widget = DropdownList(values, label=label, name=cfg_key)
+
+        return [widget]
 
 
 class RecursiveWidgetParser(WidgetParser):
@@ -314,18 +258,16 @@ class RecursiveWidgetParser(WidgetParser):
         return isinstance(x, dict)
 
     @staticmethod
-    def parse(cfg_key: str, name_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WIDGET_T]:
-        widgets: List[WIDGET_T] = []
+    def parse(cfg_key: str, label_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[Widget]:
+        widgets: List[Widget] = []
 
-        name = cfg_key.split(".")[-1]
-        name = f"{name_prefix}{name}:"
-        _, w, wargs = WidgetFactory.get_literal_widget(name, "")
-        wargs["editable"] = False
-        widgets.append((None, w, wargs))
+        label = cfg_key.split(".")[-1]
+        label = f"{label_prefix}{label}:"
+        widgets.append(Label(label))
 
-        children_prefix = f"{name_prefix}{WidgetParser.PREFIX}"
+        children_prefix = f"{label_prefix}{WidgetParser.PREFIX}"
         children = WidgetFactory.get_widgets(
-            cfg_value, base_cfg_dir, cfg_prefix=cfg_key, name_prefix=children_prefix
+            cfg_value, base_cfg_dir, cfg_prefix=cfg_key, label_prefix=children_prefix
         )
         widgets.extend(children)
 
@@ -362,47 +304,30 @@ class WidgetFactory:
 
     @staticmethod
     def get_widgets(
-        cfg: CFG_T, base_cfg_dir: Path, cfg_prefix: str = "", name_prefix: str = ""
-    ) -> List[WIDGET_T]:
+        cfg: CFG_T,
+        base_cfg_dir: Path,
+        cfg_prefix: str = "",
+        label_prefix: str = "",
+    ) -> List[Widget]:
         """Prepare widgets for a given config.
 
         Args:
             cfg: the config.
             base_cfg_dir: path to the base configs directory.
             cfg_prefix: prefix for the config key of the returned widgets.
-            name_prefix: prefix for the name of the returned widgets.
+            label_prefix: prefix for the name of the returned widgets.
 
         Returns:
             The list of the widgets for the given config.
         """
-        widgets: List[WIDGET_T] = []
+        widgets: List[Widget] = []
         parsers = WidgetFactory.get_parsers()
 
         for k in cfg:
             for parser in parsers:
                 if parser.can_handle(cfg[k]):
                     cfg_key = f"{cfg_prefix}.{k}" if len(cfg_prefix) > 0 else k
-                    widgets.extend(parser.parse(cfg_key, name_prefix, cfg[k], base_cfg_dir))
+                    widgets.extend(parser.parse(cfg_key, label_prefix, cfg[k], base_cfg_dir))
                     break
 
         return widgets
-
-    @staticmethod
-    def get_literal_widget(name: str, value: Union[int, float, str, list]) -> WIDGET_T:
-        """Get a TitleText widget for a literal config.
-
-        Args:
-            name: name of the config.
-            value: value for the config.
-
-        Returns:
-            The TitleText widget for the given config.
-        """
-        begin_entry_at = len(name) + 1
-        kwargs = {
-            "name": name,
-            "value": str(value),
-            "begin_entry_at": begin_entry_at,
-            "use_two_lines": False,
-        }
-        return (None, TitleText, kwargs)

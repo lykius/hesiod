@@ -1,36 +1,55 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
 
-from npyscreen import FixedText  # type: ignore
-from npyscreen.fmForm import FormBaseNew  # type: ignore
+from asciimatics.event import KeyboardEvent
+from asciimatics.exceptions import NextScene, StopApplication
+from asciimatics.screen import Screen
+from asciimatics.widgets import Frame, Layout
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI
 
 
-class BaseForm(ABC, FormBaseNew):
+class BaseForm(ABC, Frame):
+    EDIT_FORM = "EDIT"
+    RECAP_FORM = "RECAP"
     LAST_ROW = -3
 
-    def __init__(self, parent_app: "TUI", next_form: Optional[str], **kwargs: Any) -> None:
+    def __init__(
+        self,
+        screen: Screen,
+        parent: "TUI",
+        next_form: Optional[str] = None,
+        previous_form: Optional[str] = None,
+        **kwargs: Any,
+    ) -> None:
         """Base class for TUI forms.
 
         Args:
-            parent_app: the parent TUI.
+            screen: the screen where the form will be displayed.
+            parent: the parent TUI.
             next_form: the form to show after this one.
+            previous_form: the form shown before this one.
         """
         ABC.__init__(self)
-        self.parent_app = parent_app
-        self.going_back = False
+        Frame.__init__(self, screen, int(screen.height), int(screen.width), **kwargs)
+        self.set_theme("bright")
+        self.parent = parent
         self.next_form = next_form
-        FormBaseNew.__init__(self, **kwargs)
+        self.previous_form = previous_form
+        self.main_layout = Layout([100])
+        self.add_layout(self.main_layout)
+        self.draw()
 
-    def define_key_bindings(self, key_bindings: Dict[str, Callable]) -> None:
-        """Define form key bindings.
+    @abstractmethod
+    def draw(self) -> None:
+        pass
 
-        Args:
-            key_bindings: dictionary with key bindings.
-        """
-        self.add_handlers(key_bindings)
+    @staticmethod
+    def handle_shortcut(event: Any) -> None:
+        if isinstance(event, KeyboardEvent):
+            if event.key_code == Screen.ctrl("n"):
+                pass
 
     def set_hint(self, s: str) -> None:
         """Set hint text at the bottom of the form.
@@ -38,24 +57,23 @@ class BaseForm(ABC, FormBaseNew):
         Args:
             s: the text to be shown.
         """
-        self.add(FixedText, value=s, editable=False, rely=BaseForm.LAST_ROW)
+        # self.add(FixedText, value=s, editable=False, rely=BaseForm.LAST_ROW)
+        raise NotImplementedError
 
+    @abstractmethod
     def before_exit(self) -> None:
         """Perform final operations when exiting the form."""
         pass
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
+    def next(self, *args: Any, **kwargs: Any) -> None:
         """Exit this form and move to the next one."""
         self.before_exit()
-        self.parent_app.switchFormNow()
+        if self.next_form is not None:
+            raise NextScene(self.next_form)
+        else:
+            raise StopApplication("Stop")
 
     def back(self, *args: Any, **kwargs: Any) -> None:
-        """Move the previous form."""
-        self.going_back = True
-        self.parent_app.switchFormPrevious()
-
-    def afterEditing(self) -> None:
-        """Set the form to be shown when this one is closed."""
-        if not self.going_back:
-            self.parentApp.setNextForm(self.next_form)
-        self.going_back = False
+        """Move to the previous form."""
+        if self.previous_form is not None:
+            raise NextScene(self.previous_form)

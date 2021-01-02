@@ -1,0 +1,6 @@
+group:
+  subgroup:
+    param1: 1
+    param2: 2.3
+    param3: "test"
+    param4: "@BASE(dataset)"
