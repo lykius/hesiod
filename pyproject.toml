@@ -8,7 +8,7 @@ authors = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = ">=3.6,<3.9"
 PyYAML = "^5.3.1"
 npyscreen = "^4.10.5"
 typeguard = "^2.10.0"
