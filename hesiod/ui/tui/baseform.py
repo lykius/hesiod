@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
-from asciimatics.event import KeyboardEvent
-from asciimatics.exceptions import NextScene, StopApplication
-from asciimatics.screen import Screen
-from asciimatics.widgets import Frame, Layout
+from asciimatics.event import KeyboardEvent, MouseEvent  # type: ignore
+from asciimatics.exceptions import NextScene, StopApplication  # type: ignore
+from asciimatics.screen import Screen  # type: ignore
+from asciimatics.widgets import Frame, Layout, Widget  # type: ignore
+
+from hesiod.ui.tui.wgthandler import WidgetHandler
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI
@@ -17,55 +19,57 @@ class BaseForm(ABC, Frame):
 
     def __init__(
         self,
+        name: str,
         screen: Screen,
         parent: "TUI",
-        next_form: Optional[str] = None,
         previous_form: Optional[str] = None,
-        **kwargs: Any,
+        next_form: Optional[str] = None,
     ) -> None:
         """Base class for TUI forms.
 
         Args:
+            name: the name of the form.
             screen: the screen where the form will be displayed.
             parent: the parent TUI.
-            next_form: the form to show after this one.
-            previous_form: the form shown before this one.
+            previous: the name of the previous form (optional).
+            next: the name of the next form (optional).
         """
         ABC.__init__(self)
-        Frame.__init__(self, screen, int(screen.height), int(screen.width), **kwargs)
+        Frame.__init__(self, screen, int(screen.height), int(screen.width), name=name)
         self.set_theme("bright")
         self.parent = parent
-        self.next_form = next_form
         self.previous_form = previous_form
-        self.main_layout = Layout([100])
-        self.add_layout(self.main_layout)
+        self.next_form = next_form
+        self.widgets: List[Tuple[Optional[WidgetHandler], Widget]] = []
+        self.columns = [33, 2, 65]
+        self.layout = Layout(self.columns)
+        self.add_layout(self.layout)
         self.draw()
 
     @abstractmethod
     def draw(self) -> None:
+        """Draw the form, adding the needed widgets."""
         pass
 
-    @staticmethod
-    def handle_shortcut(event: Any) -> None:
-        if isinstance(event, KeyboardEvent):
-            if event.key_code == Screen.ctrl("n"):
-                pass
-
-    def set_hint(self, s: str) -> None:
-        """Set hint text at the bottom of the form.
+    def process_event(self, event: Union[MouseEvent, KeyboardEvent]) -> None:
+        """Process either a mouse or a keyboard event.
 
         Args:
-            s: the text to be shown.
+            event : The event that triggered the function.
         """
-        # self.add(FixedText, value=s, editable=False, rely=BaseForm.LAST_ROW)
-        raise NotImplementedError
+        if isinstance(event, KeyboardEvent):
+            if event.key_code == Screen.ctrl("n"):
+                self.next()
+            elif event.key_code == Screen.ctrl("b") and self.previous_form is not None:
+                self.back()
+        Frame.process_event(self, event)
 
     @abstractmethod
     def before_exit(self) -> None:
         """Perform final operations when exiting the form."""
         pass
 
-    def next(self, *args: Any, **kwargs: Any) -> None:
+    def next(self) -> None:
         """Exit this form and move to the next one."""
         self.before_exit()
         if self.next_form is not None:
@@ -73,7 +77,7 @@ class BaseForm(ABC, Frame):
         else:
             raise StopApplication("Stop")
 
-    def back(self, *args: Any, **kwargs: Any) -> None:
+    def back(self) -> None:
         """Move to the previous form."""
         if self.previous_form is not None:
             raise NextScene(self.previous_form)
