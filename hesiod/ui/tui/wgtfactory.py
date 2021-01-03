@@ -79,6 +79,7 @@ class LiteralWidgetParser(WidgetParser):
 
         label = cfg_key.split(".")[-1]
         label = f"{label_prefix}{label}:"
+
         widget = Text(name=cfg_key)
         widget.value = str(cfg_value)
 
@@ -161,14 +162,14 @@ class BoolWidgetParser(WidgetParser):
     def parse(cfg_key: str, label_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WGT_T]:
         handler = BoolWidgetHandler(cfg_key)
 
-        default = cfg_value.split("(")[-1].split(")")[0]
-        default = str(default).lower()
-        values = [(BoolWidgetHandler.TRUE, 0), (BoolWidgetHandler.FALSE, 1)]
-
         label = cfg_key.split(".")[-1]
         label = f"{label_prefix}{label}:"
 
+        values = [(BoolWidgetHandler.TRUE, 0), (BoolWidgetHandler.FALSE, 1)]
         widget = RadioButtons(values, name=cfg_key)
+        default = cfg_value.split("(")[-1].split(")")[0]
+        default = str(default).lower()
+        widget.value = 0 if default == BoolWidgetHandler.TRUE else 1
 
         return [(handler, Label(label, height=len(values)), widget)]
 
