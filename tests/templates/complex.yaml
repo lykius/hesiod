@@ -14,6 +14,6 @@ group:
       ca: "@DATE"
       cb: "b"
       cc: !!python/tuple [1, 2, 3]
-      cd: "@BOOL(true)"
+      cd: "@BOOL(false)"
 today: "@DATE(today)"
 date: "@DATE(2020-01-01)"
