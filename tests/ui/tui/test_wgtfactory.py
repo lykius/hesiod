@@ -2,14 +2,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import cast
 
-from asciimatics.widgets import DatePicker, Divider, DropdownList, FileBrowser, Label, RadioButtons
-from asciimatics.widgets import Text
+from asciimatics.widgets import DatePicker, Divider, FileBrowser, Label, Text
 
-from hesiod.ui.tui.wgtfactory import BaseWidgetParser, BoolWidgetParser, DateWidgetParser
-from hesiod.ui.tui.wgtfactory import FileWidgetParser, LiteralWidgetParser, OptionsWidgetParser
-from hesiod.ui.tui.wgtfactory import RecursiveWidgetParser, WidgetParser
-from hesiod.ui.tui.wgthandler import BaseWidgetHandler, BoolWidgetHandler, OptionsWidgetHandler
-from hesiod.ui.tui.wgthandler import WidgetHandler
+from hesiod.ui.tui.widgets.custom.dropdown import CustomDropdownList
+from hesiod.ui.tui.widgets.custom.radiobuttons import CustomRadioButtons
+from hesiod.ui.tui.widgets.wgtfactory import BaseWidgetParser, BoolWidgetParser, DateWidgetParser
+from hesiod.ui.tui.widgets.wgtfactory import FileWidgetParser, LiteralWidgetParser
+from hesiod.ui.tui.widgets.wgtfactory import OptionsWidgetParser, RecursiveWidgetParser
+from hesiod.ui.tui.widgets.wgtfactory import WidgetParser
+from hesiod.ui.tui.widgets.wgthandler import BaseWidgetHandler, BoolWidgetHandler
+from hesiod.ui.tui.widgets.wgthandler import OptionsWidgetHandler, WidgetHandler
 
 
 def test_literal_widget_parser() -> None:
@@ -122,8 +124,8 @@ def test_bool_widget_parser() -> None:
             assert handler.cfg_key == cfg[0]
             assert isinstance(label, Label)
             assert label.text == prefix + cfg[0] + ":"
-            assert isinstance(widget, RadioButtons)
-            assert cast(RadioButtons, widget)._options == [
+            assert isinstance(widget, CustomRadioButtons)
+            assert cast(CustomRadioButtons, widget)._options == [
                 (BoolWidgetHandler.TRUE, 0),
                 (BoolWidgetHandler.FALSE, 1),
             ]
@@ -155,8 +157,8 @@ def test_options_widget_parser() -> None:
             assert handler.cfg_key == cfg[0]
             assert isinstance(label, Label)
             assert label.text == prefix + cfg[0] + ":"
-            assert isinstance(widget, RadioButtons)
-            assert cast(RadioButtons, widget)._options == cfg[3]
+            assert isinstance(widget, CustomRadioButtons)
+            assert cast(CustomRadioButtons, widget)._options == cfg[3]
 
 
 def test_base_widget_parser(base_cfg_dir: Path) -> None:
@@ -180,9 +182,9 @@ def test_base_widget_parser(base_cfg_dir: Path) -> None:
             assert handler.cfg_key == cfg[0]
             assert isinstance(label, Label)
             assert label.text == prefix + cfg[0] + ":"
-            assert isinstance(widget, DropdownList)
+            assert isinstance(widget, CustomDropdownList)
             expected_options = [(option, i) for i, option in enumerate(sorted(cfg[3]))]
-            assert cast(DropdownList, widget).options == expected_options
+            assert cast(CustomDropdownList, widget).options == expected_options
 
 
 def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
@@ -259,19 +261,19 @@ def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
             BoolWidgetHandler,
             "test.group.subgroup2.subsubgroup.param3",
             f"{prefix}{prefix}{prefix}{prefix}param3:",
-            RadioButtons,
+            CustomRadioButtons,
         ),
         (
             OptionsWidgetHandler,
             "test.group.subgroup2.subsubgroup.param4",
             f"{prefix}{prefix}{prefix}{prefix}param4:",
-            RadioButtons,
+            CustomRadioButtons,
         ),
         (
             BaseWidgetHandler,
             "test.group.subgroup2.subsubgroup.param5",
             f"{prefix}{prefix}{prefix}{prefix}param5:",
-            DropdownList,
+            CustomDropdownList,
         ),
     ]
 

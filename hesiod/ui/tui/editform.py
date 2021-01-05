@@ -5,7 +5,7 @@ from asciimatics.widgets import Divider  # type: ignore
 
 from hesiod.cfgparse.cfgparser import CFG_T
 from hesiod.ui.tui.baseform import BaseForm
-from hesiod.ui.tui.wgtfactory import WidgetFactory
+from hesiod.ui.tui.widgets.wgtfactory import WidgetFactory
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI

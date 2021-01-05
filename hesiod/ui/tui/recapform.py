@@ -5,7 +5,7 @@ from asciimatics.widgets import Divider, Label, Text  # type: ignore
 
 from hesiod.cfgparse import RUN_NAME_KEY
 from hesiod.ui.tui.baseform import BaseForm
-from hesiod.ui.tui.wgtfactory import WidgetFactory
+from hesiod.ui.tui.widgets.wgtfactory import WidgetFactory
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI

@@ -5,12 +5,14 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any, List, Optional, Tuple, Type
 
-from asciimatics.widgets import DatePicker, Divider, DropdownList, FileBrowser  # type: ignore
-from asciimatics.widgets import Label, RadioButtons, Text, Widget
+from asciimatics.widgets import DatePicker, Divider, FileBrowser, Label, Text  # type: ignore
+from asciimatics.widgets import Widget
 
 from hesiod.cfgparse import CFG_T
-from hesiod.ui.tui.wgthandler import BaseWidgetHandler, BoolWidgetHandler, OptionsWidgetHandler
-from hesiod.ui.tui.wgthandler import WidgetHandler
+from hesiod.ui.tui.widgets.custom.dropdown import CustomDropdownList
+from hesiod.ui.tui.widgets.custom.radiobuttons import CustomRadioButtons
+from hesiod.ui.tui.widgets.wgthandler import BaseWidgetHandler, BoolWidgetHandler
+from hesiod.ui.tui.widgets.wgthandler import OptionsWidgetHandler, WidgetHandler
 
 WGT_T = Tuple[Optional[WidgetHandler], Label, Widget]
 
@@ -166,7 +168,7 @@ class BoolWidgetParser(WidgetParser):
         label = f"{label_prefix}{label}:"
 
         values = [(BoolWidgetHandler.TRUE, 0), (BoolWidgetHandler.FALSE, 1)]
-        widget = RadioButtons(values, name=cfg_key)
+        widget = CustomRadioButtons(values, name=cfg_key)
         default = cfg_value.split("(")[-1].split(")")[0]
         default = str(default).lower()
         widget.value = 0 if default == BoolWidgetHandler.TRUE else 1
@@ -187,7 +189,7 @@ class OptionsWidgetParser(WidgetParser):
         label = cfg_key.split(".")[-1]
         label = f"{label_prefix}{label}:"
 
-        widget = RadioButtons(values, name=cfg_key)
+        widget = CustomRadioButtons(values, name=cfg_key)
 
         handler_values: List[Any] = []
         for v, _ in values:
@@ -252,7 +254,7 @@ class BaseWidgetParser(WidgetParser):
         label = cfg_key.split(".")[-1]
         label = f"{label_prefix}{label}:"
 
-        widget = DropdownList(values, name=cfg_key)
+        widget = CustomDropdownList(values, name=cfg_key)
 
         return [(handler, Label(label), widget)]
 

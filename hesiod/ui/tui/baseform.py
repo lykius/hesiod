@@ -6,7 +6,7 @@ from asciimatics.exceptions import NextScene, StopApplication  # type: ignore
 from asciimatics.screen import Screen  # type: ignore
 from asciimatics.widgets import Frame, Layout, Widget  # type: ignore
 
-from hesiod.ui.tui.wgthandler import WidgetHandler
+from hesiod.ui.tui.widgets.wgthandler import WidgetHandler
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI
