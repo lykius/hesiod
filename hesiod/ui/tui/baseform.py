@@ -35,7 +35,14 @@ class BaseForm(ABC, Frame):
             next: the name of the next form (optional).
         """
         ABC.__init__(self)
-        Frame.__init__(self, screen, int(screen.height), int(screen.width), name=name)
+        Frame.__init__(
+            self,
+            screen,
+            int(screen.height),
+            int(screen.width),
+            name=name,
+            # on_load=self.draw,
+        )
         self.set_theme("bright")
         self.parent = parent
         self.previous_form = previous_form

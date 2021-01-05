@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from asciimatics.screen import Screen  # type: ignore
+from asciimatics.widgets import Divider  # type: ignore
 
 from hesiod.cfgparse.cfgparser import CFG_T
 from hesiod.ui.tui.baseform import BaseForm
@@ -29,6 +30,8 @@ class EditForm(BaseForm):
 
         for handler, label, widget in WidgetFactory.get_widgets(template_cfg, base_cfg_dir):
             self.layout.add_widget(label, column=0)
+            for i in range(1, len(self.columns) - 1):
+                self.layout.add_widget(Divider(draw_line=False), column=i)
             self.layout.add_widget(widget, column=-1)
             self.widgets.append((handler, widget))
 

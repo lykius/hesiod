@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from asciimatics.screen import Screen  # type: ignore
-from asciimatics.widgets import Divider, Layout, Text  # type: ignore
+from asciimatics.widgets import Divider, Label, Text  # type: ignore
 
 from hesiod.cfgparse import RUN_NAME_KEY
 from hesiod.ui.tui.baseform import BaseForm
@@ -30,6 +30,7 @@ class RecapForm(BaseForm):
             previous_form=BaseForm.EDIT_FORM,
         )
         self.title = RecapForm.TITLE
+        self.palette["disabled"] = self.palette["edit_text"]
 
     def draw(self) -> None:
         run_cfg = self.parent.run_cfg
@@ -37,14 +38,17 @@ class RecapForm(BaseForm):
 
         for _, label, widget in WidgetFactory.get_widgets(run_cfg, base_cfg_dir):
             self.layout.add_widget(label, column=0)
+            for i in range(1, len(self.columns) - 1):
+                self.layout.add_widget(Divider(draw_line=False), column=i)
             widget.disabled = True
             self.layout.add_widget(widget, column=-1)
 
-        bottom_layout = Layout([100], fill_frame=True)
-        self.add_layout(bottom_layout)
-        bottom_layout.add_widget(Divider())
-        self.run_name_widget = Text(label=RecapForm.RUN_NAME, name=RUN_NAME_KEY)
-        bottom_layout.add_widget(self.run_name_widget, column=-1)
+        for i in range(len(self.columns)):
+            self.layout.add_widget(Divider(), column=i)
+
+        self.layout.add_widget(Label(RecapForm.RUN_NAME), column=0)
+        self.run_name_widget = Text(name=RUN_NAME_KEY)
+        self.layout.add_widget(self.run_name_widget, column=-1)
 
         self.fix()
 
