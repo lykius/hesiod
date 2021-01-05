@@ -25,6 +25,8 @@ class EditForm(BaseForm):
         self.title = EditForm.TITLE
 
     def draw(self) -> None:
+        self.layout.clear_widgets()
+
         template_cfg = self.parent.template_cfg
         base_cfg_dir = self.parent.base_cfg_dir
 

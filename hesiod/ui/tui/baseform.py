@@ -41,7 +41,7 @@ class BaseForm(ABC, Frame):
             int(screen.height),
             int(screen.width),
             name=name,
-            # on_load=self.draw,
+            on_load=self.draw,
         )
         self.set_theme("bright")
         self.parent = parent

@@ -33,6 +33,8 @@ class RecapForm(BaseForm):
         self.palette["disabled"] = self.palette["edit_text"]
 
     def draw(self) -> None:
+        self.layout.clear_widgets()
+
         run_cfg = self.parent.run_cfg
         base_cfg_dir = self.parent.base_cfg_dir
 
@@ -48,6 +50,7 @@ class RecapForm(BaseForm):
 
         self.layout.add_widget(Label(RecapForm.RUN_NAME), column=0)
         self.run_name_widget = Text(name=RUN_NAME_KEY)
+        self.run_name_widget.value = ""
         self.layout.add_widget(self.run_name_widget, column=-1)
 
         self.fix()
