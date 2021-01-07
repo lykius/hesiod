@@ -1,7 +1,8 @@
 from typing import TYPE_CHECKING
 
+from asciimatics.parsers import AsciimaticsParser  # type: ignore
 from asciimatics.screen import Screen  # type: ignore
-from asciimatics.widgets import Divider, Label, Text  # type: ignore
+from asciimatics.widgets import Divider, Layout, Text, TextBox  # type: ignore
 
 from hesiod.cfgparse import RUN_NAME_KEY
 from hesiod.ui.tui.baseform import BaseForm
@@ -33,25 +34,27 @@ class RecapForm(BaseForm):
         self.palette["disabled"] = self.palette["edit_text"]
 
     def draw(self) -> None:
-        self.layout.clear_widgets()
+        layout = Layout([100])
+        self.add_layout(layout)
 
-        run_cfg = self.parent.run_cfg
-        base_cfg_dir = self.parent.base_cfg_dir
+        self.recap_text_box = TextBox(1, parser=AsciimaticsParser())
+        self.recap_text_box.disabled = True
+        layout.add_widget(self.recap_text_box)
 
-        for _, label, widget in WidgetFactory.get_widgets(run_cfg, base_cfg_dir):
-            self.layout.add_widget(label, column=0)
-            for i in range(1, len(self.columns) - 1):
-                self.layout.add_widget(Divider(draw_line=False), column=i)
-            widget.disabled = True
-            self.layout.add_widget(widget, column=-1)
+        layout.add_widget(Divider())
 
-        for i in range(len(self.columns)):
-            self.layout.add_widget(Divider(), column=i)
-
-        self.layout.add_widget(Label(RecapForm.RUN_NAME), column=0)
-        self.run_name_widget = Text(name=RUN_NAME_KEY)
+        self.run_name_widget = Text(name=RUN_NAME_KEY, label=RecapForm.RUN_NAME)
         self.run_name_widget.value = ""
-        self.layout.add_widget(self.run_name_widget, column=-1)
+        layout.add_widget(self.run_name_widget)
+
+        self.fix()
+
+    def refresh(self) -> None:
+        label_style = (self.palette["label"][0], self.palette["label"][1])
+        text_style = (self.palette["edit_text"][0], self.palette["edit_text"][1])
+        recap = WidgetFactory.get_recap_text(self.parent.run_cfg, label_style, text_style)
+        self.recap_text_box._required_height = len(recap)
+        self.recap_text_box.value = recap
 
         self.fix()
 

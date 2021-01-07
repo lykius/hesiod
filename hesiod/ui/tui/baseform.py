@@ -1,12 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from asciimatics.event import KeyboardEvent, MouseEvent  # type: ignore
 from asciimatics.exceptions import NextScene, StopApplication  # type: ignore
 from asciimatics.screen import Screen  # type: ignore
-from asciimatics.widgets import Frame, Layout, Widget  # type: ignore
-
-from hesiod.ui.tui.widgets.wgthandler import WidgetHandler
+from asciimatics.widgets import Frame  # type: ignore
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI
@@ -41,21 +39,21 @@ class BaseForm(ABC, Frame):
             int(screen.height),
             int(screen.width),
             name=name,
-            on_load=self.draw,
+            on_load=self.refresh,
         )
         self.set_theme("bright")
         self.parent = parent
         self.previous_form = previous_form
         self.next_form = next_form
-        self.widgets: List[Tuple[Optional[WidgetHandler], Widget]] = []
-        self.columns = [33, 2, 65]
-        self.layout = Layout(self.columns)
-        self.add_layout(self.layout)
         self.draw()
 
     @abstractmethod
     def draw(self) -> None:
         """Draw the form, adding the needed widgets."""
+        pass
+
+    def refresh(self) -> None:
+        """Refresh the form."""
         pass
 
     def process_event(self, event: Union[MouseEvent, KeyboardEvent]) -> None:

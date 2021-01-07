@@ -1,11 +1,12 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 from asciimatics.screen import Screen  # type: ignore
-from asciimatics.widgets import Divider  # type: ignore
+from asciimatics.widgets import Divider, Layout, Widget  # type: ignore
 
 from hesiod.cfgparse.cfgparser import CFG_T
 from hesiod.ui.tui.baseform import BaseForm
 from hesiod.ui.tui.widgets.wgtfactory import WidgetFactory
+from hesiod.ui.tui.widgets.wgthandler import WidgetHandler
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI
@@ -25,16 +26,19 @@ class EditForm(BaseForm):
         self.title = EditForm.TITLE
 
     def draw(self) -> None:
-        self.layout.clear_widgets()
-
         template_cfg = self.parent.template_cfg
         base_cfg_dir = self.parent.base_cfg_dir
 
+        self.columns = [33, 2, 65]
+        layout = Layout(self.columns)
+        self.add_layout(layout)
+
+        self.widgets: List[Tuple[Optional[WidgetHandler], Widget]] = []
         for handler, label, widget in WidgetFactory.get_widgets(template_cfg, base_cfg_dir):
-            self.layout.add_widget(label, column=0)
+            layout.add_widget(label, column=0)
             for i in range(1, len(self.columns) - 1):
-                self.layout.add_widget(Divider(draw_line=False), column=i)
-            self.layout.add_widget(widget, column=-1)
+                layout.add_widget(Divider(draw_line=False), column=i)
+            layout.add_widget(widget, column=-1)
             self.widgets.append((handler, widget))
 
         self.fix()

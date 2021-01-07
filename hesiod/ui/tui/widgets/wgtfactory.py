@@ -338,3 +338,30 @@ class WidgetFactory:
                     break
 
         return widgets
+
+    @staticmethod
+    def get_recap_text(
+        cfg: CFG_T,
+        label_style: Tuple[int, int],
+        text_style: Tuple[int, int],
+    ) -> List[str]:
+        """Create a recap text for a given config.
+
+        Args:
+            cfg: the config to recap.
+
+        Returns:
+            A list with the lines of the recap text.
+        """
+        recap: List[str] = []
+
+        lbl = "${" + str(label_style[0]) + "," + str(label_style[1]) + "}"
+        txt = "${" + str(text_style[0]) + "," + str(text_style[1]) + "}"
+
+        for _, label, widget in WidgetFactory.get_widgets(cfg, Path()):
+            line = f"{lbl}{label.text}"
+            if not isinstance(widget, Divider):
+                line += f"{txt} {widget.value}"
+            recap.append(line)
+
+        return recap
