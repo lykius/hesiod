@@ -2,8 +2,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import cast
 
-from asciimatics.widgets import DatePicker, Divider, Label, Text
+from asciimatics.widgets import Divider, Label, Text
 
+from hesiod.ui.tui.widgets.custom.datepicker import CustomDatePicker
 from hesiod.ui.tui.widgets.custom.dropdown import CustomDropdownList
 from hesiod.ui.tui.widgets.custom.filebrowser import CustomFileBrowser
 from hesiod.ui.tui.widgets.custom.radiobuttons import CustomRadioButtons
@@ -70,7 +71,7 @@ def test_date_widget_parser() -> None:
             assert handler.cfg_key == cfg[0]
             assert isinstance(label, Label)
             assert label.text == f"{prefix}{cfg[0]} {DateWidgetParser.HINT}:"
-            assert isinstance(widget, DatePicker)
+            assert isinstance(widget, CustomDatePicker)
             if cfg[3] is not None:
                 assert widget.value == cfg[3]
 
@@ -183,7 +184,7 @@ def test_base_widget_parser(base_cfg_dir: Path) -> None:
             assert isinstance(handler, BaseWidgetHandler)
             assert handler.cfg_key == cfg[0]
             assert isinstance(label, Label)
-            assert label.text == prefix + cfg[0] + ":"
+            assert label.text == prefix + cfg[0] + " " + BaseWidgetParser.HINT + ":"
             assert isinstance(widget, CustomDropdownList)
             expected_options = [(option, i) for i, option in enumerate(sorted(cfg[3]))]
             assert cast(CustomDropdownList, widget).options == expected_options
@@ -229,6 +230,7 @@ def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
     prefix = WidgetParser.PREFIX
     date_hint = DateWidgetParser.HINT
     file_hint = FileWidgetParser.HINT
+    base_hint = BaseWidgetParser.HINT
     expected = [
         (None, "test", "test:", Divider),
         (None, "test.group", f"{prefix}group:", Divider),
@@ -251,7 +253,7 @@ def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
             WidgetHandler,
             "test.group.subgroup2.subsubgroup.param1",
             f"{prefix}{prefix}{prefix}{prefix}param1 {date_hint}:",
-            DatePicker,
+            CustomDatePicker,
         ),
         (
             WidgetHandler,
@@ -274,7 +276,7 @@ def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
         (
             BaseWidgetHandler,
             "test.group.subgroup2.subsubgroup.param5",
-            f"{prefix}{prefix}{prefix}{prefix}param5:",
+            f"{prefix}{prefix}{prefix}{prefix}param5 {base_hint}:",
             CustomDropdownList,
         ),
     ]

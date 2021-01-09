@@ -5,9 +5,10 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any, List, Optional, Tuple, Type
 
-from asciimatics.widgets import DatePicker, Divider, Label, Text, Widget  # type: ignore
+from asciimatics.widgets import Divider, Label, Text, Widget  # type: ignore
 
 from hesiod.cfgparse import CFG_T
+from hesiod.ui.tui.widgets.custom.datepicker import CustomDatePicker
 from hesiod.ui.tui.widgets.custom.dropdown import CustomDropdownList
 from hesiod.ui.tui.widgets.custom.filebrowser import CustomFileBrowser
 from hesiod.ui.tui.widgets.custom.radiobuttons import CustomRadioButtons
@@ -108,7 +109,7 @@ class DateWidgetParser(WidgetParser):
         label = cfg_key.split(".")[-1]
         label = f"{label_prefix}{label} {DateWidgetParser.HINT}:"
 
-        widget = DatePicker(name=cfg_key)
+        widget = CustomDatePicker(name=cfg_key)
 
         if WidgetParser.match(cfg_value, WidgetParser.DEFAULT_DATE_PATTERN):
             default = cfg_value.split("(")[-1].split(")")[0]
