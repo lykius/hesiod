@@ -49,3 +49,11 @@ class CustomRadioButtons(RadioButtons):
             return event
         else:
             return super().process_event(event)
+
+    @property
+    def value(self) -> int:
+        return self._value
+
+    @value.setter
+    def value(self, new_value: int) -> None:
+        self._value = new_value
