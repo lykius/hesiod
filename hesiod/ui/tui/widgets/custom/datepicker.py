@@ -1,8 +1,8 @@
 from typing import Optional
 
-from asciimatics.event import Event, KeyboardEvent, MouseEvent
-from asciimatics.screen import Screen
-from asciimatics.widgets import DatePicker, _DatePickerPopup
+from asciimatics.event import Event, KeyboardEvent, MouseEvent  # type: ignore
+from asciimatics.screen import Screen  # type: ignore
+from asciimatics.widgets import DatePicker, _DatePickerPopup  # type: ignore
 
 
 class CustomDatePickerPopup(_DatePickerPopup):

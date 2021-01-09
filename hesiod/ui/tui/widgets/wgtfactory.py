@@ -5,7 +5,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any, List, Optional, Tuple, Type
 
-from asciimatics.widgets import Divider, Label, Text, Widget  # type: ignore
+from asciimatics.widgets import Label, Text, Widget  # type: ignore
 
 from hesiod.cfgparse import CFG_T
 from hesiod.ui.tui.widgets.custom.datepicker import CustomDatePicker
@@ -15,7 +15,7 @@ from hesiod.ui.tui.widgets.custom.radiobuttons import CustomRadioButtons
 from hesiod.ui.tui.widgets.wgthandler import BaseWidgetHandler, BoolWidgetHandler
 from hesiod.ui.tui.widgets.wgthandler import OptionsWidgetHandler, WidgetHandler
 
-WGT_T = Tuple[Optional[WidgetHandler], Label, Widget]
+WGT_T = Tuple[Optional[WidgetHandler], Widget]
 
 
 class WidgetParser(ABC):
@@ -83,10 +83,10 @@ class LiteralWidgetParser(WidgetParser):
         label = cfg_key.split(".")[-1]
         label = f"{label_prefix}{label}:"
 
-        widget = Text(name=cfg_key)
+        widget = Text(label=label, name=cfg_key)
         widget.value = str(cfg_value)
 
-        return [(handler, Label(label), widget)]
+        return [(handler, widget)]
 
 
 class DateWidgetParser(WidgetParser):
@@ -109,7 +109,7 @@ class DateWidgetParser(WidgetParser):
         label = cfg_key.split(".")[-1]
         label = f"{label_prefix}{label} {DateWidgetParser.HINT}:"
 
-        widget = CustomDatePicker(name=cfg_key)
+        widget = CustomDatePicker(label=label, name=cfg_key)
 
         if WidgetParser.match(cfg_value, WidgetParser.DEFAULT_DATE_PATTERN):
             default = cfg_value.split("(")[-1].split(")")[0]
@@ -124,7 +124,7 @@ class DateWidgetParser(WidgetParser):
             if value is not None:
                 widget.value = value
 
-        return [(handler, Label(label), widget)]
+        return [(handler, widget)]
 
 
 class FileWidgetParser(WidgetParser):
@@ -151,9 +151,9 @@ class FileWidgetParser(WidgetParser):
         else:
             path = str(Path(".").absolute())
 
-        widget = CustomFileBrowser("", cfg_key, path)
+        widget = CustomFileBrowser(label, cfg_key, path)
 
-        return [(handler, Label(label), widget)]
+        return [(handler, widget)]
 
 
 class BoolWidgetParser(WidgetParser):
@@ -169,12 +169,12 @@ class BoolWidgetParser(WidgetParser):
         label = f"{label_prefix}{label}:"
 
         values = [(BoolWidgetHandler.TRUE, 0), (BoolWidgetHandler.FALSE, 1)]
-        widget = CustomRadioButtons(values, name=cfg_key)
+        widget = CustomRadioButtons(values, label=label, name=cfg_key)
         default = cfg_value.split("(")[-1].split(")")[0]
         default = str(default).lower()
         widget.value = 0 if default == BoolWidgetHandler.TRUE else 1
 
-        return [(handler, Label(label, height=len(values)), widget)]
+        return [(handler, widget)]
 
 
 class OptionsWidgetParser(WidgetParser):
@@ -190,7 +190,7 @@ class OptionsWidgetParser(WidgetParser):
         label = cfg_key.split(".")[-1]
         label = f"{label_prefix}{label}:"
 
-        widget = CustomRadioButtons(values, name=cfg_key)
+        widget = CustomRadioButtons(values, label=label, name=cfg_key)
 
         handler_values: List[Any] = []
         for v, _ in values:
@@ -201,7 +201,7 @@ class OptionsWidgetParser(WidgetParser):
             handler_values.append(value)
         handler = OptionsWidgetHandler(cfg_key, handler_values)
 
-        return [(handler, Label(label, height=len(values)), widget)]
+        return [(handler, widget)]
 
 
 class BaseWidgetParser(WidgetParser):
@@ -257,9 +257,9 @@ class BaseWidgetParser(WidgetParser):
         label = cfg_key.split(".")[-1]
         label = f"{label_prefix}{label} {BaseWidgetParser.HINT}:"
 
-        widget = CustomDropdownList(values, name=cfg_key)
+        widget = CustomDropdownList(values, label=label, name=cfg_key)
 
-        return [(handler, Label(label), widget)]
+        return [(handler, widget)]
 
 
 class RecursiveWidgetParser(WidgetParser):
@@ -273,7 +273,7 @@ class RecursiveWidgetParser(WidgetParser):
 
         label = cfg_key.split(".")[-1]
         label = f"{label_prefix}{label}:"
-        widgets.append((None, Label(label), Divider(draw_line=False)))
+        widgets.append((None, Label(label)))
 
         children_prefix = f"{label_prefix}{WidgetParser.PREFIX}"
         children = WidgetFactory.get_widgets(
@@ -361,9 +361,10 @@ class WidgetFactory:
         lbl = "${" + str(label_style[0]) + "," + str(label_style[1]) + "}"
         txt = "${" + str(text_style[0]) + "," + str(text_style[1]) + "}"
 
-        for _, label, widget in WidgetFactory.get_widgets(cfg, Path()):
-            line = f"{lbl}{label.text}"
-            if not isinstance(widget, Divider):
+        for _, widget in WidgetFactory.get_widgets(cfg, Path()):
+            label = widget.text if isinstance(widget, Label) else widget.label
+            line = f"{lbl}{label}"
+            if not isinstance(widget, Label):
                 line += f"{txt} {widget.value}"
             recap.append(line)
 

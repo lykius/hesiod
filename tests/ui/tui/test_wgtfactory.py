@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import cast
 
-from asciimatics.widgets import Divider, Label, Text
+from asciimatics.widgets import Label, Text
 
 from hesiod.ui.tui.widgets.custom.datepicker import CustomDatePicker
 from hesiod.ui.tui.widgets.custom.dropdown import CustomDropdownList
@@ -32,11 +32,10 @@ def test_literal_widget_parser() -> None:
 
     for cfg in cfgs:
         assert LiteralWidgetParser.can_handle(cfg[1])
-        handler, label, widget = LiteralWidgetParser.parse(cfg[0], prefix, cfg[1], Path())[0]
+        handler, widget = LiteralWidgetParser.parse(cfg[0], prefix, cfg[1], Path())[0]
         assert isinstance(handler, WidgetHandler)
         assert handler.cfg_key == cfg[0]
-        assert isinstance(label, Label)
-        assert label.text == prefix + cfg[0] + ":"
+        assert widget.label == prefix + cfg[0] + ":"
         assert isinstance(widget, Text)
         assert widget.value == str(cfg[1])
 
@@ -66,11 +65,10 @@ def test_date_widget_parser() -> None:
         assert DateWidgetParser.can_handle(cfg[1]) == cfg[2]
 
         if cfg[2]:
-            handler, label, widget = DateWidgetParser.parse(cfg[0], prefix, cfg[1], Path())[0]
+            handler, widget = DateWidgetParser.parse(cfg[0], prefix, cfg[1], Path())[0]
             assert isinstance(handler, WidgetHandler)
             assert handler.cfg_key == cfg[0]
-            assert isinstance(label, Label)
-            assert label.text == f"{prefix}{cfg[0]} {DateWidgetParser.HINT}:"
+            assert widget.label == f"{prefix}{cfg[0]} {DateWidgetParser.HINT}:"
             assert isinstance(widget, CustomDatePicker)
             if cfg[3] is not None:
                 assert widget.value == cfg[3]
@@ -93,11 +91,10 @@ def test_file_widget_parser() -> None:
         assert FileWidgetParser.can_handle(cfg[1]) == cfg[2]
 
         if cfg[2]:
-            handler, label, widget = FileWidgetParser.parse(cfg[0], prefix, cfg[1], Path())[0]
+            handler, widget = FileWidgetParser.parse(cfg[0], prefix, cfg[1], Path())[0]
             assert isinstance(handler, WidgetHandler)
             assert handler.cfg_key == cfg[0]
-            assert isinstance(label, Label)
-            assert label.text == f"{prefix}{cfg[0]} {FileWidgetParser.HINT}:"
+            assert widget.label == f"{prefix}{cfg[0]} {FileWidgetParser.HINT}:"
             assert isinstance(widget, CustomFileBrowser)
             assert cast(CustomFileBrowser, widget).value == cfg[3]
 
@@ -122,11 +119,10 @@ def test_bool_widget_parser() -> None:
         assert BoolWidgetParser.can_handle(cfg[1]) == cfg[2]
 
         if cfg[2]:
-            handler, label, widget = BoolWidgetParser.parse(cfg[0], prefix, cfg[1], Path())[0]
+            handler, widget = BoolWidgetParser.parse(cfg[0], prefix, cfg[1], Path())[0]
             assert isinstance(handler, BoolWidgetHandler)
             assert handler.cfg_key == cfg[0]
-            assert isinstance(label, Label)
-            assert label.text == prefix + cfg[0] + ":"
+            assert widget.label == prefix + cfg[0] + ":"
             assert isinstance(widget, CustomRadioButtons)
             assert cast(CustomRadioButtons, widget)._options == [
                 (BoolWidgetHandler.TRUE, 0),
@@ -155,11 +151,10 @@ def test_options_widget_parser() -> None:
         assert OptionsWidgetParser.can_handle(cfg[1]) == cfg[2]
 
         if cfg[2]:
-            handler, label, widget = OptionsWidgetParser.parse(cfg[0], prefix, cfg[1], Path())[0]
+            handler, widget = OptionsWidgetParser.parse(cfg[0], prefix, cfg[1], Path())[0]
             assert isinstance(handler, OptionsWidgetHandler)
             assert handler.cfg_key == cfg[0]
-            assert isinstance(label, Label)
-            assert label.text == prefix + cfg[0] + ":"
+            assert widget.label == prefix + cfg[0] + ":"
             assert isinstance(widget, CustomRadioButtons)
             assert cast(CustomRadioButtons, widget)._options == cfg[3]
 
@@ -180,11 +175,10 @@ def test_base_widget_parser(base_cfg_dir: Path) -> None:
         assert BaseWidgetParser.can_handle(cfg[1]) == cfg[2]
 
         if cfg[2]:
-            handler, label, widget = BaseWidgetParser.parse(cfg[0], prefix, cfg[1], base_cfg_dir)[0]
+            handler, widget = BaseWidgetParser.parse(cfg[0], prefix, cfg[1], base_cfg_dir)[0]
             assert isinstance(handler, BaseWidgetHandler)
             assert handler.cfg_key == cfg[0]
-            assert isinstance(label, Label)
-            assert label.text == prefix + cfg[0] + " " + BaseWidgetParser.HINT + ":"
+            assert widget.label == prefix + cfg[0] + " " + BaseWidgetParser.HINT + ":"
             assert isinstance(widget, CustomDropdownList)
             expected_options = [(option, i) for i, option in enumerate(sorted(cfg[3]))]
             assert cast(CustomDropdownList, widget).options == expected_options
@@ -232,9 +226,9 @@ def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
     file_hint = FileWidgetParser.HINT
     base_hint = BaseWidgetParser.HINT
     expected = [
-        (None, "test", "test:", Divider),
-        (None, "test.group", f"{prefix}group:", Divider),
-        (None, "test.group.subgroup1", f"{prefix}{prefix}subgroup1:", Divider),
+        (None, "test", "test:", Label),
+        (None, "test.group", f"{prefix}group:", Label),
+        (None, "test.group.subgroup1", f"{prefix}{prefix}subgroup1:", Label),
         (WidgetHandler, "test.group.subgroup1.param1", f"{prefix}{prefix}{prefix}param1:", Text),
         (WidgetHandler, "test.group.subgroup1.param2", f"{prefix}{prefix}{prefix}param2:", Text),
         (WidgetHandler, "test.group.subgroup1.param3", f"{prefix}{prefix}{prefix}param3:", Text),
@@ -242,12 +236,12 @@ def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
         (WidgetHandler, "test.group.subgroup1.param5", f"{prefix}{prefix}{prefix}param5:", Text),
         (WidgetHandler, "test.group.subgroup1.param6", f"{prefix}{prefix}{prefix}param6:", Text),
         (WidgetHandler, "test.group.subgroup1.param7", f"{prefix}{prefix}{prefix}param7:", Text),
-        (None, "test.group.subgroup2", f"{prefix}{prefix}subgroup2:", Divider),
+        (None, "test.group.subgroup2", f"{prefix}{prefix}subgroup2:", Label),
         (
             None,
             "test.group.subgroup2.subsubgroup",
             f"{prefix}{prefix}{prefix}subsubgroup:",
-            Divider,
+            Label,
         ),
         (
             WidgetHandler,
@@ -281,12 +275,12 @@ def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
         ),
     ]
 
-    for i, (handler, label, widget) in enumerate(widgets):
+    for i, (handler, widget) in enumerate(widgets):
         if expected[i][0] is None:
             assert handler is None
         else:
             assert isinstance(handler, expected[i][0])
             assert handler.cfg_key == expected[i][1]
-        assert isinstance(label, Label)
-        assert label.text == expected[i][2]
+        label = widget.text if isinstance(widget, Label) else widget.label
+        assert label == expected[i][2]
         assert isinstance(widget, expected[i][3])
