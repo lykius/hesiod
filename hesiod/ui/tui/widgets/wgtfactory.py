@@ -5,11 +5,11 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any, List, Optional, Tuple, Type
 
-from asciimatics.widgets import DatePicker, Divider, FileBrowser, Label, Text  # type: ignore
-from asciimatics.widgets import Widget
+from asciimatics.widgets import DatePicker, Divider, Label, Text, Widget  # type: ignore
 
 from hesiod.cfgparse import CFG_T
 from hesiod.ui.tui.widgets.custom.dropdown import CustomDropdownList
+from hesiod.ui.tui.widgets.custom.filebrowser import CustomFileBrowser
 from hesiod.ui.tui.widgets.custom.radiobuttons import CustomRadioButtons
 from hesiod.ui.tui.widgets.wgthandler import BaseWidgetHandler, BoolWidgetHandler
 from hesiod.ui.tui.widgets.wgthandler import OptionsWidgetHandler, WidgetHandler
@@ -18,7 +18,7 @@ WGT_T = Tuple[Optional[WidgetHandler], Label, Widget]
 
 
 class WidgetParser(ABC):
-    PREFIX = "    "
+    PREFIX = "   "
     DATE_PATTERN = r"^@DATE$"
     DEFAULT_DATE_PATTERN = r"^@DATE\((today|Today|TODAY|\d{4}-\d{2}-\d{2})\)$"
     FILE_PATTERN = r"^@FILE$"
@@ -91,7 +91,7 @@ class LiteralWidgetParser(WidgetParser):
 class DateWidgetParser(WidgetParser):
     TODAY = "today"
     FORMAT = r"%Y-%M-%d"
-    HINT = "(ENTER)"
+    HINT = "(↲ to select)"
 
     @staticmethod
     def can_handle(x: Any) -> bool:
@@ -127,7 +127,7 @@ class DateWidgetParser(WidgetParser):
 
 
 class FileWidgetParser(WidgetParser):
-    HINT = "(↑↓)"
+    HINT = "(↲ to select)"
 
     @staticmethod
     def can_handle(x: Any) -> bool:
@@ -146,13 +146,13 @@ class FileWidgetParser(WidgetParser):
 
         if WidgetParser.match(cfg_value, WidgetParser.DEFAULT_FILE_PATTERN):
             default = cfg_value.split("(")[-1].split(")")[0]
-            value = default.lower()
+            path = default.lower()
         else:
-            value = str(Path(".").absolute())
+            path = str(Path(".").absolute())
 
-        widget = FileBrowser(2, value, name=cfg_key)
+        widget = CustomFileBrowser("", cfg_key, path)
 
-        return [(handler, Label(label, height=2), widget)]
+        return [(handler, Label(label), widget)]
 
 
 class BoolWidgetParser(WidgetParser):
@@ -204,6 +204,8 @@ class OptionsWidgetParser(WidgetParser):
 
 
 class BaseWidgetParser(WidgetParser):
+    HINT = "(↲ to select)"
+
     @staticmethod
     def can_handle(x: Any) -> bool:
         return isinstance(x, str) and WidgetParser.match(x, WidgetParser.BASE_PATTERN)
@@ -252,7 +254,7 @@ class BaseWidgetParser(WidgetParser):
         handler = BaseWidgetHandler(cfg_key, base_keys)
 
         label = cfg_key.split(".")[-1]
-        label = f"{label_prefix}{label}:"
+        label = f"{label_prefix}{label} {BaseWidgetParser.HINT}:"
 
         widget = CustomDropdownList(values, name=cfg_key)
 

@@ -2,9 +2,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import cast
 
-from asciimatics.widgets import DatePicker, Divider, FileBrowser, Label, Text
+from asciimatics.widgets import DatePicker, Divider, Label, Text
 
 from hesiod.ui.tui.widgets.custom.dropdown import CustomDropdownList
+from hesiod.ui.tui.widgets.custom.filebrowser import CustomFileBrowser
 from hesiod.ui.tui.widgets.custom.radiobuttons import CustomRadioButtons
 from hesiod.ui.tui.widgets.wgtfactory import BaseWidgetParser, BoolWidgetParser, DateWidgetParser
 from hesiod.ui.tui.widgets.wgtfactory import FileWidgetParser, LiteralWidgetParser
@@ -75,9 +76,10 @@ def test_date_widget_parser() -> None:
 
 
 def test_file_widget_parser() -> None:
+    default_path = Path(".") / "tests/templates/simple.yaml"
     cfgs = [
         ("cfg1", "@FILE", True, str(Path(".").absolute())),
-        ("cfg2", "@FILE(/path/to/default)", True, "/path/to/default"),
+        ("cfg2", f"@FILE({str(default_path)})", True, str(default_path.absolute())),
         ("cfg3", "@FILE()", False, ""),
         ("cfg4", "@File", False, ""),
         ("cfg5", "@file", False, ""),
@@ -95,8 +97,8 @@ def test_file_widget_parser() -> None:
             assert handler.cfg_key == cfg[0]
             assert isinstance(label, Label)
             assert label.text == f"{prefix}{cfg[0]} {FileWidgetParser.HINT}:"
-            assert isinstance(widget, FileBrowser)
-            assert cast(FileBrowser, widget)._root == cfg[3]
+            assert isinstance(widget, CustomFileBrowser)
+            assert cast(CustomFileBrowser, widget).value == cfg[3]
 
 
 def test_bool_widget_parser() -> None:
@@ -210,7 +212,7 @@ def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
             "subgroup2": {
                 "subsubgroup": {
                     "param1": "@DATE(today)",
-                    "param2": "@FILE(/path/to/default)",
+                    "param2": "@FILE",
                     "param3": "@BOOL(False)",
                     "param4": "@OPTIONS(1, 2, 3)",
                     "param5": "@BASE(dataset.cifar)",
@@ -255,7 +257,7 @@ def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
             WidgetHandler,
             "test.group.subgroup2.subsubgroup.param2",
             f"{prefix}{prefix}{prefix}{prefix}param2 {file_hint}:",
-            FileBrowser,
+            CustomFileBrowser,
         ),
         (
             BoolWidgetHandler,
