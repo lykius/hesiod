@@ -14,7 +14,7 @@ class CustomRadioButtons(RadioButtons):
         on_change: Optional[Callable] = None,
         **kwargs: Any,
     ):
-        super().__init__(options, label=label, name=name, on_change=on_change, **kwargs)
+        RadioButtons.__init__(self, options, label=label, name=name, on_change=on_change, **kwargs)
         self._value = self._options[self._selection][1]
 
     def update(self, frame_no: int) -> None:
@@ -43,12 +43,12 @@ class CustomRadioButtons(RadioButtons):
             elif event.key_code == Screen.KEY_DOWN and self._selection < len(self._options) - 1:
                 self._selection += 1
                 return None
-            elif event.key_code in [ord("\n"), ord(" ")]:
+            elif event.key_code in [Screen.ctrl("M"), Screen.ctrl("J"), ord(" ")]:
                 self._value = self._options[self._selection][1]
                 return None
             return event
         else:
-            return super().process_event(event)
+            return RadioButtons.process_event(self, event)
 
     @property
     def value(self) -> int:
