@@ -21,3 +21,138 @@
         <img src="https://github.com/lykius/hesiod/workflows/CI/badge.svg" alt="CI" />
     </a>
 </p>
+
+## What is hesiod?
+Hesiod is a simple python library which helps you to keep your configs clean.  
+There are three main concepts used in hesiod:
+* configs are defined hierarchically in files separated from the main code
+* you define a __template__ config structure just once (e.g. you can say "in every run I will need parameter p1, which is an integer, parameter p2, which must be selected among a predefined set of values, etc."); then, before starting a run, you can specifiy the actual config values used in that run in a super intuitive way, without creating new files for each run
+* configs can be accessed anywhere in the code with several modalities.
+
+## Example
+Let's see it more concretely with an [example](https://github.com/lykius/hesiod-test).  
+Imagine that you write some python program where you need a dataset, a neural network and other parameters (does it sound familiar?). Each run of your program will use a different dataset or a different network or different parameters. To achieve this, you can write a config file for each element and organize them in a hierarchy of directories, something like this:
+```
+cfg
+|____ dataset
+|    |
+|    |____ cifar.yaml    
+|    |____ imagenet.yaml
+|
+|____ net
+|    |
+|    |____ resnet101.yaml
+|    |____ efficientnet.yaml
+|
+|____ params
+     |
+     |____ training.yaml
+     |____ test.yaml
+```
+Each .yaml file contains the specific config for that element, for instance:
+#### __cfg/dataset/cifar.yaml__
+```yaml
+name: "cifar10"
+path: "/path/to/cifar10"
+splits:
+  - 70
+  - 20
+  - 10
+```
+#### __cfg/net/efficientnet.yaml__
+```yaml
+name: "efficientnet"
+num_layers: 20
+ckpt_path: "/path/to/efficientnet"
+```
+Then, you can define the generic __template__ config structure which will be used in every run, with a single .yaml file:
+#### __template.yaml__
+```yaml
+dataset: "@BASE(dataset)"  # every run will need a dataset...
+net: "@BASE(net)"          # ...and a network...
+params: "@BASE(params)"    # ...and some params
+p1: 1
+p2: 2.3
+p3: "test"
+```
+In the __template__ file you define which config will be used by every run, without specifying the actual set of values (but you can specify defaults). In this simple example, we use the placeholder __@BASE__ which defines that the config values will be chosen among some _base_ configs. So, when you write `"@BASE(dataset)"`, hesiod will look for a directory named `dataset` and will ask you to choose among the options available in that directory (i.e. the .yaml files, in our example for `dataset` we have `cifar` and `imagenet`). In the example we also specify some params (p1, p2 and p3) with default values.  
+Once you have defined all your possibilities and a __template__ file, you just need to add hesiod to your program in the following way:
+#### __main.py__
+```python
+@hmain(base_cfg_dir="./cfg", template_cfg_file"./template.yaml")
+def main():
+    # do some fancy stuff
+    ...
+
+if __name__ == "__main__":
+    main()
+```
+As you can see, you just need to use hesiod special decorator `hmain` and to specify the path to the _base_ configs and the path to the file with the __template__ config structure.  
+When you run this program, hesiod will present you a simple TUI (text-based user interface), where you will be able to select which config you want to use for the starting run:
+
+<p align="center">
+    <img src="images/edit1.png" alt="edit1" width="60%"/>
+    <img src="images/edit2.png" alt="edit2" width="60%"/>
+</p>
+
+When you are done with your selections, you can confirm by pressing CTRL+N and hesiod will show a recap of the selected configuration:
+
+<p align="center">
+    <img src="images/recap.png" alt="recap" width="60%"/>
+</p>
+
+Here you can check that you selected the right things, you are asked to insert a name for current run and, finally, you can press CTRL+N to save the configuration and start the run (alternatively, you can press CTRL+B to go back and edit the config).  
+When you confirm with CTRL+N hesiod creates a directory for the run (by default, the new directory is created in a directory called `logs`) and saves the resulting config in a file called `run.yaml`. Then hesiod terminates and the control goes to your program.
+
+## How can I access configs in the program?
+Hesiod defines two ways to access configs in your program:
+* you can use the function `get_cfg_copy()` to get a copy of the whole config as a dictionary
+* you can use the function `hcfg(key, type=None)` anywhere in your code to get a specific config value identified by `key`; for instance, in the above example, we can use `hcfg("dataset.name")` to get the name of the dataset; optionally, if you use types in your code (you should! 😁), you can specify the expected `type` for the requested parameter, enabling some type checking and helping your linter when using the returned parameter.
+
+## What can I write in config files?
+Each config file represents a key-value dictionary. For the time being, hesiod supports .yaml files and you can write anything that is compliant with the .yaml format:
+```yaml
+p1: 1  # integer
+p2: 1.2  # float
+p3: true  # boolean
+p4: "test"  # string
+p5: [1, 2, 3]  # list
+p6: !!python/tuple [1, 2, 3]  # tuple
+p7: 2021-01-01  # date
+p8:  # dictionary that contains...
+  p9:  # ...another dictionary that contains...
+    p10: 10  # ...an integer and...
+      p11: "11"  # ...a string and...
+      p12: 12.0  # ...a float
+```
+Additionally, hesiod defines the special keywork `base`, which allows to load a config dictionary defined in another file. For instance, if we have:
+#### __case1/subcase1/file1.yaml__
+```yaml
+p1: 1
+p2: 2.0
+p3: "3"
+```
+#### __file2.yaml__
+```yaml
+base: "case1.subcase1.file1"
+p3: 3.456
+```
+when loading `file2.yaml`, hesiod will solve the `base` keyword by loading the content in `file1.yaml` without touching parameters that are overriden in `file2.yaml`, resulting in:
+```yaml
+p1: 1
+p2: 2.0
+p3: 3.456
+```
+
+## What can I write in a __template__ file?
+__Template__ files can contain all the options available for normal config files. In addition that are some special placeholders:
+### @BASE(key)
+The user will select one of the options available in the path specified by `key`. The key can represent a complete path with the notation `dir.subdir.subsubdir`.
+### @OPTIONS(o1, o2, o3, ...)
+The user will select one between the given options.
+### @BOOL(true) / @BOOL(false)
+The user will select between TRUE and FALSE, with the default set as specified.
+### @FILE / @FILE(path/to/default)
+The user will select a file starting either from the current directory or from a default path (if given).
+### @DATE / @DATE(today) / @DATE(YYYY-MM-DD)
+The user will select a date, starting from a default (if given).
