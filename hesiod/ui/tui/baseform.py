@@ -1,61 +1,88 @@
-from abc import ABC
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Optional, Union
 
-from npyscreen import FixedText  # type: ignore
-from npyscreen.fmForm import FormBaseNew  # type: ignore
+from asciimatics.event import KeyboardEvent, MouseEvent  # type: ignore
+from asciimatics.exceptions import NextScene, StopApplication  # type: ignore
+from asciimatics.screen import Screen  # type: ignore
+from asciimatics.widgets import Frame  # type: ignore
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI
 
 
-class BaseForm(ABC, FormBaseNew):
+class BaseForm(ABC, Frame):
+    EDIT_FORM = "EDIT"
+    RECAP_FORM = "RECAP"
     LAST_ROW = -3
 
-    def __init__(self, parent_app: "TUI", next_form: Optional[str], **kwargs: Any) -> None:
+    def __init__(
+        self,
+        name: str,
+        screen: Screen,
+        parent: "TUI",
+        previous_form: Optional[str] = None,
+        next_form: Optional[str] = None,
+    ) -> None:
         """Base class for TUI forms.
 
         Args:
-            parent_app: the parent TUI.
-            next_form: the form to show after this one.
+            name: the name of the form.
+            screen: the screen where the form will be displayed.
+            parent: the parent TUI.
+            previous: the name of the previous form (optional).
+            next: the name of the next form (optional).
         """
         ABC.__init__(self)
-        self.parent_app = parent_app
-        self.going_back = False
+        Frame.__init__(
+            self,
+            screen,
+            int(screen.height),
+            int(screen.width),
+            name=name,
+            on_load=self.refresh,
+        )
+        self.set_theme("bright")
+        self.parent = parent
+        self.previous_form = previous_form
         self.next_form = next_form
-        FormBaseNew.__init__(self, **kwargs)
+        self.draw()
 
-    def define_key_bindings(self, key_bindings: Dict[str, Callable]) -> None:
-        """Define form key bindings.
+    @abstractmethod
+    def draw(self) -> None:
+        """Draw the form, adding the needed widgets."""
+        pass
+
+    def refresh(self) -> None:
+        """Refresh the form."""
+        pass
+
+    def process_event(self, event: Union[MouseEvent, KeyboardEvent]) -> None:
+        """Process either a mouse or a keyboard event.
 
         Args:
-            key_bindings: dictionary with key bindings.
+            event : The event that triggered the function.
         """
-        self.add_handlers(key_bindings)
+        if isinstance(event, KeyboardEvent):
+            if event.key_code == Screen.ctrl("n"):
+                self.next()
+            elif event.key_code == Screen.ctrl("b") and self.previous_form is not None:
+                self.back()
+        Frame.process_event(self, event)
 
-    def set_hint(self, s: str) -> None:
-        """Set hint text at the bottom of the form.
-
-        Args:
-            s: the text to be shown.
-        """
-        self.add(FixedText, value=s, editable=False, rely=BaseForm.LAST_ROW)
-
+    @abstractmethod
     def before_exit(self) -> None:
         """Perform final operations when exiting the form."""
         pass
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
+    def next(self) -> None:
         """Exit this form and move to the next one."""
         self.before_exit()
-        self.parent_app.switchFormNow()
+        if self.next_form is not None:
+            raise NextScene(self.next_form)
+        else:
+            raise StopApplication("Stop")
 
-    def back(self, *args: Any, **kwargs: Any) -> None:
-        """Move the previous form."""
-        self.going_back = True
-        self.parent_app.switchFormPrevious()
-
-    def afterEditing(self) -> None:
-        """Set the form to be shown when this one is closed."""
-        if not self.going_back:
-            self.parentApp.setNextForm(self.next_form)
-        self.going_back = False
+    def back(self) -> None:
+        """Move to the previous form."""
+        if self.previous_form is not None:
+            raise NextScene(self.previous_form)

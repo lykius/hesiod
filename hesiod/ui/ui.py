@@ -7,7 +7,10 @@ from hesiod.cfgparse import CFG_T, ConfigParser
 
 class UI(ABC):
     def __init__(
-        self, template_cfg: CFG_T, base_cfg_dir: Path, cfgparser: Type[ConfigParser]
+        self,
+        template_cfg: CFG_T,
+        base_cfg_dir: Path,
+        cfgparser: Type[ConfigParser],
     ) -> None:
         """Create a new user interface (UI).
 
