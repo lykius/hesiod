@@ -30,7 +30,7 @@ There are three main concepts used in hesiod:
 * configs can be accessed anywhere in the code with several modalities.
 
 ## Example
-Let's see it more concretely with an [example](https://github.com/lykius/hesiod-test).  
+Let's see it more concretely with an example.  
 Imagine that you write some python program where you need a dataset, a neural network and other parameters (does it sound familiar?). Each run of your program will use a different dataset or a different network or different parameters. To achieve this, you can write a config file for each element and organize them in a hierarchy of directories, something like this:
 ```
 cfg
@@ -49,7 +49,7 @@ cfg
      |____ training.yaml
      |____ test.yaml
 ```
-Each .yaml file contains the specific config for that element, for instance:
+Each `.yaml` file contains the specific config for that element, for instance:
 #### __cfg/dataset/cifar.yaml__
 ```yaml
 name: "cifar10"
@@ -65,7 +65,7 @@ name: "efficientnet"
 num_layers: 20
 ckpt_path: "/path/to/efficientnet"
 ```
-Then, you can define the generic __template__ config structure which will be used in every run, with a single .yaml file:
+Then, you can define the generic __template__ config structure which will be used in every run, with a single `.yaml` file:
 #### __template.yaml__
 ```yaml
 dataset: "@BASE(dataset)"  # every run will need a dataset...
@@ -75,8 +75,8 @@ p1: 1
 p2: 2.3
 p3: "test"
 ```
-In the __template__ file you define which config will be used by every run, without specifying the actual set of values (but you can specify defaults). In this simple example, we use the placeholder __@BASE__ which defines that the config values will be chosen among some _base_ configs. So, when you write `"@BASE(dataset)"`, hesiod will look for a directory named `dataset` and will ask you to choose among the options available in that directory (i.e. the .yaml files, in our example for `dataset` we have `cifar` and `imagenet`). In the example we also specify some params (p1, p2 and p3) with default values.  
-Once you have defined all your possibilities and a __template__ file, you just need to add hesiod to your program in the following way:
+In the __template__ file you define which config will be used by every run, without specifying the actual set of values (but you can provide defaults). In this simple example, we use the placeholder `@BASE` which defines that the config values will be chosen among some _base_ configs. So, when you write `"@BASE(dataset)"`, hesiod will look for a directory named `dataset` and will ask you to choose among the options available in that directory (i.e. the `.yaml` files, in our example for `dataset` we have `cifar` and `imagenet`). In this example we also specify some params (p1, p2 and p3) with default values.  
+Once you have defined all your possibilities (i.e. all the _base_ configs) and a __template__ file, you just need to add hesiod to your program in the following way:
 #### __main.py__
 ```python
 @hmain(base_cfg_dir="./cfg", template_cfg_file"./template.yaml")
@@ -102,7 +102,7 @@ When you are done with your selections, you can confirm by pressing CTRL+N and h
 </p>
 
 Here you can check that you selected the right things, you are asked to insert a name for current run and, finally, you can press CTRL+N to save the configuration and start the run (alternatively, you can press CTRL+B to go back and edit the config).  
-When you confirm with CTRL+N hesiod creates a directory for the run (by default, the new directory is created in a directory called `logs`) and saves the resulting config in a file called `run.yaml`. Then hesiod terminates and the control goes to your program.
+When you confirm with CTRL+N hesiod creates a directory for the run and saves the resulting config in a file called `run.yaml` (by default, the new directory is created in a directory called `logs`, but you can change that). Then, hesiod terminates and the control goes to your program.
 
 ## How can I access configs in the program?
 Hesiod defines two ways to access configs in your program:
@@ -125,7 +125,7 @@ p8:  # dictionary that contains...
       p11: "11"  # ...a string and...
       p12: 12.0  # ...a float
 ```
-Additionally, hesiod defines the special keywork `base`, which allows to load a config dictionary defined in another file. For instance, if we have:
+Additionally, hesiod defines the special keyword `base`, which allows to load a config dictionary defined in another file. For instance, if we have:
 #### __case1/subcase1/file1.yaml__
 ```yaml
 p1: 1
@@ -147,12 +147,24 @@ p3: 3.456
 ## What can I write in a __template__ file?
 __Template__ files can contain all the options available for normal config files. In addition that are some special placeholders:
 ### @BASE(key)
-The user will select one of the options available in the path specified by `key`. The key can represent a complete path with the notation `dir.subdir.subsubdir`.
+The user will select one of the base configs (i.e. `.yaml` files) available in the path specified by `key`. The key can represent a complete path with the notation `dir.subdir.subsubdir`.
 ### @OPTIONS(o1, o2, o3, ...)
 The user will select one between the given options.
 ### @BOOL(true) / @BOOL(false)
-The user will select between TRUE and FALSE, with the default set as specified.
+The user will select between `TRUE` and `FALSE`, with the default set as specified.
 ### @FILE / @FILE(path/to/default)
-The user will select a file starting either from the current directory or from a default path (if given).
+The user will select a file starting either from the current directory or from a default path.
 ### @DATE / @DATE(today) / @DATE(YYYY-MM-DD)
-The user will select a date, starting from a default (if given).
+The user will select a date, starting from today or from a default date.
+
+## How can I install hesiod?
+Hesiod is on pypi, so you can simply:
+```
+pip install hesiod
+```
+
+## A more complete example
+Have a look [here](https://github.com/lykius/hesiod-test) for a complete working example.
+
+## Future development
+Hopefully, hesiod will get many new features in the next few months, stay tuned!
