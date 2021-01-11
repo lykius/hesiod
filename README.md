@@ -146,16 +146,10 @@ p3: 3.456
 
 ## What can I write in a __template__ file?
 __Template__ files can contain all the options available for normal config files. In addition that are some special placeholders:
-### @BASE(key)
-The user will select one of the base configs (i.e. `.yaml` files) available in the path specified by `key`. The key can represent a complete path with the notation `dir.subdir.subsubdir`.
-### @OPTIONS(o1, o2, o3, ...)
-The user will select one between the given options.
-### @BOOL(true) / @BOOL(false)
-The user will select between `TRUE` and `FALSE`, with the default set as specified.
-### @FILE / @FILE(path/to/default)
-The user will select a file starting either from the current directory or from a default path.
-### @DATE / @DATE(today) / @DATE(YYYY-MM-DD)
-The user will select a date, starting from today or from a default date.
+* `@BASE(key)` the user will select one of the base configs (i.e. `.yaml` files) available in the path specified by `key`. The key can represent a complete path with the notation `dir.subdir.subsubdir`.
+* `@BOOL(true)` / `@BOOL(false)` the user will select between `TRUE` and `FALSE`, with the default set as specified.
+* `@FILE` / `@FILE(path/to/default)` the user will select a file starting either from the current directory or from a default path.
+* `@DATE` / `@DATE(today)` / `@DATE(YYYY-MM-DD)` the user will select a date, starting from today or from a default date.
 
 ## How can I install hesiod?
 Hesiod is on pypi, so you can simply:
