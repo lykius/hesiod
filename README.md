@@ -107,10 +107,10 @@ When you confirm with CTRL+N hesiod creates a directory for the run and saves th
 ## How can I access configs in the program?
 Hesiod defines two ways to access configs in your program:
 * you can use the function `get_cfg_copy()` to get a copy of the whole config as a dictionary
-* you can use the function `hcfg(key, type=None)` anywhere in your code to get a specific config value identified by `key`; for instance, in the above example, we can use `hcfg("dataset.name")` to get the name of the dataset; optionally, if you use types in your code (you should! 😁), you can specify the expected `type` for the requested parameter, enabling some type checking and helping your linter when using the returned parameter.
+* you can use the function `hcfg(key, type=None)` anywhere in your code to get a specific config value identified by `key`; for instance, in the above example, we can use `hcfg("dataset.name")` to get the name of the dataset (note the "dot" notation to navigate dictionaries); optionally, if you use types in your code (you should! 😁), you can specify the expected `type` for the requested parameter, enabling some type checking and helping your linter when using the returned parameter.
 
 ## What can I write in config files?
-Each config file represents a key-value dictionary. For the time being, hesiod supports .yaml files and you can write anything that is compliant with the `.yaml` format:
+Each config file represents a key-value dictionary. For the time being, hesiod supports `.yaml` files and you can write anything that is compliant with the [YAML](https://yaml.org/) format:
 ```yaml
 p1: 1  # integer
 p2: 1.2  # float
@@ -146,7 +146,8 @@ p3: 3.456
 
 ## What can I write in a __template__ file?
 __Template__ files can contain all the options available for normal config files. In addition, there are some special placeholders:
-* `@BASE(key)` the user will select one of the base configs (i.e. `.yaml` files) available in the path specified by `key`. The key can represent a complete path with the notation `dir.subdir.subsubdir`.
+* `@BASE(key)` the user will select one of the base configs (i.e. `.yaml` files) available in the path specified by `key`. The key can represent a complete path with the notation `dir.subdir.subsubdir` etc.
+* `@OPTIONS(opt1,opt2,opt3,...)` the user will select one of the given options.
 * `@BOOL(true)` / `@BOOL(false)` the user will select between `TRUE` and `FALSE`, with the default set as specified.
 * `@FILE` / `@FILE(path/to/default)` the user will select a file starting either from the current directory or from a default path.
 * `@DATE` / `@DATE(today)` / `@DATE(YYYY-MM-DD)` the user will select a date, starting from today or from a default date.
