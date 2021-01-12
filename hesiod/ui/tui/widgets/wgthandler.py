@@ -66,8 +66,8 @@ class BoolWidgetHandler(WidgetHandler):
         WidgetHandler.__init__(self, cfg_key)
 
     def get_value(self, widget: Widget) -> Any:
-        selected_value = widget.value
-        return [BoolWidgetHandler.TRUE, BoolWidgetHandler.FALSE][selected_value]
+        selected_value = [BoolWidgetHandler.TRUE, BoolWidgetHandler.FALSE][widget.value]
+        return selected_value == BoolWidgetHandler.TRUE
 
 
 class OptionsWidgetHandler(WidgetHandler):
