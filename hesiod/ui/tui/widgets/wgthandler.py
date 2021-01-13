@@ -81,10 +81,12 @@ class OptionsWidgetHandler(WidgetHandler):
 
 
 class BaseWidgetHandler(WidgetHandler):
+    BASE_KEY = "***TUI_BASE***"
+
     def __init__(self, cfg_key: str, options: List[str]) -> None:
         WidgetHandler.__init__(self, cfg_key)
         self.options = options
 
     def get_value(self, widget: Widget) -> Any:
         selected_value = widget.value
-        return {BASE_KEY: self.options[selected_value]}
+        return {BaseWidgetHandler.BASE_KEY: self.options[selected_value]}

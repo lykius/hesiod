@@ -1,0 +1,2 @@
+base: "params.default"
+use_augmentation: False

@@ -6,7 +6,7 @@ from asciimatics.widgets import Layout, Widget  # type: ignore
 from hesiod.cfgparse.cfgparser import CFG_T
 from hesiod.ui.tui.baseform import BaseForm
 from hesiod.ui.tui.widgets.wgtfactory import WidgetFactory
-from hesiod.ui.tui.widgets.wgthandler import WidgetHandler
+from hesiod.ui.tui.widgets.wgthandler import BaseWidgetHandler, WidgetHandler
 
 if TYPE_CHECKING:
     from hesiod.ui import TUI
@@ -51,6 +51,7 @@ class EditForm(BaseForm):
 
         parser = self.parent.cfgparser
         base_cfgs = parser.load_base_cfgs(self.parent.base_cfg_dir)
-        run_cfg = parser.replace_bases(edited_cfg, base_cfgs)
+        temp_cfg = parser.replace_bases(edited_cfg, base_cfgs, base_key=BaseWidgetHandler.BASE_KEY)
+        run_cfg = parser.replace_bases(temp_cfg, base_cfgs)
 
         self.parent.run_cfg.update(run_cfg)
