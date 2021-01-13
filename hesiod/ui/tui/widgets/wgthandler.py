@@ -4,7 +4,7 @@ from typing import Any, List
 
 from asciimatics.widgets import Widget  # type: ignore
 
-from hesiod.cfgparse import BASE_KEY, CFG_T
+from hesiod.cfgparse import CFG_T
 
 
 class WidgetHandler:
