@@ -8,10 +8,6 @@ import hesiod.core as hcore
 from hesiod import __version__, get_cfg_copy, get_out_dir, get_run_name, hcfg, hmain
 
 
-def test_version() -> None:
-    assert __version__ == "0.2.1"
-
-
 def test_args_kwargs(base_cfg_dir: Path, simple_run_file: Path) -> None:
     @hmain(base_cfg_dir, run_cfg_file=simple_run_file, create_out_dir=False)
     def test(a: int, b: str, c: float = 3.4) -> Tuple[int, str, float]:
