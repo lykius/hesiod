@@ -61,7 +61,9 @@ jobs:
         echo "PyPI version $PYPI_VERSION - pushed version $PUSHED_VERSION"
         if [ $PYPI_VERSION != $PUSHED_VERSION ]
           then
-            echo "publishing version $PUSHED_VERSION to PyPI"
+            echo "Publishing version $PUSHED_VERSION on PyPI"
             poetry build
             poetry publish
+        else
+          echo "Not publishing on PyPI"
         fi
