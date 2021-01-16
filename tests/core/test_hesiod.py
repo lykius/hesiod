@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Tuple
 import pytest
 
 import hesiod.core as hcore
-from hesiod import __version__, get_cfg_copy, get_out_dir, get_run_name, hcfg, hmain
+from hesiod import get_cfg_copy, get_out_dir, get_run_name, hcfg, hmain
 
 
 def test_args_kwargs(base_cfg_dir: Path, simple_run_file: Path) -> None:
