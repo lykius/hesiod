@@ -1,17 +1,13 @@
 name: CI
 
-on:
-  push:
-    branches: [ main ]
+on: push
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -35,3 +31,37 @@ jobs:
         black .
         mypy .
         flake8 .
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install Poetry
+      env:
+        POETRY_VERSION: 1.1.4
+      run: |
+        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+        echo "PATH=$HOME/.poetry/bin:$PATH" >> $GITHUB_ENV
+    - name: Install dependencies
+      run: |
+        poetry install
+        echo "PATH=$(poetry env info --path)/bin:$PATH" >> $GITHUB_ENV
+    - name: Publish on PyPI
+      env:
+        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+      run: |
+        PYPI_VERSION=`curl -L -s https://pypi.org/pypi/hesiod/json | jq -r '.info.version'`
+        PUSHED_VERSION=`poetry version -s`
+        echo "PyPI version $PYPI_VERSION - pushed version $PUSHED_VERSION"
+        if [ $PYPI_VERSION != $PUSHED_VERSION ]
+          then
+            echo "publishing version $PUSHED_VERSION to PyPI"
+            poetry build
+            poetry publish
+        fi
