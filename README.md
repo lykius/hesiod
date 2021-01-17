@@ -114,16 +114,18 @@ Each config file represents a key-value dictionary. For the time being, hesiod s
 ```yaml
 p1: 1  # integer
 p2: 1.2  # float
-p3: true  # boolean
-p4: "test"  # string
-p5: [1, 2, 3]  # list
-p6: !!python/tuple [1, 2, 3]  # tuple
-p7: 2021-01-01  # date
-p8:  # dictionary that contains...
-  p9:  # ...another dictionary that contains...
-    p10: 10  # ...an integer and...
-      p11: "11"  # ...a string and...
-      p12: 12.0  # ...a float
+p3: 1e-4  # another float
+p4: true  # boolean
+p5: "test"  # string
+p6: [1, 2, 3]  # list
+p7: !!python/tuple [1, 2, 3]  # tuple
+p8: !!set {1: null, 2: null, 3: null}  # set
+p9: 2021-01-01  # date
+p10:  # dictionary that contains...
+  p11:  # ...another dictionary that contains...
+    p12: 10  # ...an integer and...
+      p13: "11"  # ...a string and...
+      p14: 12.0  # ...a float
 ```
 Additionally, hesiod defines the special keyword `base`, which allows to load a config dictionary defined in another file. For instance, if we have:
 #### __case1/subcase1/file1.yaml__
@@ -151,6 +153,23 @@ __Template__ files can contain all the options available for normal config files
 * `@BOOL(true)` / `@BOOL(false)` the user will select between `TRUE` and `FALSE`, with the default set as specified.
 * `@FILE` / `@FILE(path/to/default)` the user will select a file starting either from the current directory or from a default path.
 * `@DATE` / `@DATE(today)` / `@DATE(YYYY-MM-DD)` the user will select a date, starting from today or from a default date.
+
+## Can I skip the TUI?
+Yes! The TUI is a powerful way to select and check your configs before running the program, but there are scenarios where you just need to load a config file without making any selection (for instance, when you prepare a script to launch several runs sequentially). To skip the TUI, you just need to modify slightly the arguments passed to `hmain`:
+#### __main.py__
+```python
+@hmain(base_cfg_dir="./cfg", run_cfg_file"./run.yaml")
+def main():
+    # do some fancy stuff
+    ...
+
+if __name__ == "__main__":
+    main()
+```
+Note that in this case we don't pass `template_cfg_file` but `run_cfg_file`, telling hesiod that we want only to load the content of the given run file, without showing any TUI. You can still use the keyword `base` to combine hierarchically multiple config files in a single run file. The only constraint is that the run file passed to hesiod must contain the run name, represented by the key `run_name`. Such run name will be used by hesiod to create the directory for the run and to save the run file in it.
+
+## Can I restore a previous run?
+Absolutely! If you pass to `hmain` the `run_cfg_file` argument with the path of a run file previously created by hesiod, this file will be loaded regularly but this time hesiod will not create a new directory for the run.
 
 ## How can I install hesiod?
 Hesiod is on pypi, so you can simply:
