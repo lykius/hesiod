@@ -1,0 +1,2 @@
+use_bn: True
+use_dropout: False

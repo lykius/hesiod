@@ -1,3 +1,4 @@
 name: "efficientnet"
 num_layers: 20
 ckpt_path: "/path/to/efficientnet"
+use_skip: True

@@ -121,12 +121,17 @@ class ConfigParser(ABC):
         return base_cfgs
 
     @staticmethod
-    def replace_base(cfg: CFG_T, base_cfgs: Dict[str, CFG_T]) -> CFG_T:
+    def replace_base(
+        cfg: CFG_T,
+        base_cfgs: Dict[str, CFG_T],
+        base_key: str = BASE_KEY,
+    ) -> CFG_T:
         """Replace base placeholder in a given config.
 
         Args:
-            cfg: config with base placeholder.
-            base_cfgs: base configs.
+            cfg: the config with base placeholder.
+            base_cfgs: the available base configs.
+            base_key: the string used as base key.
 
         Raises:
             ValueError: if it is not possible to retrieve the base config.
@@ -135,31 +140,48 @@ class ConfigParser(ABC):
             The config with the base placeholder replaced.
         """
         new_cfg = deepcopy(cfg)
-        base_key = new_cfg[BASE_KEY]
+        base_id = new_cfg[base_key]
         base_cfg = base_cfgs
 
-        for k in base_key.split("."):
+        for k in base_id.split("."):
             if k not in base_cfg:
-                raise ValueError(f"Config error: cannot find base {base_key}")
+                raise ValueError(f"Config error: cannot find base {base_id}")
             base_cfg = base_cfg[k]
+
+        del new_cfg[base_key]
 
         for k in base_cfg:
             if k not in new_cfg:
                 new_cfg[k] = base_cfg[k]
 
-        del new_cfg[BASE_KEY]
-
         return new_cfg
 
     @classmethod
-    def replace_bases(cls, cfg: CFG_T, base_cfgs: Dict[str, CFG_T]) -> CFG_T:
+    def replace_bases(
+        cls,
+        cfg: CFG_T,
+        base_cfgs: Dict[str, CFG_T],
+        base_key: str = BASE_KEY,
+    ) -> CFG_T:
+        """Replace all the bases in a given config recursively.
+
+        Args:
+            cfg: the config to process.
+            base_cfgs: the available base configs.
+            base_key: the string used as base key.
+
+        Returns:
+            The config with all bases resolved.
+        """
         new_cfg = deepcopy(cfg)
 
-        if BASE_KEY in cfg:
-            new_cfg = cls.replace_base(new_cfg, base_cfgs)
+        # replace base in main cfg
+        while base_key in new_cfg:
+            new_cfg = cls.replace_base(new_cfg, base_cfgs, base_key=base_key)
 
+        # replace bases in sub cfgs
         for cfg_key in new_cfg:
-            if isinstance(new_cfg[cfg_key], dict) and BASE_KEY in new_cfg[cfg_key]:
-                new_cfg[cfg_key] = cls.replace_base(new_cfg[cfg_key], base_cfgs)
+            if isinstance(new_cfg[cfg_key], dict):
+                new_cfg[cfg_key] = cls.replace_bases(new_cfg[cfg_key], base_cfgs, base_key=base_key)
 
         return new_cfg

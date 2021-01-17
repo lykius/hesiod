@@ -1,3 +1,4 @@
+base: "net.efficientnet"
 name: "resnet101"
 num_layers: 101
 ckpt_path: "/path/to/resnet101"
