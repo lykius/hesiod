@@ -4,12 +4,11 @@ dataset:
     - 1
     - 5
     - 6
-
-run_name: "test"
-
 net:
   base: "net.efficientnet"
   freeze: false
-
 base: "var"
 lr: 0.005
+params:
+  base: "params.train"
+run_name: "test"
