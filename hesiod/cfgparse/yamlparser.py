@@ -1,18 +1,17 @@
 from pathlib import Path
 from typing import Any, List, Tuple
 
-import yaml
+from ruamel.yaml import YAML
+from ruamel.yaml.constructor import SafeConstructor
 
 from hesiod.cfgparse.cfgparser import CFG_T, ConfigParser
 
 
-class SafeLoader(yaml.SafeLoader):
-    def construct_python_tuple(self, node: Any) -> Tuple:
-        return tuple(self.construct_sequence(node))  # type: ignore
+def construct_python_tuple(constructor: SafeConstructor, node: Any) -> Tuple:
+    return tuple(constructor.construct_sequence(node))
 
 
-tuple_key = "tag:yaml.org,2002:python/tuple"
-SafeLoader.add_constructor(tuple_key, SafeLoader.construct_python_tuple)  # type: ignore
+SafeConstructor.add_constructor("tag:yaml.org,2002:python/tuple", construct_python_tuple)
 
 
 class YAMLConfigParser(ConfigParser):
@@ -22,11 +21,10 @@ class YAMLConfigParser(ConfigParser):
 
     @staticmethod
     def read_cfg_file(cfg_file: Path) -> CFG_T:
-        with open(cfg_file, "rt") as f:
-            cfg = yaml.load(f, Loader=SafeLoader)
-        return cfg
+        yaml = YAML(typ="safe")
+        return yaml.load(cfg_file)
 
     @staticmethod
     def save_cfg(cfg: CFG_T, cfg_file: Path) -> None:
-        with open(cfg_file, "wt") as f:
-            yaml.dump(cfg, f)
+        yaml = YAML()
+        yaml.dump(cfg, cfg_file)
