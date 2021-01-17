@@ -5,7 +5,7 @@ from typing import Any, Callable, Optional, Type, TypeVar, Union, cast
 
 from typeguard import check_type
 
-from hesiod.cfgparse import CFG_T, RUN_NAME_KEY, get_parser
+from hesiod.cfg.cfghandler import CFG_T, RUN_NAME_KEY, ConfigHandler
 from hesiod.ui import TUI
 
 T = TypeVar("T")
@@ -34,12 +34,10 @@ def _get_cfg(
         The loaded config.
     """
     if run_cfg_path is not None:
-        parser = get_parser(run_cfg_path.suffix)
-        return parser.load_cfg(run_cfg_path, base_cfg_path)
+        return ConfigHandler.load_cfg(run_cfg_path, base_cfg_path)
     elif template_cfg_path is not None:
-        parser = get_parser(template_cfg_path.suffix)
-        template_cfg = parser.load_cfg(template_cfg_path, base_cfg_path)
-        tui = TUI(template_cfg, base_cfg_path, parser)
+        template_cfg = ConfigHandler.load_cfg(template_cfg_path, base_cfg_path)
+        tui = TUI(template_cfg, base_cfg_path)
         return tui.show()
     else:
         msg = "Either a valid run file or a template file must be passed to hesiod."
@@ -75,8 +73,7 @@ def _create_out_dir_and_save_run_file(
     if create_dir:
         run_dir.mkdir(parents=True, exist_ok=False)
         cfg[OUT_DIR_KEY] = str(run_dir.absolute())
-        parser = get_parser(run_file.suffix)
-        parser.save_cfg(cfg, run_file)
+        ConfigHandler.save_cfg(cfg, run_file)
 
 
 def hmain(

@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import List, Type
+from typing import List
 
 from asciimatics.exceptions import ResizeScreenError  # type: ignore
 from asciimatics.scene import Scene  # type: ignore
 from asciimatics.screen import Screen  # type: ignore
 
-from hesiod.cfgparse import CFG_T, ConfigParser
+from hesiod.cfg.cfghandler import CFG_T
 from hesiod.ui.tui.baseform import BaseForm
 from hesiod.ui.tui.editform import EditForm
 from hesiod.ui.tui.recapform import RecapForm
@@ -17,16 +17,14 @@ class TUI(UI):
         self,
         template_cfg: CFG_T,
         base_cfg_dir: Path,
-        cfgparser: Type[ConfigParser],
     ) -> None:
         """Create a new terminal user interface (TUI).
 
         Args:
             template_file: path to the config template file.
             base_cfg_dir: path to the base configs directory.
-            cfgparser: config parser.
         """
-        UI.__init__(self, template_cfg, base_cfg_dir, cfgparser)
+        UI.__init__(self, template_cfg, base_cfg_dir)
         self.run_cfg: CFG_T = {}
 
     @staticmethod

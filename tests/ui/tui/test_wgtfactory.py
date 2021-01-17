@@ -74,11 +74,10 @@ def test_date_widget_parser() -> None:
                 assert widget.value == cfg[3]
 
 
-def test_file_widget_parser() -> None:
-    default_path = Path(".") / "tests/templates/simple.yaml"
+def test_file_widget_parser(simple_template_file: Path) -> None:
     cfgs = [
         ("cfg1", "@FILE", True, str(Path(".").absolute())),
-        ("cfg2", f"@FILE({str(default_path)})", True, str(default_path.absolute())),
+        ("cfg2", f"@FILE({str(simple_template_file)})", True, str(simple_template_file.absolute())),
         ("cfg3", "@FILE()", False, ""),
         ("cfg4", "@File", False, ""),
         ("cfg5", "@file", False, ""),

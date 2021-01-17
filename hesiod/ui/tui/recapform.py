@@ -4,7 +4,7 @@ from asciimatics.parsers import AsciimaticsParser  # type: ignore
 from asciimatics.screen import Screen  # type: ignore
 from asciimatics.widgets import Divider, Layout, Text, TextBox  # type: ignore
 
-from hesiod.cfgparse import RUN_NAME_KEY
+from hesiod.cfg.cfghandler import RUN_NAME_KEY
 from hesiod.ui.tui.baseform import BaseForm
 from hesiod.ui.tui.widgets.wgtfactory import WidgetFactory
 

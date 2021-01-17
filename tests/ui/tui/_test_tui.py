@@ -6,8 +6,8 @@ from typing import Dict, List, Sequence, Union
 
 from pynput.keyboard import Controller, Key, KeyCode
 
-from hesiod.cfgparse import get_parser
-from hesiod.cfgparse.cfgparser import CFG_T
+from hesiod.cfg import get_parser
+from hesiod.cfg.cfgparser import CFG_T
 from hesiod.ui.tui import TUI
 
 INPUT_T = Union[KeyCode, str]
