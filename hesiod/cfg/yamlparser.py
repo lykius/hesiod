@@ -3,8 +3,9 @@ from typing import Any, List, Tuple
 
 from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
+from ruamel.yaml.representer import Representer, SafeRepresenter
 
-from hesiod.cfgparse.cfgparser import CFG_T, ConfigParser
+from hesiod.cfg.cfgparser import CFG_T, ConfigParser
 
 
 def construct_python_tuple(constructor: SafeConstructor, node: Any) -> Tuple:
@@ -12,6 +13,7 @@ def construct_python_tuple(constructor: SafeConstructor, node: Any) -> Tuple:
 
 
 SafeConstructor.add_constructor("tag:yaml.org,2002:python/tuple", construct_python_tuple)
+SafeRepresenter.add_representer(tuple, Representer.represent_tuple)
 
 
 class YAMLConfigParser(ConfigParser):
@@ -25,6 +27,6 @@ class YAMLConfigParser(ConfigParser):
         return yaml.load(cfg_file)
 
     @staticmethod
-    def save_cfg(cfg: CFG_T, cfg_file: Path) -> None:
-        yaml = YAML()
+    def write_cfg(cfg: CFG_T, cfg_file: Path) -> None:
+        yaml = YAML(typ="safe")
         yaml.dump(cfg, cfg_file)

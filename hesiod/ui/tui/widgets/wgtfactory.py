@@ -7,7 +7,7 @@ from typing import Any, List, Optional, Tuple, Type
 
 from asciimatics.widgets import Label, Text, Widget  # type: ignore
 
-from hesiod.cfgparse import CFG_T
+from hesiod.cfg.cfghandler import CFG_T
 from hesiod.ui.tui.widgets.custom.datepicker import CustomDatePicker
 from hesiod.ui.tui.widgets.custom.dropdown import CustomDropdownList
 from hesiod.ui.tui.widgets.custom.filebrowser import CustomFileBrowser

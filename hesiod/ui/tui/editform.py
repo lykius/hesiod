@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, List, Optional, Tuple
 from asciimatics.screen import Screen  # type: ignore
 from asciimatics.widgets import Layout, Widget  # type: ignore
 
-from hesiod.cfgparse.cfgparser import CFG_T
+from hesiod.cfg.cfghandler import CFG_T, ConfigHandler
 from hesiod.ui.tui.baseform import BaseForm
 from hesiod.ui.tui.widgets.wgtfactory import WidgetFactory
 from hesiod.ui.tui.widgets.wgthandler import BaseWidgetHandler, WidgetHandler
@@ -49,9 +49,10 @@ class EditForm(BaseForm):
             if handler is not None:
                 edited_cfg = handler.update_cfg(edited_cfg, widget)
 
-        parser = self.parent.cfgparser
-        base_cfgs = parser.load_base_cfgs(self.parent.base_cfg_dir)
-        temp_cfg = parser.replace_bases(edited_cfg, base_cfgs, base_key=BaseWidgetHandler.BASE_KEY)
-        run_cfg = parser.replace_bases(temp_cfg, base_cfgs)
+        base_cfgs = ConfigHandler.load_base_cfgs(self.parent.base_cfg_dir)
+        temp_cfg = ConfigHandler.replace_bases(
+            edited_cfg, base_cfgs, base_key=BaseWidgetHandler.BASE_KEY
+        )
+        run_cfg = ConfigHandler.replace_bases(temp_cfg, base_cfgs)
 
         self.parent.run_cfg.update(run_cfg)
