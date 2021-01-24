@@ -1,4 +1,5 @@
 import shutil
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -131,13 +132,28 @@ def test_out_dir(base_cfg_dir: Path, complex_run_file: Path) -> None:
     shutil.rmtree("logs")
 
 
-def test_no_run_name(no_run_name_run_file: Path) -> None:
-    @hmain("", run_cfg_file=no_run_name_run_file)
+def test_no_run_name(base_cfg_dir: Path, no_run_name_run_file: Path) -> None:
+    @hmain(base_cfg_dir, run_cfg_file=no_run_name_run_file, run_name_strategy=None)
     def test() -> None:
         pass
 
     with pytest.raises(ValueError):
         test()
+
+
+def test_default_run_name(base_cfg_dir: Path, no_run_name_run_file: Path) -> None:
+    @hmain(
+        base_cfg_dir,
+        run_cfg_file=no_run_name_run_file,
+        run_name_strategy=hcore.RUN_NAME_STRATEGY_DATE,
+    )
+    def test() -> None:
+        now = datetime.now()
+        run_name = get_run_name()
+        assert run_name == now.strftime(hcore.RUN_NAME_DATE_FORMAT)
+
+    test()
+    shutil.rmtree("logs")
 
 
 def test_run_name(base_cfg_dir: Path, complex_run_file: Path) -> None:

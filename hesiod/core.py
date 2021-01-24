@@ -1,5 +1,6 @@
 import functools
 from copy import deepcopy
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Optional, Type, TypeVar, Union, cast
 
@@ -13,6 +14,8 @@ FUNCTION_T = Callable[..., Any]
 _CFG: CFG_T = {}
 RUN_FILE_NAME = "run.yaml"
 OUT_DIR_KEY = "***hesiod_out_dir***"
+RUN_NAME_STRATEGY_DATE = "date"
+RUN_NAME_DATE_FORMAT = "%Y-%m-%d-%H-%M-%S"
 
 
 def _get_cfg(
@@ -24,8 +27,8 @@ def _get_cfg(
 
     Args:
         base_cfg_path: the path to the directory with all the config files.
-        template_cfg_path : the path to the template config file for this run (optional).
-        run_cfg_path : the path to the config file created by the user for this run (optional).
+        template_cfg_path: the path to the template config file for this run (optional).
+        run_cfg_path: the path to the config file created by the user for this run (optional).
 
     Raises:
         ValueError: if both template_cfg_path and run_cfg_path are None.
@@ -44,23 +47,42 @@ def _get_cfg(
         raise ValueError(msg)
 
 
+def _get_default_run_name(strategy: str) -> str:
+    """Get a run name according the given strategy.
+
+    Args:
+        strategy: the strategy to use to create the run name.
+
+    Returns:
+        The created run name.
+    """
+    run_name = ""
+    if strategy == RUN_NAME_STRATEGY_DATE:
+        now = datetime.now()
+        run_name = now.strftime(RUN_NAME_DATE_FORMAT)
+
+    return run_name
+
+
 def _create_out_dir_and_save_run_file(
-    cfg: CFG_T, out_dir_root: str, run_cfg_path: Optional[Path]
+    cfg: CFG_T,
+    out_dir_root: str,
+    run_cfg_path: Optional[Path],
 ) -> None:
     """Create output directory for the current run and save the run file
     in it (if needed).
 
     Args:
-        cfg : the loaded config.
-        out_dir_root : root for output directories.
-        run_cfg_path : the path to the config file created by the user for this run (optional).
+        cfg: the loaded config.
+        out_dir_root: root for output directories.
+        run_cfg_path: the path to the config file created by the user for this run (optional).
 
     Raises:
         ValueError: if the run name is not specified in the given config.
     """
     run_name = cfg.get(RUN_NAME_KEY, "")
-    if len(run_name) == 0:
-        msg = f"The run file must contain a valid name for the run ({RUN_NAME_KEY})."
+    if run_name == "":
+        msg = f"The config must contain a valid name for the run (key={RUN_NAME_KEY})."
         raise ValueError(msg)
 
     run_dir = Path(out_dir_root) / Path(run_name)
@@ -82,6 +104,7 @@ def hmain(
     run_cfg_file: Optional[Union[str, Path]] = None,
     create_out_dir: bool = True,
     out_dir_root: str = "logs",
+    run_name_strategy: Optional[str] = RUN_NAME_STRATEGY_DATE,
 ) -> Callable[[FUNCTION_T], FUNCTION_T]:
     """Decorator for a given function.
 
@@ -94,10 +117,13 @@ def hmain(
         run_cfg_file: the path to the config file created by the user for this run (optional).
         create_out_dir: flag that indicates whether hesiod should create an output directory or not.
         out_dir_root: root for output directories.
+        run_name_strategy: the strategy to assign a default run name if this is
+            not specified by user (available options: "date").
 
     Raises:
         ValueError: if both template_cfg_file and run_cfg_file are None.
-        ValueError: if the run name is not specified in the run file.
+        ValueError: if the run name is not specified in the run file
+            and no default strategy is specified.
 
     Returns:
         Function wrapped in the decorator.
@@ -113,6 +139,19 @@ def hmain(
             template_cfg_path = Path(template_cfg_file) if template_cfg_file else None
 
             _CFG = _get_cfg(bcfg_path, template_cfg_path, run_cfg_path)
+
+            run_name = _CFG.get(RUN_NAME_KEY, "")
+            if run_name == "" and run_name_strategy is not None:
+                run_name = _get_default_run_name(run_name_strategy)
+                _CFG[RUN_NAME_KEY] = run_name
+
+            if run_name == "":
+                msg = (
+                    f"A valid name must be provided for the run. Provide one "
+                    f"by setting a value for the key {RUN_NAME_KEY} or "
+                    f'selecting a default strategy (e.g. "date")'
+                )
+                raise ValueError(msg)
 
             if create_out_dir:
                 _create_out_dir_and_save_run_file(_CFG, out_dir_root, run_cfg_path)

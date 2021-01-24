@@ -59,12 +59,6 @@ class RecapForm(BaseForm):
         self.fix()
 
     def before_exit(self) -> None:
-        """Save run name in the parent app config when exiting the form.
-
-        Raises:
-            ValueError: if the user did not inserted a valid run name.
-        """
+        """Save run name in the parent app config when exiting the form."""
         run_name = self.run_name_widget.value
-        if len(run_name) == 0:
-            raise ValueError("Run name cannot be empty.")
         self.parent.run_cfg[RUN_NAME_KEY] = run_name
