@@ -146,6 +146,7 @@ def test_default_run_name(base_cfg_dir: Path, no_run_name_run_file: Path) -> Non
         base_cfg_dir,
         run_cfg_file=no_run_name_run_file,
         run_name_strategy=hcore.RUN_NAME_STRATEGY_DATE,
+        create_out_dir=False,
     )
     def test() -> None:
         now = datetime.now()
@@ -153,14 +154,12 @@ def test_default_run_name(base_cfg_dir: Path, no_run_name_run_file: Path) -> Non
         assert run_name == now.strftime(hcore.RUN_NAME_DATE_FORMAT)
 
     test()
-    shutil.rmtree("logs")
 
 
 def test_run_name(base_cfg_dir: Path, complex_run_file: Path) -> None:
-    @hmain(base_cfg_dir, run_cfg_file=complex_run_file)
+    @hmain(base_cfg_dir, run_cfg_file=complex_run_file, create_out_dir=False)
     def test() -> None:
         run_name = get_run_name()
         assert run_name == "test"
 
     test()
-    shutil.rmtree("logs")
