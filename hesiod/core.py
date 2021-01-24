@@ -148,7 +148,7 @@ def hmain(
             if run_name == "":
                 msg = (
                     f"A valid name must be provided for the run. Provide one "
-                    f"by setting a value for the key ({RUN_NAME_KEY}) or "
+                    f"by setting a value for the key {RUN_NAME_KEY} or "
                     f'selecting a default strategy (e.g. "date")'
                 )
                 raise ValueError(msg)
