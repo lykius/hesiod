@@ -25,7 +25,7 @@ class WidgetParser(ABC):
     FILE_PATTERN = r"^@FILE$"
     DEFAULT_FILE_PATTERN = r"^@FILE\(.+\)$"
     BASE_PATTERN = r"^@BASE\([0-9A-Za-z_.]+\)$"
-    OPTIONS_PATTERN = r"^@OPTIONS\(.+\)$"
+    OPTIONS_PATTERN = r"^@OPTIONS\((.+)\)$"
     BOOL_PATTERN = r"^@BOOL\((true|True|TRUE|false|False|FALSE)\)$"
 
     @staticmethod
@@ -184,8 +184,13 @@ class OptionsWidgetParser(WidgetParser):
 
     @staticmethod
     def parse(cfg_key: str, label_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WGT_T]:
-        options = cfg_value.split("(")[-1].split(")")[0]
-        values = [(option.strip(), i) for i, option in enumerate(options.split(","))]
+        opt_search = re.search(WidgetParser.OPTIONS_PATTERN, cfg_value)
+        if opt_search is not None:
+            options = opt_search.group(1)
+        else:
+            raise ValueError("Something went wrong, no options passed to OptionsWidgetParser.")
+
+        values = [(option.strip(), i) for i, option in enumerate(options.split(";"))]
 
         label = cfg_key.split(".")[-1]
         label = f"{label_prefix}{label}:"

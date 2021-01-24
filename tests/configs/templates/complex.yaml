@@ -10,7 +10,7 @@ group:
     p2: "@FILE"
     p3: "@FILE(hesiod/ui/tui/)"
   subgroupb:
-    p1: "@OPTIONS(1,p1value,3.2)"
+    p1: "@OPTIONS(1;p1value;3.2)"
     p2:
       ca: "@DATE"
       cb: "b"

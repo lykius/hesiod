@@ -134,7 +134,7 @@ def test_options_widget_parser() -> None:
     cfgs = [
         (
             "cfg1",
-            "@OPTIONS(1, 2.5, True, test)",
+            "@OPTIONS(1; 2.5; True; test)",
             True,
             [("1", 0), ("2.5", 1), ("True", 2), ("test", 3)],
         ),
