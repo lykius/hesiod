@@ -27,8 +27,8 @@ def _get_cfg(
 
     Args:
         base_cfg_path: the path to the directory with all the config files.
-        template_cfg_path : the path to the template config file for this run (optional).
-        run_cfg_path : the path to the config file created by the user for this run (optional).
+        template_cfg_path: the path to the template config file for this run (optional).
+        run_cfg_path: the path to the config file created by the user for this run (optional).
 
     Raises:
         ValueError: if both template_cfg_path and run_cfg_path are None.
@@ -73,16 +73,16 @@ def _create_out_dir_and_save_run_file(
     in it (if needed).
 
     Args:
-        cfg : the loaded config.
-        out_dir_root : root for output directories.
-        run_cfg_path : the path to the config file created by the user for this run (optional).
+        cfg: the loaded config.
+        out_dir_root: root for output directories.
+        run_cfg_path: the path to the config file created by the user for this run (optional).
 
     Raises:
         ValueError: if the run name is not specified in the given config.
     """
     run_name = cfg.get(RUN_NAME_KEY, "")
     if run_name == "":
-        msg = f"The config must contain a valid name for the run ({RUN_NAME_KEY})."
+        msg = f"The config must contain a valid name for the run (key={RUN_NAME_KEY})."
         raise ValueError(msg)
 
     run_dir = Path(out_dir_root) / Path(run_name)
