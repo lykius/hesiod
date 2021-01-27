@@ -182,3 +182,6 @@ Have a look [here](https://github.com/lykius/hesiod-test) for a complete working
 
 ## Future development
 Hopefully, hesiod will get many new features in the next few months, stay tuned!
+
+## License
+Hesiod is licensed under the [MIT licence](https://github.com/lykius/hesiod/blob/main/LICENSE)
