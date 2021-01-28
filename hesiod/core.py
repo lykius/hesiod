@@ -1,8 +1,10 @@
 import functools
+import re
+from ast import literal_eval
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Optional, Type, TypeVar, Union, cast
+from typing import Any, Callable, List, Optional, Type, TypeVar, Union, cast
 
 from typeguard import check_type
 
@@ -221,3 +223,39 @@ def get_run_name() -> str:
         raise ValueError("Something went wrong: current run has no name.")
 
     return run_name
+
+
+def parse_args(args: List[str]) -> None:
+    """Parse the given args and add them to the global config.
+    Args are expected to be formatted as "key=value", "-key=value",
+    "--key=value", etc. "key" can be "key.subkey.subsubkey..." to
+    indicate sub configs.
+
+    Args:
+        args: the list of args to be parsed.
+    """
+    for arg in args:
+        if not bool(re.match(r"^-*[^-=]+=[^=]+$", arg)):
+            raise ValueError('Args must be in the form "key=value" with optional leading "-".')
+
+        while arg[0] == "-":
+            arg = arg[1:]
+
+        keys_pattern, value = arg.split("=")
+
+        try:
+            value = literal_eval(value)
+        except (ValueError, SyntaxError):
+            pass
+
+        keys = keys_pattern.split(".")
+        cfg = _CFG
+        for key in keys[:-1]:
+            if key not in cfg:
+                cfg[key] = {}
+            cfg = cfg[key]
+
+        last_key = keys[-1]
+        if last_key not in cfg:
+            cfg[last_key] = {}
+        cfg[last_key] = value
