@@ -227,35 +227,41 @@ def get_run_name() -> str:
 
 def parse_args(args: List[str]) -> None:
     """Parse the given args and add them to the global config.
-    Args are expected to be formatted as "key=value", "-key=value",
-    "--key=value", etc. "key" can be "key.subkey.subsubkey..." to
-    indicate sub configs.
+    Each arg is expected with the format "{prefix}{key}{sep}{value}".
+    {prefix} is optional and can be any amount of the char "-".
+    {sep} is mandatory and can be one of "=", ":".
+    {key} cannot contain the chars "-", "=" and ":".
+    {value} can contain everything.
 
     Args:
         args: the list of args to be parsed.
     """
     for arg in args:
-        if not bool(re.match(r"^-*[^-=]+=[^=]+$", arg)):
-            raise ValueError('Args must be in the form "key=value" with optional leading "-".')
+        pattern = r"^-*(?P<key>[^-=:]+)[=:]{1}(?P<value>.+)$"
+        match = re.match(pattern, arg)
 
-        while arg[0] == "-":
-            arg = arg[1:]
+        if match is None:
+            raise ValueError(f"One of the arg is in a not supported format {arg}.")
+        else:
+            while arg[0] == "-":
+                arg = arg[1:]
 
-        keys_pattern, value = arg.split("=")
+            key = match.group("key")
+            value = match.group("value")
 
-        try:
-            value = literal_eval(value)
-        except (ValueError, SyntaxError):
-            pass
+            try:
+                value = literal_eval(value)
+            except (ValueError, SyntaxError):
+                pass
 
-        keys = keys_pattern.split(".")
-        cfg = _CFG
-        for key in keys[:-1]:
-            if key not in cfg:
-                cfg[key] = {}
-            cfg = cfg[key]
+            key_splits = key.split(".")
+            cfg = _CFG
+            for key in key_splits[:-1]:
+                if key not in cfg:
+                    cfg[key] = {}
+                cfg = cfg[key]
 
-        last_key = keys[-1]
-        if last_key not in cfg:
-            cfg[last_key] = {}
-        cfg[last_key] = value
+            last_key = key_splits[-1]
+            if last_key not in cfg:
+                cfg[last_key] = {}
+            cfg[last_key] = value
