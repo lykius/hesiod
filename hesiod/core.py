@@ -1,8 +1,10 @@
 import functools
+import re
+from ast import literal_eval
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Optional, Type, TypeVar, Union, cast
+from typing import Any, Callable, List, Optional, Type, TypeVar, Union, cast
 
 from typeguard import check_type
 
@@ -221,3 +223,45 @@ def get_run_name() -> str:
         raise ValueError("Something went wrong: current run has no name.")
 
     return run_name
+
+
+def parse_args(args: List[str]) -> None:
+    """Parse the given args and add them to the global config.
+    Each arg is expected with the format "{prefix}{key}{sep}{value}".
+    {prefix} is optional and can be any amount of the char "-".
+    {sep} is mandatory and can be one of "=", ":".
+    {key} cannot contain the chars "-", "=" and ":".
+    {value} can contain everything.
+
+    Args:
+        args: the list of args to be parsed.
+    """
+    for arg in args:
+        pattern = r"^-*(?P<key>[^-=:]+)[=:]{1}(?P<value>.+)$"
+        match = re.match(pattern, arg)
+
+        if match is None:
+            raise ValueError(f"One of the arg is in a not supported format {arg}.")
+        else:
+            while arg[0] == "-":
+                arg = arg[1:]
+
+            key = match.group("key")
+            value = match.group("value")
+
+            try:
+                value = literal_eval(value)
+            except (ValueError, SyntaxError):
+                pass
+
+            key_splits = key.split(".")
+            cfg = _CFG
+            for key in key_splits[:-1]:
+                if key not in cfg:
+                    cfg[key] = {}
+                cfg = cfg[key]
+
+            last_key = key_splits[-1]
+            if last_key not in cfg:
+                cfg[last_key] = {}
+            cfg[last_key] = value

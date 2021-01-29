@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Tuple
 import pytest
 
 import hesiod.core as hcore
-from hesiod import get_cfg_copy, get_out_dir, get_run_name, hcfg, hmain
+from hesiod import get_cfg_copy, get_out_dir, get_run_name, hcfg, hmain, parse_args
 
 
 def test_args_kwargs(base_cfg_dir: Path, simple_run_file: Path) -> None:
@@ -161,5 +161,69 @@ def test_run_name(base_cfg_dir: Path, complex_run_file: Path) -> None:
     def test() -> None:
         run_name = get_run_name()
         assert run_name == "test"
+
+    test()
+
+
+def test_parse_args(base_cfg_dir: Path, simple_run_file: Path) -> None:
+    @hmain(base_cfg_dir=base_cfg_dir, run_cfg_file=simple_run_file, create_out_dir=False)
+    def test() -> None:
+        args = [
+            "group_1.param_a=5",
+            "group_1.param_c=1.2345",
+            "group_1.param_d=1e-4",
+            "group_1.param_e=False",
+            "-group_3.param_e.param_i:this is a test",
+            "--group_5=[1, 2, 3]",
+            '---group_6.subgroup.subsubgroup.subsubsubgroup:(1.2, "test", True)',
+            '----param_7=\\|!"£$%&/()=?^€[]*@#°§<>,;.:-_+=abcABC123àèìòùç',
+            "param_8:{7, 8, 9}",
+            "param_9:=value",
+            "param_10=:value",
+            "param_11==value",
+            "param_12::value",
+            "#param_13:value",
+            "!param_14=value",
+        ]
+
+        parse_args(args)
+
+        assert hcfg("group_1.param_a") == 5
+        assert hcfg("group_1.param_b") == 1.2
+        assert hcfg("group_1.param_c") == 1.2345
+        assert hcfg("group_1.param_d") == 1e-4
+        assert hcfg("group_1.param_e") is False
+        assert hcfg("group_2.param_c") is True
+        assert hcfg("group_2.param_d") == "param_d"
+        assert hcfg("group_3.param_e.param_f") == "param_f"
+        assert hcfg("group_3.param_e.param_g") == 2
+        assert hcfg("group_3.param_e.param_h") == 4.56
+        assert hcfg("group_3.param_e.param_i") == "this is a test"
+        assert hcfg("group_4") == (1, True, "test")
+        assert hcfg("group_5") == [1, 2, 3]
+        assert hcfg("group_6.subgroup.subsubgroup.subsubsubgroup") == (1.2, "test", True)
+        assert hcfg("param_7") == '\\|!"£$%&/()=?^€[]*@#°§<>,;.:-_+=abcABC123àèìòùç'
+        assert hcfg("param_8") == {7, 8, 9}
+        assert hcfg("param_9") == "=value"
+        assert hcfg("param_10") == ":value"
+        assert hcfg("param_11") == "=value"
+        assert hcfg("param_12") == ":value"
+        assert hcfg("#param_13") == "value"
+        assert hcfg("!param_14") == "value"
+
+        wrong_args = [
+            "key value",
+            "keyvalue",
+            "key-value",
+            "key_value",
+            "=",
+            ":",
+            "-=",
+            "-:",
+        ]
+
+        for arg in wrong_args:
+            with pytest.raises(ValueError):
+                parse_args([arg])
 
     test()
