@@ -52,6 +52,16 @@ jobs:
       run: |
         poetry install
         echo "PATH=$(poetry env info --path)/bin:$PATH" >> $GITHUB_ENV
+    - name: Generate coverage report
+      run: |
+        pytest --cov=hesiod/ --cov-report=xml
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage.xml
+        name: codecov-umbrella
+        fail_ci_if_error: true
     - name: Publish on PyPI
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
