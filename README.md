@@ -23,7 +23,9 @@
     <a href="https://codecov.io/gh/lykius/hesiod">
         <img src="https://codecov.io/gh/lykius/hesiod/branch/main/graph/badge.svg?token=COY51YDQE8"/>
     </a>
-    
+    <a href="https://www.codacy.com/gh/lykius/hesiod/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=lykius/hesiod&amp;utm_campaign=Badge_Grade">
+        <img src="https://app.codacy.com/project/badge/Grade/db4c5b3580744047988516213b75287c"/>
+    </a>
 </p>
 
 ## What is hesiod?
