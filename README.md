@@ -20,6 +20,10 @@
     <a href="https://github.com/lykius/hesiod">
         <img src="https://github.com/lykius/hesiod/workflows/CI/badge.svg" alt="CI" />
     </a>
+    <a href="https://codecov.io/gh/lykius/hesiod">
+        <img src="https://codecov.io/gh/lykius/hesiod/branch/main/graph/badge.svg?token=COY51YDQE8"/>
+    </a>
+    
 </p>
 
 ## What is hesiod?
