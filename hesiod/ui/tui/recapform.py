@@ -20,8 +20,8 @@ class RecapForm(BaseForm):
         """Create new form that show a recap of the run config.
 
         Args:
-            screen: the screen where the form will be displayed.
-            parent_app: the parent TUI.
+            screen: The screen where the form will be displayed.
+            parent_app: The parent TUI.
         """
         BaseForm.__init__(
             self,

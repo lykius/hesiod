@@ -33,8 +33,8 @@ class WidgetParser(ABC):
         """Check if a given string matches a pattern.
 
         Args:
-            s: the string to be checked.
-            pattern: the pattern to check.
+            s: The string to be checked.
+            pattern: The pattern to check.
 
         Returns:
             True if the given string matches the patter, False otherwise.
@@ -47,7 +47,7 @@ class WidgetParser(ABC):
         """Check if the input config can be handled by this parser.
 
         Args:
-            x: the input config.
+            x: The input config.
 
         Returns:
             True if the input config is int, float, str or list.
@@ -60,10 +60,10 @@ class WidgetParser(ABC):
         """Parse a literal config and return a list with the needed widgets.
 
         Args:
-            cfg_key: name of the config.
-            label_prefix: prefix for the name of the config.
-            cfg_value: literal value of the config.
-            base_cfg_dir: path to the base configs directory.
+            cfg_key: The name of the config.
+            label_prefix: The prefix for the name of the config.
+            cfg_value: The literal value of the config.
+            base_cfg_dir: The path to the base configs directory.
 
         Returns:
             A list with the widgets for the given config.
@@ -218,11 +218,12 @@ class BaseWidgetParser(WidgetParser):
 
     @staticmethod
     def get_files_list(dir: Path) -> List[Path]:
-        """Returns the list of files contained in the given directory
-        and in all its subdirectories.
+        """Returns the list of files contained in the given directory.
+
+        Files are searched in the given directory and in all its subdirectories.
 
         Args:
-            dir: the directory to be searched.
+            dir: The directory to be searched.
 
         Returns:
             The list of files.
@@ -327,10 +328,10 @@ class WidgetFactory:
         """Prepare widgets for a given config.
 
         Args:
-            cfg: the config.
-            base_cfg_dir: path to the base configs directory.
-            cfg_prefix: prefix for the config key of the returned widgets.
-            label_prefix: prefix for the name of the returned widgets.
+            cfg: The config.
+            base_cfg_dir: The path to the base configs directory.
+            cfg_prefix: The prefix for the config key of the returned widgets.
+            label_prefix: The prefix for the name of the returned widgets.
 
         Returns:
             The list of the widgets for the given config.
@@ -356,7 +357,7 @@ class WidgetFactory:
         """Create a recap text for a given config.
 
         Args:
-            cfg: the config to recap.
+            cfg: The config to recap.
 
         Returns:
             A list with the lines of the recap text.

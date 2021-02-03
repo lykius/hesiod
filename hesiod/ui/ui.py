@@ -13,8 +13,8 @@ class UI(ABC):
         """Create a new user interface (UI).
 
         Args:
-            template_file: path to the config template file.
-            base_cfg_dir: path to the base configs directory.
+            template_file: The path to the config template file.
+            base_cfg_dir: The path to the base configs directory.
         """
         ABC.__init__(self)
         self.template_cfg = template_cfg

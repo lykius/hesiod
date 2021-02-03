@@ -15,7 +15,7 @@ class ConfigHandler:
         """Return the proper parser given the extension of the file to parse.
 
         Args:
-            ext: the extension of the file to parse.
+            ext: The extension of the file to parse.
 
         Returns:
             The proper parser for the given extension.
@@ -35,8 +35,8 @@ class ConfigHandler:
         """Load config replacing "bases" with proper values.
 
         Args:
-            run_cfg_file: path to the run config file.
-            base_cfg_dir: path to the base configs directory.
+            run_cfg_file: The path to the run config file.
+            base_cfg_dir: The path to the base configs directory.
 
         Returns:
             The loaded config.
@@ -55,10 +55,10 @@ class ConfigHandler:
         """Load config from a given file.
 
         Args:
-            cfg_file: the file with the config.
+            cfg_file: The file with the config.
 
         Raises:
-            ValueError: if the config is not of the expected type.
+            ValueError: If the config is not of the expected type.
 
         Returns:
             The loaded config.
@@ -80,7 +80,7 @@ class ConfigHandler:
         """Load configs recursively from a given directory.
 
         Args:
-            cfg_dir: the config directory.
+            cfg_dir: The config directory.
 
         Returns:
             The loaded config.
@@ -99,6 +99,19 @@ class ConfigHandler:
 
     @staticmethod
     def load_base_cfgs(base_cfg_dir: Path) -> Dict[str, CFG_T]:
+        """Load all the base configs.
+
+        Starting from the given path, each subdir is considered a
+        base config. Then, each base config is loaded by reading
+        recursively subdirs and files. Finally all base configs
+        are saved in a global dictionary.
+
+        Args:
+            base_cfg_dir: The path with the base config directories.
+
+        Returns:
+            A dictionary with all the base configs.
+        """
         base_cfgs: Dict[str, CFG_T] = {}
         cfg_files = [p for p in base_cfg_dir.glob("*.yaml")]
         for cfg_file in cfg_files:
@@ -118,12 +131,12 @@ class ConfigHandler:
         """Replace base placeholder in a given config.
 
         Args:
-            cfg: the config with base placeholder.
-            base_cfgs: the available base configs.
-            base_key: the string used as base key.
+            cfg: The config with base placeholder.
+            base_cfgs: The available base configs.
+            base_key: The string used as base key.
 
         Raises:
-            ValueError: if it is not possible to retrieve the base config.
+            ValueError: If it is not possible to retrieve the base config.
 
         Returns:
             The config with the base placeholder replaced.
@@ -155,9 +168,9 @@ class ConfigHandler:
         """Replace all the bases in a given config recursively.
 
         Args:
-            cfg: the config to process.
-            base_cfgs: the available base configs.
-            base_key: the string used as base key.
+            cfg: The config to process.
+            base_cfgs: The available base configs.
+            base_key: The string used as base key.
 
         Returns:
             The config with all bases resolved.
@@ -180,8 +193,8 @@ class ConfigHandler:
         """Save config into the given file.
 
         Args:
-            cfg: the config to be saved.
-            cfg_file: the path to the output file.
+            cfg: The config to be saved.
+            cfg_file: The path to the output file.
         """
         parser = ConfigHandler.get_parser(cfg_file.suffix)
         parser.write_cfg(cfg, cfg_file)

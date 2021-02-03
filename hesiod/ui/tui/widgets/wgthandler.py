@@ -12,7 +12,7 @@ class WidgetHandler:
         """Create a handler for a widget.
 
         Args:
-            cfg_key: the key of the handled config.
+            cfg_key: The key of the handled config.
         """
         self.cfg_key = cfg_key
 
@@ -20,7 +20,7 @@ class WidgetHandler:
         """Extract the value from the given widget.
 
         Args:
-            widget: the widget with the value of interest.
+            widget: The widget with the value of interest.
 
         Returns:
             The value extracted from the given widget.
@@ -33,12 +33,14 @@ class WidgetHandler:
         return value
 
     def update_cfg(self, cfg: CFG_T, widget: Widget) -> CFG_T:
-        """Update the given config by adding the value extracted
+        """Update the given config with the widget value.
+
+        The given config is updated by setting the value extracted
         from the given widget in the right place.
 
         Args:
-            cfg: the config to be updated.
-            widget: the widget with the value of interest.
+            cfg: The config to be updated.
+            widget: The widget with the value of interest.
 
         Returns:
             The updated config.

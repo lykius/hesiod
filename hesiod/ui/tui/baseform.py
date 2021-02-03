@@ -26,11 +26,11 @@ class BaseForm(ABC, Frame):
         """Base class for TUI forms.
 
         Args:
-            name: the name of the form.
-            screen: the screen where the form will be displayed.
-            parent: the parent TUI.
-            previous: the name of the previous form (optional).
-            next: the name of the next form (optional).
+            name: The name of the form.
+            screen: The screen where the form will be displayed.
+            parent: The parent TUI.
+            previous: The name of the previous form (optional).
+            next: The name of the next form (optional).
         """
         ABC.__init__(self)
         Frame.__init__(

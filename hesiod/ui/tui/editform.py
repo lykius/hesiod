@@ -16,11 +16,11 @@ class EditForm(BaseForm):
     TITLE = "Edit configuration (^N: next)"
 
     def __init__(self, screen: Screen, parent: "TUI") -> None:
-        """Create new form that allows editing the run configuration.
+        """Create a new form that allows editing the run configuration.
 
         Args:
-            screen: the screen where the form will be displayed.
-            parent: the parent TUI.
+            screen: The screen where the form will be displayed.
+            parent: The parent TUI.
         """
         BaseForm.__init__(self, BaseForm.EDIT_FORM, screen, parent, next_form=BaseForm.RECAP_FORM)
         self.title = EditForm.TITLE
@@ -40,8 +40,9 @@ class EditForm(BaseForm):
         self.fix()
 
     def before_exit(self) -> None:
-        """Save the config edited by the user in the parent app
-        when exiting the form.
+        """Save the config edited by the user.
+
+        The config is saved in the parent app when exiting the form.
         """
         edited_cfg: CFG_T = {}
 
