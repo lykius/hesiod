@@ -1,5 +1,6 @@
 import functools
 import re
+import sys
 from ast import literal_eval
 from copy import deepcopy
 from datetime import datetime
@@ -20,6 +21,52 @@ RUN_NAME_STRATEGY_DATE = "date"
 RUN_NAME_DATE_FORMAT = "%Y-%m-%d-%H-%M-%S"
 
 
+def _parse_args(args: List[str]) -> None:
+    """Parse the given args and add them to the global config.
+
+    Each arg is expected with the format "{prefix}{key}{sep}{value}".
+    {prefix} is optional and can be any amount of the char "-".
+    {sep} is mandatory and can be one of "=", ":".
+    {key} cannot contain the chars "-", "=" and ":".
+    {value} can contain everything.
+
+    Args:
+        args: The list of args to be parsed.
+
+    Raises:
+        ValueError: If one of the given args is a not supported format.
+    """
+    for arg in args:
+        pattern = r"^-*(?P<key>[^-=:]+)[=:]{1}(?P<value>.+)$"
+        match = re.match(pattern, arg)
+
+        if match is None:
+            raise ValueError(f"One of the arg is in a not supported format {arg}.")
+        else:
+            while arg[0] == "-":
+                arg = arg[1:]
+
+            key = match.group("key")
+            value = match.group("value")
+
+            try:
+                value = literal_eval(value)
+            except (ValueError, SyntaxError):
+                pass
+
+            key_splits = key.split(".")
+            cfg = _CFG
+            for key in key_splits[:-1]:
+                if key not in cfg:
+                    cfg[key] = {}
+                cfg = cfg[key]
+
+            last_key = key_splits[-1]
+            if last_key not in cfg:
+                cfg[last_key] = {}
+            cfg[last_key] = value
+
+
 def _get_cfg(
     base_cfg_path: Path,
     template_cfg_path: Optional[Path],
@@ -28,12 +75,12 @@ def _get_cfg(
     """Load config either from template file or from run file.
 
     Args:
-        base_cfg_path: the path to the directory with all the config files.
-        template_cfg_path: the path to the template config file for this run (optional).
-        run_cfg_path: the path to the config file created by the user for this run (optional).
+        base_cfg_path: The path to the directory with all the config files.
+        template_cfg_path: The path to the template config file for this run.
+        run_cfg_path: The path to the config file created by the user for this run.
 
     Raises:
-        ValueError: if both template_cfg_path and run_cfg_path are None.
+        ValueError: If both template_cfg_path and run_cfg_path are None.
 
     Returns:
         The loaded config.
@@ -53,7 +100,7 @@ def _get_default_run_name(strategy: str) -> str:
     """Get a run name according the given strategy.
 
     Args:
-        strategy: the strategy to use to create the run name.
+        strategy: The strategy to use to create the run name.
 
     Returns:
         The created run name.
@@ -71,16 +118,18 @@ def _create_out_dir_and_save_run_file(
     out_dir_root: str,
     run_cfg_path: Optional[Path],
 ) -> None:
-    """Create output directory for the current run and save the run file
-    in it (if needed).
+    """Create output directory for the current run.
+
+    A new directory is created for the current run
+    and the run file is saved in it (if needed).
 
     Args:
-        cfg: the loaded config.
-        out_dir_root: root for output directories.
-        run_cfg_path: the path to the config file created by the user for this run (optional).
+        cfg: The loaded config.
+        out_dir_root: The root for output directories.
+        run_cfg_path: The path to the config file created by the user for this run.
 
     Raises:
-        ValueError: if the run name is not specified in the given config.
+        ValueError: If the run name is not specified in the given config.
     """
     run_name = cfg.get(RUN_NAME_KEY, "")
     if run_name == "":
@@ -107,6 +156,7 @@ def hmain(
     create_out_dir: bool = True,
     out_dir_root: str = "logs",
     run_name_strategy: Optional[str] = RUN_NAME_STRATEGY_DATE,
+    parse_cmd_line: bool = True,
 ) -> Callable[[FUNCTION_T], FUNCTION_T]:
     """Decorator for a given function.
 
@@ -114,17 +164,22 @@ def hmain(
     and runs the given function.
 
     Args:
-        base_cfg_dir: the path to the directory with all the config files.
-        template_cfg_file: the path to the template config file for this run (optional).
-        run_cfg_file: the path to the config file created by the user for this run (optional).
-        create_out_dir: flag that indicates whether hesiod should create an output directory or not.
-        out_dir_root: root for output directories.
-        run_name_strategy: the strategy to assign a default run name if this is
+        base_cfg_dir: The path to the directory with all the config files.
+        template_cfg_file: The path to the template config file for this run.
+        run_cfg_file: The path to the config file created by the user for this run.
+        create_out_dir: A flag that indicates whether hesiod should create
+            an output directory or not.
+        out_dir_root: The root for output directories.
+        run_name_strategy: The strategy to assign a default run name if this is
             not specified by user (available options: "date").
+        parse_cmd_line: A flag that indicates whether hesiod should parse args
+            from the command line or not.
 
     Raises:
-        ValueError: if both template_cfg_file and run_cfg_file are None.
-        ValueError: if the run name is not specified in the run file
+        ValueError: If both template_cfg_file and run_cfg_file are None.
+        ValueError: If hesiod is asked to parse the command line and one
+            of the args is in a not supported format.
+        ValueError: If the run name is not specified in the run file
             and no default strategy is specified.
 
     Returns:
@@ -141,6 +196,9 @@ def hmain(
             template_cfg_path = Path(template_cfg_file) if template_cfg_file else None
 
             _CFG = _get_cfg(bcfg_path, template_cfg_path, run_cfg_path)
+
+            if parse_cmd_line and len(sys.argv) > 1:
+                _parse_args(sys.argv[1:])
 
             run_name = _CFG.get(RUN_NAME_KEY, "")
             if run_name == "" and run_name_strategy is not None:
@@ -223,45 +281,3 @@ def get_run_name() -> str:
         raise ValueError("Something went wrong: current run has no name.")
 
     return run_name
-
-
-def parse_args(args: List[str]) -> None:
-    """Parse the given args and add them to the global config.
-    Each arg is expected with the format "{prefix}{key}{sep}{value}".
-    {prefix} is optional and can be any amount of the char "-".
-    {sep} is mandatory and can be one of "=", ":".
-    {key} cannot contain the chars "-", "=" and ":".
-    {value} can contain everything.
-
-    Args:
-        args: the list of args to be parsed.
-    """
-    for arg in args:
-        pattern = r"^-*(?P<key>[^-=:]+)[=:]{1}(?P<value>.+)$"
-        match = re.match(pattern, arg)
-
-        if match is None:
-            raise ValueError(f"One of the arg is in a not supported format {arg}.")
-        else:
-            while arg[0] == "-":
-                arg = arg[1:]
-
-            key = match.group("key")
-            value = match.group("value")
-
-            try:
-                value = literal_eval(value)
-            except (ValueError, SyntaxError):
-                pass
-
-            key_splits = key.split(".")
-            cfg = _CFG
-            for key in key_splits[:-1]:
-                if key not in cfg:
-                    cfg[key] = {}
-                cfg = cfg[key]
-
-            last_key = key_splits[-1]
-            if last_key not in cfg:
-                cfg[last_key] = {}
-            cfg[last_key] = value
