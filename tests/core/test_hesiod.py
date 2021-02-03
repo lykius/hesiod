@@ -1,4 +1,5 @@
 import shutil
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
@@ -237,5 +238,28 @@ def test_parse_args(base_cfg_dir: Path, simple_run_file: Path) -> None:
         for arg in wrong_args:
             with pytest.raises(ValueError):
                 _parse_args([arg])
+
+    test()
+
+
+def test_parse_cmd_line(base_cfg_dir: Path, complex_run_file: Path) -> None:
+    sys.argv = ["test"]
+    sys.argv.append("--dataset.classes=[4, 7, 8]")
+    sys.argv.append("--lr=1e-10")
+    sys.argv.append('--new_group.new_sub_group.new_sub_param={"t", "e", "s", "t"}')
+
+    @hmain(base_cfg_dir, run_cfg_file=complex_run_file, create_out_dir=False)
+    def test() -> None:
+        assert hcfg("dataset.name") == "cifar10"
+        assert hcfg("dataset.path") == "/path/to/cifar10"
+        assert hcfg("dataset.splits") == [70, 20, 10]
+        assert hcfg("dataset.classes") == [4, 7, 8]
+        assert hcfg("net.name") == "efficientnet"
+        assert hcfg("net.num_layers") == 20
+        assert hcfg("net.ckpt_path") == "/path/to/efficientnet"
+        assert hcfg("run_name") == "test"
+        assert hcfg("lr") == 1e-10
+        assert hcfg("optimizer") == "adam"
+        assert hcfg("new_group.new_sub_group.new_sub_param") == {"t", "e", "s", "t"}
 
     test()
