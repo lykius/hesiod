@@ -248,8 +248,7 @@ def test_parse_cmd_line(base_cfg_dir: Path, complex_run_file: Path) -> None:
     sys.argv.append("--lr=1e-10")
     sys.argv.append('--new_group.new_sub_group.new_sub_param={"t", "e", "s", "t"}')
 
-    @hmain(base_cfg_dir, run_cfg_file=complex_run_file, create_out_dir=False)
-    def test() -> None:
+    def check_cfg() -> None:
         assert hcfg("dataset.name") == "cifar10"
         assert hcfg("dataset.path") == "/path/to/cifar10"
         assert hcfg("dataset.splits") == [70, 20, 10]
@@ -262,4 +261,14 @@ def test_parse_cmd_line(base_cfg_dir: Path, complex_run_file: Path) -> None:
         assert hcfg("optimizer") == "adam"
         assert hcfg("new_group.new_sub_group.new_sub_param") == {"t", "e", "s", "t"}
 
-    test()
+    @hmain(base_cfg_dir, run_cfg_file=complex_run_file)
+    def test1() -> None:
+        check_cfg()
+
+    @hmain(base_cfg_dir, run_cfg_file="logs/test/run.yaml", parse_cmd_line=False)
+    def test2() -> None:
+        check_cfg()
+
+    test1()
+    test2()
+    shutil.rmtree("logs")
