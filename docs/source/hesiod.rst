@@ -1,3 +1,6 @@
+hesiod API
+==========
+
 .. automodule:: hesiod
    :members:
    :undoc-members:

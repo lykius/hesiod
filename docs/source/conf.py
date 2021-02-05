@@ -3,7 +3,7 @@ from pathlib import Path
 
 from hesiod import __version__
 
-hesiod_path = Path("/home/ldeluigi/dev/hesiod/hesiod")
+hesiod_path = Path("../hesiod")
 sys.path.append(str(hesiod_path.absolute()))
 
 project = "Hesiod"
@@ -17,9 +17,8 @@ extensions = [
 ]
 napoleon_google_docstring = True
 
-templates_path = ["_templates"]
-
 exclude_patterns = []
 
-html_theme = "alabaster"
 html_static_path = ["_static"]
+templates_path = ["_templates"]
+html_theme = "sphinx_rtd_theme"
