@@ -1,10 +1,10 @@
 import sys
 from pathlib import Path
 
-from hesiod import __version__
-
 hesiod_path = Path("../hesiod")
 sys.path.append(str(hesiod_path.absolute()))
+
+from hesiod import __version__
 
 project = "Hesiod"
 copyright = "2021, Luca De Luigi"
