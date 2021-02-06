@@ -215,19 +215,19 @@ class BaseWidgetParser(WidgetParser):
         return isinstance(x, str) and WidgetParser.match(x, WidgetParser.BASE_PATTERN)
 
     @staticmethod
-    def get_files_list(dir: Path) -> List[Path]:
+    def get_files_list(dir_path: Path) -> List[Path]:
         """Returns the list of files contained in the given directory.
 
         Files are searched in the given directory and in all its subdirectories.
 
         Args:
-            dir: The directory to be searched.
+            dir_path: The directory to be searched.
 
         Returns:
             The list of files.
         """
         files: List[Path] = []
-        children = [p for p in dir.glob("*")]
+        children = [p for p in dir_path.glob("*")]
         for p in children:
             if p.is_file():
                 files.append(p)
