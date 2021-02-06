@@ -14,7 +14,6 @@ class ConfigParser(ABC):
         Returns:
             List of the managed extensions.
         """
-        ...
 
     @staticmethod
     @abstractmethod
@@ -27,7 +26,6 @@ class ConfigParser(ABC):
         Returns:
             The config read from the given file.
         """
-        ...
 
     @staticmethod
     @abstractmethod
@@ -38,4 +36,3 @@ class ConfigParser(ABC):
             cfg: The config to be saved.
             cfg_file: The path to the output file.
         """
-        ...

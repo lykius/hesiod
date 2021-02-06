@@ -156,7 +156,6 @@ class CustomFileBrowser(Widget):
 
     def reset(self) -> None:
         """Reset the widget."""
-        pass
 
     def process_event(self, event: Optional[Event]) -> Optional[Event]:
         """Process either a keyboard or a mouse event. If the user pressed

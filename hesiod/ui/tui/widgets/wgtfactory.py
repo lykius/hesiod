@@ -52,7 +52,6 @@ class WidgetParser(ABC):
         Returns:
             True if the input config is int, float, str or list.
         """
-        ...
 
     @staticmethod
     @abstractmethod
@@ -68,7 +67,6 @@ class WidgetParser(ABC):
         Returns:
             A list with the widgets for the given config.
         """
-        ...
 
 
 class LiteralWidgetParser(WidgetParser):

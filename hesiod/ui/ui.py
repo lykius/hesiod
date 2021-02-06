@@ -22,4 +22,8 @@ class UI(ABC):
 
     @abstractmethod
     def show(self) -> CFG_T:
-        ...
+        """Show the UI.
+
+        Returns:
+            The run configuration selected by the user.
+        """

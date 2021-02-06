@@ -50,11 +50,9 @@ class BaseForm(ABC, Frame):
     @abstractmethod
     def draw(self) -> None:
         """Draw the form, adding the needed widgets."""
-        ...
 
     def refresh(self) -> None:
         """Refresh the form."""
-        pass
 
     def process_event(self, event: Union[MouseEvent, KeyboardEvent]) -> None:
         """Process either a mouse or a keyboard event.
@@ -64,17 +62,16 @@ class BaseForm(ABC, Frame):
         """
         if isinstance(event, KeyboardEvent):
             if event.key_code == Screen.ctrl("n"):
-                self.next()
+                self.move_next()
             elif event.key_code == Screen.ctrl("b") and self.previous_form is not None:
-                self.back()
+                self.move_back()
         Frame.process_event(self, event)
 
     @abstractmethod
     def before_exit(self) -> None:
         """Perform final operations when exiting the form."""
-        ...
 
-    def next(self) -> None:
+    def move_next(self) -> None:
         """Exit this form and move to the next one."""
         self.before_exit()
         if self.next_form is not None:
@@ -82,7 +79,7 @@ class BaseForm(ABC, Frame):
         else:
             raise StopApplication("Stop")
 
-    def back(self) -> None:
+    def move_back(self) -> None:
         """Move to the previous form."""
         if self.previous_form is not None:
             raise NextScene(self.previous_form)
