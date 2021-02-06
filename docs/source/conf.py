@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-hesiod_path = Path("../../hesiod")
+hesiod_path = Path("../..")
 sys.path.append(str(hesiod_path.absolute()))
 
 from hesiod import __version__
