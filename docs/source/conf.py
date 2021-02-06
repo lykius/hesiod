@@ -1,15 +1,11 @@
 import sys
 from pathlib import Path
 
-hesiod_path = Path("../..")
-sys.path.append(str(hesiod_path.absolute()))
-
-from hesiod import __version__
+sys.path.append(str(Path("../..").absolute()))
 
 project = "Hesiod"
 copyright = "2021, Luca De Luigi"
 author = "Luca De Luigi"
-release = __version__
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -22,3 +18,5 @@ exclude_patterns = []
 html_static_path = ["_static"]
 templates_path = ["_templates"]
 html_theme = "sphinx_rtd_theme"
+
+release = "0.3.1"
