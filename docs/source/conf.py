@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+print("current dir:", str(Path(".").absolute()))
+
 hesiod_path = Path("../hesiod")
 sys.path.append(str(hesiod_path.absolute()))
 
