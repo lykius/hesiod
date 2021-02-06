@@ -17,6 +17,8 @@
     <a href="http://mypy-lang.org/">
         <img src="http://www.mypy-lang.org/static/mypy_badge.svg" alt="mypy checked" />
     </a>
+</p>
+<p align="center">
     <a href="https://github.com/lykius/hesiod">
         <img src="https://github.com/lykius/hesiod/workflows/CI/badge.svg" alt="CI" />
     </a>
