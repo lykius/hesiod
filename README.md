@@ -26,6 +26,9 @@
     <a href="https://www.codacy.com/gh/lykius/hesiod/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=lykius/hesiod&amp;utm_campaign=Badge_Grade">
         <img src="https://app.codacy.com/project/badge/Grade/db4c5b3580744047988516213b75287c"/>
     </a>
+    <a href='https://hesiod.readthedocs.io/en/latest/?badge=latest'>
+        <img src='https://readthedocs.org/projects/hesiod/badge/?version=latest' alt='Documentation Status' />
+    </a>
 </p>
 
 ## What is hesiod?
