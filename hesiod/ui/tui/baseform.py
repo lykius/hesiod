@@ -50,7 +50,7 @@ class BaseForm(ABC, Frame):
     @abstractmethod
     def draw(self) -> None:
         """Draw the form, adding the needed widgets."""
-        pass
+        ...
 
     def refresh(self) -> None:
         """Refresh the form."""
@@ -72,7 +72,7 @@ class BaseForm(ABC, Frame):
     @abstractmethod
     def before_exit(self) -> None:
         """Perform final operations when exiting the form."""
-        pass
+        ...
 
     def next(self) -> None:
         """Exit this form and move to the next one."""
