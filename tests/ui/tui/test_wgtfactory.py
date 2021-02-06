@@ -95,7 +95,7 @@ def test_file_widget_parser(simple_template_file: Path) -> None:
             assert handler.cfg_key == cfg[0]
             assert widget.label == f"{prefix}{cfg[0]} {FileWidgetParser.HINT}:"
             assert isinstance(widget, CustomFileBrowser)
-            assert cast(CustomFileBrowser, widget).value == cfg[3]
+            assert widget.value == cfg[3]
 
 
 def test_bool_widget_parser() -> None:
@@ -180,7 +180,7 @@ def test_base_widget_parser(base_cfg_dir: Path) -> None:
             assert widget.label == prefix + cfg[0] + " " + BaseWidgetParser.HINT + ":"
             assert isinstance(widget, CustomDropdownList)
             expected_options = [(option, i) for i, option in enumerate(sorted(cfg[3]))]
-            assert cast(CustomDropdownList, widget).options == expected_options
+            assert widget.options == expected_options
 
 
 def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
@@ -278,6 +278,7 @@ def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
         if expected[i][0] is None:
             assert handler is None
         else:
+            assert handler is not None
             assert isinstance(handler, expected[i][0])
             assert handler.cfg_key == expected[i][1]
         label = widget.text if isinstance(widget, Label) else widget.label

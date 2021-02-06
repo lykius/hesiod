@@ -158,7 +158,7 @@ def hmain(
     run_name_strategy: Optional[str] = RUN_NAME_STRATEGY_DATE,
     parse_cmd_line: bool = True,
 ) -> Callable[[FUNCTION_T], FUNCTION_T]:
-    """Decorator for a given function.
+    """Hesiod decorator for a given function.
 
     The decorator loads the configuration with the right parser
     and runs the given function.
@@ -183,7 +183,7 @@ def hmain(
             and no default strategy is specified.
 
     Returns:
-        Function wrapped in the decorator.
+        The given function wrapped in hesiod decorator.
     """
 
     def decorator(fn: FUNCTION_T) -> FUNCTION_T:
@@ -227,11 +227,11 @@ def hcfg(name: str, t: Optional[Type[T]] = None) -> T:
     """Get the requested parameter from global configuration.
 
     Args:
-        name: name of the parameter.
-        t: type of the parameter.
+        name: The name of the required parameter.
+        t: The type of the required parameter.
 
     Raises:
-        TypeError: if the requested parameter is not of the required type.
+        TypeError: If the requested parameter is not of the required type.
 
     Returns:
         The requested parameter.
@@ -258,10 +258,10 @@ def get_cfg_copy() -> CFG_T:
 
 
 def get_out_dir() -> Path:
-    """Get path to the output directory for the current run.
+    """Get the path to the output directory for the current run.
 
     Returns:
-        Path to the output directory.
+        he path to the output directory.
     """
     out_dir = deepcopy(_CFG[OUT_DIR_KEY])
     return Path(out_dir)
@@ -271,7 +271,7 @@ def get_run_name() -> str:
     """Get the name of the current run.
 
     Raises:
-        ValueError: if the current run has no name (it should never happen).
+        ValueError: If the current run has no name (it should never happen).
 
     Returns:
         The name of the current run.
