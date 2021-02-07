@@ -15,7 +15,6 @@ napoleon_google_docstring = True
 
 exclude_patterns = []
 
-html_static_path = ["_static"]
 templates_path = ["_templates"]
 html_theme = "sphinx_rtd_theme"
 

@@ -261,7 +261,7 @@ def get_out_dir() -> Path:
     """Get the path to the output directory for the current run.
 
     Returns:
-        he path to the output directory.
+        The path to the output directory.
     """
     out_dir = deepcopy(_CFG[OUT_DIR_KEY])
     return Path(out_dir)

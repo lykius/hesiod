@@ -7,4 +7,6 @@
 
     intro
     quickstart
+    config
+    usage
     hesiod

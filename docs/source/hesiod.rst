@@ -1,4 +1,4 @@
-hesiod API
+Hesiod API
 ==========
 
 .. automodule:: hesiod
