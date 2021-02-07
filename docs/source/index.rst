@@ -1,5 +1,5 @@
 .. image:: ../../images/hesiod.svg
-    :width: 800
+    :width: 100%
 
 .. toctree::
     :caption: Table of Contents

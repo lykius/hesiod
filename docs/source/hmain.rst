@@ -1,2 +1,0 @@
-The hmain decorator
-===================

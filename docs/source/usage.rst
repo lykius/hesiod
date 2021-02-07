@@ -1,9 +1,15 @@
+############
 Hesiod usage
-============
+############
 
-.. toctree::
-    :maxdepth: 2
+*******************
+The hmain decorator
+*******************
 
-    hmain
-    hcfg
-    utilities
+*****************
+The hcfg function
+*****************
+
+*********
+Utilities
+*********

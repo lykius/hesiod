@@ -1,9 +1,16 @@
+############
 Config Files
-============
+############
 
-.. toctree::
-    :maxdepth: 2
+********************
+Config files content
+********************
 
-    config_content
-    base
-    run_vs_template
+******************
+The base mechanism
+******************
+.. _base-mechanism:
+
+***************************
+Run files vs Template files
+***************************
