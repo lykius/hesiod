@@ -105,7 +105,7 @@ for the run. Your main file could be something like:
 
     from hesiod import hmain
 
-    @hmain(base_cfg_dir="./cfg", run_cfg_file"./run.yaml")
+    @hmain(base_cfg_dir="./cfg", run_cfg_file="./run.yaml")
     def main():
         # do some fancy stuff
         ...
@@ -161,6 +161,13 @@ by casting the returned value to the proper type. You can use the ``hcfg()`` fun
 Template files
 **************
 
+So far, we have seen that it is possible to define a **run** file for each run of your program.
+This allows to separate your configs from your code, but it's not very flexible and, most
+importantly, it requires you to prepare run files manually for every run, which is tedious
+and error prone. To overcome these limitations, Hesiod introduces the concept of **template**
+config files, where you define a generic structure for your config, without specifying the actual
+values that will be used in every run. A valid **template** file for our example could be:
+
 .. code-block:: yaml
 
     # template.yaml
@@ -172,13 +179,22 @@ Template files
     p2: 2.3
     p3: "test"
 
+As you may see, in the **template** file you can use special **placeholders** to define,
+for instance, that a specific config (e.g. dataset) will be selected among the bases contained
+in the base directory "dataset". By doing that, you can define the generic structure of the configs
+needed in your program, postponing the selection of specific values to the moment in which the
+program will be executed.
+
+To use a **template** config file, instead of a **run** file, you need to make a small change
+to the args passed to ``hmain``:
+
 .. code-block:: python
 
     # main.py
 
     from hesiod import hmain
 
-    @hmain(base_cfg_dir="./cfg", template_cfg_file"./template.yaml")
+    @hmain(base_cfg_dir="./cfg", template_cfg_file="./template.yaml")
     def main():
         # do some fancy stuff
         ...
@@ -186,18 +202,39 @@ Template files
     if __name__ == "__main__":
         main()
 
+At this point, you may say "this sounds interesting, but how do I specify the actual values for a
+run of my program when using template files?". Well, bear with me and keep reading.
+
 *******************************
 TUI (Text-based User Interface)
 *******************************
+
+When you run ``main.py``, you will be presented with a Text-based User Interface (TUI), where
+you will be able to fill with actual values the config specified in the template file:
 
 .. image:: ../../images/edit1.png
     :width: 80%
     :align: center
 
+Depending on how you specified configs in the template file, you can fill values with different
+modalities. If you used the ``@BASE`` decorator (like we did for dataset, net and params), Hesiod
+will load all the possibility for each base and, for example, if you press ``ENTER`` on the field
+"net" you will be able to select among "efficientnet" and "resnet101":
+
 .. image:: ../../images/edit2.png
     :width: 80%
     :align: center
 
+When you are done editing and selecting values for all your configs, you can press ``CTRL+N`` and
+Hesiod will show you a recap of the whole config.
+
 .. image:: ../../images/recap.png
     :width: 80%
     :align: center
+
+If you spot something wrong, you can go back and edit the configs by pressing ``CTRL+B``.
+Otherwise, you can insert a name for this specific run and press ``CTRL+N`` to close the TUI. 
+Hesiod will conclude its execution, as always, by creating an output directory for the current run,
+named as you requested, and by saving in this directory a single ``.yaml`` file with the completely
+specified version of the config of the run. The control goes now back to your program, where you
+will be able to access configs in the exact same way as stated above.
