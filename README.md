@@ -29,7 +29,7 @@
         <img src="https://app.codacy.com/project/badge/Grade/db4c5b3580744047988516213b75287c"/>
     </a>
     <a href='https://hesiod.readthedocs.io/en/latest/?badge=latest'>
-        <img src='https://readthedocs.org/projects/hesiod/badge/?version=latest' alt='Documentation Status' />
+        <img src='https://hesiod.readthedocs.io/en/latest/' alt='Documentation Status' />
     </a>
 </p>
 
