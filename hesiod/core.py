@@ -158,22 +158,40 @@ def hmain(
     run_name_strategy: Optional[str] = RUN_NAME_STRATEGY_DATE,
     parse_cmd_line: bool = True,
 ) -> Callable[[FUNCTION_T], FUNCTION_T]:
-    """Hesiod decorator for a given function.
+    """Hesiod decorator for a given function (typically the main).
 
-    The decorator loads the configuration with the right parser
-    and runs the given function.
+    ``hmain`` should be used with only one between ``run_cfg_file`` and ``template_cfg_file``.
+    If ``run_cfg_file`` is passed, Hesiod will just load the given run file; otherwise,
+    if ``template_cfg_file`` is passed, Hesiod will create a Text-based User Interface (TUI)
+    to ask the user to fill/select the values in the given template config.
+
+    The ``hmain`` decorator loads the configuration with the right parser (either using the TUI
+    or not) and runs the decorated function.
+
+    Before giving the control back to the decorated function, Hesiod creates a directory named as
+    the run inside ``out_dir_root`` and saves the loaded config in a single file in it. This can be
+    disabled with the argument ``create_out_dir``. The default value for ``out_dir_root`` is ``logs``.
+
+    If the run has no name (either because it is not provided in the run file or it is not inserted
+    by the user in the TUI), Hesiod will try to name it according to the ``run_name_strategy``, if
+    given. ``run_name_strategy`` default is "date" and runs will be named with the date and time
+    formatted as "YYYY-MM-DD-hh-mm-ss".
+
+    By default, Hesiod parses command line arguments to add/override config values. This can be
+    disabled with the argument ``parse_cmd_line``.
 
     Args:
-        base_cfg_dir: The path to the directory with all the config files.
-        template_cfg_file: The path to the template config file for this run.
-        run_cfg_file: The path to the config file created by the user for this run.
+        base_cfg_dir: The path to the directory with all the base config files.
+        template_cfg_file: The path to the template config file (optional).
+        run_cfg_file: The path to the run config file created by the user
+            for this run (optional).
         create_out_dir: A flag that indicates whether hesiod should create
-            an output directory or not.
-        out_dir_root: The root for output directories.
+            an output directory for the run or not (default: True).
+        out_dir_root: The root for output directories (default: "logs").
         run_name_strategy: The strategy to assign a default run name if this is
-            not specified by user (available options: "date").
+            not specified by user (available options: "date", default: "date").
         parse_cmd_line: A flag that indicates whether hesiod should parse args
-            from the command line or not.
+            from the command line or not (default: True).
 
     Raises:
         ValueError: If both template_cfg_file and run_cfg_file are None.
