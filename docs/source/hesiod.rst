@@ -1,6 +1,7 @@
 ##########
 Hesiod API
 ##########
+.. _api:
 
 .. automodule:: hesiod
    :members:

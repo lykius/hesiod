@@ -1,6 +1,7 @@
 ############
 Config files
 ############
+.. _configs:
 
 Hesiod relies on config files, allowing you to create the config for your program with two simple
 concepts:
