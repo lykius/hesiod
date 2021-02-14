@@ -26,7 +26,7 @@ files and you can write anything that is compliant with the `YAML <https://yaml.
     p5: "test"  # string
     p6: [1, 2, 3]  # list
     p7: !!python/tuple [1, 2, 3]  # tuple
-    p8: !!set {1: null, 2: null, 3: null}  # set (yes, this is how to define a python set in YAML)
+    p8: !!set {1: null, 2: null, 3: null}  # set (yes, this is a python set in YAML)
     p9: 2021-01-01  # date
     p10:  # dictionary that contains...
       p11:  # ...another dictionary that contains...

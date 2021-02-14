@@ -174,8 +174,8 @@ def hmain(
 
     If the run has no name (either because it is not provided in the run file or it is not inserted
     by the user in the TUI), Hesiod will try to name it according to the ``run_name_strategy``, if
-    given. ``run_name_strategy`` default is "date" and runs will be named with the date and time
-    formatted as "YYYY-MM-DD-hh-mm-ss".
+    given. ``run_name_strategy`` default is "date", meaning that runs will be named with the date
+    and time formatted as "YYYY-MM-DD-hh-mm-ss".
 
     By default, Hesiod parses command line arguments to add/override config values. This can be
     disabled with the argument ``parse_cmd_line``.
