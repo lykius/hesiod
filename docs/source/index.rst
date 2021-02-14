@@ -1,3 +1,8 @@
+########
+Welcome!
+########
+
+
 .. image:: ../../images/hesiod.svg
     :width: 100%
 

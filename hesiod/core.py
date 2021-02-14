@@ -26,9 +26,9 @@ def _parse_args(args: List[str]) -> None:
 
     Each arg is expected with the format "{prefix}{key}{sep}{value}".
     {prefix} is optional and can be any amount of the char "-".
+    {key} is a string but cannot contain the chars "-", "=" and ":".
     {sep} is mandatory and can be one of "=", ":".
-    {key} cannot contain the chars "-", "=" and ":".
-    {value} can contain everything.
+    {value} is a string that can contain everything.
 
     Args:
         args: The list of args to be parsed.
@@ -242,14 +242,24 @@ def hmain(
 
 
 def hcfg(name: str, t: Optional[Type[T]] = None) -> T:
-    """Get the requested parameter from global configuration.
+    """Get the requested parameter from the global configuration.
+
+    The ``name`` argument is used to identify the requested parameter.
+    It can be a composition of keys and subkeys separated by dots
+    (as in ``key.subkey.subsubkey...``), if the requested parameter comes
+    from nested config dictionaries.
+
+    The ``t`` argument is optional and represents the expected Type of the
+    requested parameter. If given, it allows Hesiod to check that the requested
+    parameter is of the expected type. Furthermore, it enables proper code
+    completion, static type checking and similar stuff.
 
     Args:
         name: The name of the required parameter.
-        t: The type of the required parameter.
+        t: The expected type of the required parameter (optional).
 
     Raises:
-        TypeError: If the requested parameter is not of the required type.
+        TypeError: If ``t`` is not None and the requested parameter is not of the expected type.
 
     Returns:
         The requested parameter.
@@ -289,7 +299,9 @@ def get_run_name() -> str:
     """Get the name of the current run.
 
     Raises:
-        ValueError: If the current run has no name (it should never happen).
+        ValueError: If the current run has no name. If this happens, something went wrong
+            in the Hesiod protocol. The most likely cause for this error is ``get_run_name()``
+            being called before that a function wrapped in ``hmain`` is called.
 
     Returns:
         The name of the current run.

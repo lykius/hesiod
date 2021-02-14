@@ -26,7 +26,7 @@ files and you can write anything that is compliant with the `YAML <https://yaml.
     p5: "test"  # string
     p6: [1, 2, 3]  # list
     p7: !!python/tuple [1, 2, 3]  # tuple
-    p8: !!set {1: null, 2: null, 3: null}  # set
+    p8: !!set {1: null, 2: null, 3: null}  # set (yes, this is how to define a python set in YAML)
     p9: 2021-01-01  # date
     p10:  # dictionary that contains...
       p11:  # ...another dictionary that contains...
@@ -43,8 +43,7 @@ The base mechanism
 
 One of the key elements in Hesiod is the **base mechanism**, triggered by the use of
 the special keyword ``base``. The first step to use the base mechanism consists in defining base
-configs in a directory of your choice. This directory could be something like this ("scenario1",
-"case1", "case2", "scenario2", etc. are just examples, they can be whatever you like)::
+configs in a directory of your choice. This directory could be something like this::
 
     cfg/bases
     |
@@ -62,8 +61,10 @@ configs in a directory of your choice. This directory could be something like th
          |
          |____ ...
 
-You tell Hesiod where it can find your base configs by specifying the path to the
-bases directory in the ``hmain`` decorator (i.e. ``@hmain(base_cfg_dir="cfg/bases", ...)``).
+Please, note that "scenario1", "case1", "case2", "scenario2", etc. are just examples, they can be
+whatever you need for your application. You tell Hesiod where it can find your base configs by
+specifying the path to the bases directory in the ``hmain`` decorator
+(i.e. ``@hmain(base_cfg_dir="cfg/bases", ...)``).
 
 Then, you can use the keyword ``base`` to load in the current file the config dictionary defined in
 some base file. For instance, if we have:
@@ -136,14 +137,14 @@ an output directory for the run (named accordingly).
 Template files
 ==============
 
-**Run** files allows you to separate configs from your code, but are not very flexible and, most
+**Run** files allow you to separate configs from your code, but are not very flexible and, most
 importantly, require you to prepare run files manually for each run, which is tedious and error
 prone. To overcome these limitations, Hesiod introduces the concept of **template**
 config files, where you define a generic structure for your config, without specifying the actual
 values that will be used in every run.
 
-**Template** files can contain all the options available for normal config files. In addition,
-there are some special placeholders:
+**Template** files can contain all the options available for normal config files (we will call them
+*literal* configs in the following). In addition, there are some special placeholders:
 
 .. list-table::
     :widths: 20 80
@@ -185,8 +186,8 @@ with a TUI widget, whose kind depends on the config itself.
 Literal configs
 ---------------
 
-Literal configs are configs in the form ``key: value``, where key is a string and value is also a
-string that can represent any literal value (integers, floats, booleans, tuples, lists, ecc.).
+Literal configs are configs in the form ``key: value``, where key is a string and value is any
+literal value (integers, floats, booleans, tuples, lists, ecc.).
 These configs are treated as plain strings in the TUI, so that you can edit value in any way you
 want. Hesiod will process the final value with the python interpreter and will cast it to a proper
 type if the interpreter recognizes it as such.
@@ -288,7 +289,7 @@ widget like this:
 
 Configs that use the ``@DATE`` placeholder are either in the form ``key: "@DATE"`` or in the form
 ``key: "@DATE(default)"``, where key is a string and the optional value between parenthesis is the
-default date for the config. The default date can be either "today" or a date in the format
+default date for the config. The default date can be either ``today`` or a date in the format
 ``YYYY-MM-DD`` (e.g. 2021-01-11).
 
 If you write ``param: "@DATE(2021-01-11)"`` in your template file, you will be presented with the

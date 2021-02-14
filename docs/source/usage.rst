@@ -2,8 +2,8 @@
 Hesiod usage
 ############
 
-Once that you have understood how to define the configs for your program (see :ref:`here <configs>`),
-you need to understand just three simple mechanisms:
+Once that you have understood how to :ref:`define the configs <configs>` for your program, you need
+to understand just three simple mechanisms:
 
 1. How to connect your program with Hesiod.
 2. How to get configs loaded by Hesiod in your program.
@@ -50,14 +50,26 @@ Hesiod needs a name for each run. There are two options to name a run:
 1. Enter a name in the field ``run_name`` of the config (this must be done manually when using
    run files or in the TUI when using template files).
 2. Leave the ``run_name`` field empty and Hesiod will name the run according to a default strategy
-   (the strategy can be changed with one of ``hmain`` arguments).
+   (the strategy can be selected among the predefined ones with the argument ``run_name_strategy``
+   of ``hmain``).
+
+Output directories
+==================
 
 In any case, when you run ``main.py``, Hesiod will load the config (either showing the TUI or not)
 and will save it in a new directory created by Hesiod itself for the current run. The directory is
 created inside a parent directory and is named as the run (the default parent directory is ``logs``
-but can be changed with one of ``hmain`` arguments). The creation of an output directory for
-each run and the saving of the config in it is enabled by default but can be disabled with one of
-``hmain`` arguments.
+but can be changed with the argument ``out_dir_root`` of ``hmain``). The creation of an output
+directory for each run and the saving of the config in it is enabled by default but can be disabled
+with the argument ``create_out_dir`` of ``hmain``.
+
+If you want to restore a previous run, without creating a new output directory, you can just pass
+in the ``run_cfg_file`` argument of ``hmain`` the path to the run file created previously by Hesiod
+for the run of interest. Hesiod will understand that you are restoring a previous run and will simply
+load the config, without creating any new file or directory.
+
+Command line arguments
+======================
 
 One final thing to consider when using Hesiod is that, when you run ``main.py``, command line
 arguments will be parsed to add new config values or to override existing ones. This is particularly
@@ -68,9 +80,9 @@ automatic system to run your program with many different configs combinations (e
 Configs passed on the command line must be in the format ``{prefix}{key}{sep}{value}``:
 
 * ``{prefix}`` is optional and can be any amount of the char "-".
+* ``{key}`` is a string but cannot contain the chars "-", "=" and ":".
 * ``{sep}`` is mandatory and can be one of "=", ":".
-* ``{key}`` cannot contain the chars "-", "=" and ":".
-* ``{value}`` can contain everything.
+* ``{value}`` is a string that can contain everything.
 
 For instance, let's consider the following run file:
 
@@ -108,8 +120,8 @@ You will get a config like this:
     c: False
     d: [1, 2, 3]
 
-As usual, if you need to disable the parsing of command line arguments, you can do it
-with one of ``hmain`` arguments.
+If you need to disable the parsing of command line arguments, you can do it with the argument
+``parse_cmd_line`` of ``hmain``.
 
 More details on ``hmain`` can be found :ref:`here <api>`.
 
@@ -117,8 +129,8 @@ More details on ``hmain`` can be found :ref:`here <api>`.
 The hcfg function
 *****************
 
-So far, we have discussed how to connect Hesiod with your program, in order to allow it to load
-properly the config. But how it is possibile to access the config loaded by Hesiod? The answer is the
+So far we have discussed how to connect Hesiod with your program, in order to allow it to load
+properly the config. But how is it possibile to access the config loaded by Hesiod? The answer is the
 function ``hcfg``, which allows you to get a value from your config **anywhere** in the code, without
 passing around the whole config to every function and object.
 
@@ -161,7 +173,7 @@ Optionally, you can pass a ``Type`` to ``hcfg``, enabling two things:
 1. Hesiod will check that the required config is of the required type and will raise an error if
    that's not the case.
 2. The code linter will know the type of the returned config and you will be able to exploit code
-   completion and similar stuff.
+   completion, type checking and similar stuff.
 
 Reusing the above example, we can do something like this:
 
@@ -200,4 +212,4 @@ Hesiod provides some utility functions, summarized in the following table.
     * - ``get_run_name()``
       - Returns the name of the current run.
 
-See :ref:`here <api>` for additional details.
+See :ref:`the API documentation <api>` for additional details.

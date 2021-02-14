@@ -9,7 +9,9 @@ Config files
 ************
 
 Imagine that you write some python program where you need a dataset, a neural network 
-and other parameters. Each run of your program will use a different dataset or a different 
+and other parameters. Don't worry if you're not familiar with these terms, their just *entities*
+used in your program and you can adapt this example to many different scenarios. For the sake of our
+example, let's say that each run of your program will use a different dataset or a different 
 network or different parameters. To achieve this, you can write a config file for each element 
 and organize them in a hierarchy of directories, something like this::
 
@@ -218,7 +220,7 @@ you will be able to fill with actual values the config specified in the template
 
 Depending on how you specified configs in the template file, you can fill values with different
 modalities. If you used the ``@BASE`` decorator (like we did for dataset, net and params), Hesiod
-will load all the possibility for each base and, for example, if you press ``ENTER`` on the field
+will load all the possibilities for each base. For example, if you press ``ENTER`` on the field
 "net" you will be able to select among "efficientnet" and "resnet101":
 
 .. image:: ../../images/edit2.png
