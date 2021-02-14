@@ -1,7 +1,8 @@
+.. _configs:
+
 ############
 Config files
 ############
-.. _configs:
 
 Hesiod relies on config files, allowing you to create the config for your program with two simple
 concepts:
@@ -34,10 +35,11 @@ files and you can write anything that is compliant with the `YAML <https://yaml.
         p14: 12.0  # ...a float
 
 
+.. _base-mechanism:
+
 ******************
 The base mechanism
 ******************
-.. _base-mechanism:
 
 One of the key elements in Hesiod is the **base mechanism**, triggered by the use of
 the special keyword ``base``. The first step to use the base mechanism consists in defining base
@@ -92,6 +94,8 @@ Hesiod will solve the ``base`` keyword in ``config.yaml`` by loading in it the c
     p1: 1
     p2: 2.0
     p3: 3.456
+
+.. _run_vs_template:
 
 ***************************
 Run files vs Template files
