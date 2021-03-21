@@ -15,7 +15,7 @@ example, let's say that each run of your program will use a different dataset or
 network or different parameters. To achieve this, you can write a config file for each element 
 and organize them in a hierarchy of directories, something like this::
 
-    cfg
+    cfg/bases
     |____ dataset
     |    |
     |    |____ cifar.yaml    
@@ -35,31 +35,31 @@ Each ``.yaml`` file contains the specific config for that element, for instance:
 
 .. code-block:: yaml
 
-    # cfg/dataset/cifar.yaml
+    # cfg/bases/dataset/cifar.yaml
     name: "cifar10"
     path: "/path/to/cifar10"
     splits: [70, 20, 10]
 
-    # cfg/dataset/imagenet.yaml
+    # cfg/bases/dataset/imagenet.yaml
     name: "imagenet"
     path: "/path/to/imagenet"
     splits: [80, 10, 10]
 
-    # cfg/net/resnet101.yaml
+    # cfg/bases/net/resnet101.yaml
     name: "resnet101"
     num_layers: 101
     ckpt_path: "/path/to/resnet101"
 
-    # cfg/net/efficientnet.yaml
+    # cfg/bases/net/efficientnet.yaml
     name: "efficientnet"
     num_layers: 20
     ckpt_path: "/path/to/efficientnet"
 
-    # cfg/params/training.yaml
+    # cfg/bases/params/training.yaml
     optimizer: "SGD"
     lr: 1e-4
 
-    # cfg/params/test.yaml
+    # cfg/bases/params/test.yaml
     metric: "accuracy"
     times: 10
 
@@ -72,7 +72,7 @@ what you intend to do in a specific run. For instance, you could do something li
 
 .. code-block:: yaml
 
-    # run.yaml
+    # cfg/run.yaml
 
     dataset:
         base: "dataset.cifar"
@@ -107,7 +107,7 @@ for the run. Your main file could be something like:
 
     from hesiod import hmain
 
-    @hmain(base_cfg_dir="./cfg", run_cfg_file="./run.yaml")
+    @hmain(base_cfg_dir="./cfg/bases", run_cfg_file="./cfg/run.yaml")
     def main():
         # do some fancy stuff
         ...
@@ -172,7 +172,7 @@ values that will be used in every run. A valid **template** file for our example
 
 .. code-block:: yaml
 
-    # template.yaml
+    # cfg/template.yaml
 
     dataset: "@BASE(dataset)"  # every run will need a dataset...
     net: "@BASE(net)"          # ...and a network...
@@ -183,7 +183,7 @@ values that will be used in every run. A valid **template** file for our example
 
 As you may see, in the **template** file you can use special **placeholders** to define,
 for instance, that a specific config (e.g. dataset) will be selected among the bases contained
-in the base directory "dataset". By doing that, you can define the generic structure of the configs
+in the base directory ``dataset``. By doing that, you can define the generic structure of the configs
 needed in your program, postponing the selection of specific values to the moment in which the
 program will be executed.
 
@@ -196,7 +196,7 @@ to the args passed to ``hmain``:
 
     from hesiod import hmain
 
-    @hmain(base_cfg_dir="./cfg", template_cfg_file="./template.yaml")
+    @hmain(base_cfg_dir="./cfg/bases", template_cfg_file="./cfg/template.yaml")
     def main():
         # do some fancy stuff
         ...
@@ -206,6 +206,8 @@ to the args passed to ``hmain``:
 
 At this point, you may say "this sounds interesting, but how do I specify the actual values for a
 run of my program when using template files?". Well, bear with me and keep reading.
+
+.. _tui:
 
 *******************************
 TUI (Text-based User Interface)
@@ -221,7 +223,7 @@ you will be able to fill with actual values the config specified in the template
 Depending on how you specified configs in the template file, you can fill values with different
 modalities. If you used the ``@BASE`` decorator (like we did for dataset, net and params), Hesiod
 will load all the possibilities for each base. For example, if you press ``ENTER`` on the field
-"net" you will be able to select among "efficientnet" and "resnet101":
+``net`` you will be able to select among ``efficientnet`` and ``resnet101``:
 
 .. image:: ../../images/edit2.png
     :width: 80%

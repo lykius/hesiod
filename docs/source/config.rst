@@ -61,10 +61,11 @@ configs in a directory of your choice. This directory could be something like th
          |
          |____ ...
 
-Please, note that "scenario1", "case1", "case2", "scenario2", etc. are just examples, they can be
-whatever you need for your application. You tell Hesiod where it can find your base configs by
-specifying the path to the bases directory in the ``hmain`` decorator
-(i.e. ``@hmain(base_cfg_dir="cfg/bases", ...)``).
+Please, note that ``scenario1``, ``case1``, ``case2``, ``scenario2``, etc. are just examples, they can be
+whatever you need for your application.
+
+You tell Hesiod where it can find your base configs by specifying the path to the bases directory in
+the ``hmain`` decorator with the argument ``base_cfg_dir``.
 
 Then, you can use the keyword ``base`` to load in the current file the config dictionary defined in
 some base file. For instance, if we have:

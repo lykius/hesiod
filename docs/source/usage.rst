@@ -14,17 +14,18 @@ The hmain decorator
 *******************
 
 To use Hesiod in your program you need to wrap your main with the ``hmain`` decorator. There are two
-args that you need to pass to the decorator:
+arguments that you need to pass to the decorator:
 
-1. ``base_cfg_dir``, with the path of the directory with base configs (see
-   :ref:`here <base-mechanism>`).
+1. ``base_cfg_dir``, with the path of the directory with the base configs (see
+   :ref:`here <base-mechanism>` for a description of the base mechanism).
 2. Either ``run_cfg_file`` or ``template_cfg_file``, with the path to the **run** file or to the
-   **template** file (see :ref:`here <run_vs_template>`).
+   **template** file (see :ref:`here <run_vs_template>` to understand the difference between them).
 
 You must pass only one between ``run_cfg_file`` and ``template_cfg_file``, since this will determine
 Hesiod behavior: if you pass a run file, Hesiod will just load the config (expecting it to be completely
 specified); otherwise, if you pass a template file, Hesiod will present you a TUI to specify the
-values to fill your template config. Here's a code snippet to show you how to use ``hmain``:
+values to fill your template config, as shown :ref:`here <tui>`.
+Here's a code snippet to show you how to use ``hmain``:
 
 .. code-block:: python
 
@@ -33,12 +34,12 @@ values to fill your template config. Here's a code snippet to show you how to us
     from hesiod import hmain
 
     # using a run file
-    @hmain(base_cfg_dir="./cfg/bases", run_cfg_file="./run.yaml")
+    @hmain(base_cfg_dir="./cfg/bases", run_cfg_file="./cfg/run.yaml")
     def main():
         # do some fancy stuff
 
     # using a template file
-    @hmain(base_cfg_dir="./cfg/bases", template_cfg_file="./template.yaml")
+    @hmain(base_cfg_dir="./cfg/bases", template_cfg_file="./cfg/template.yaml")
     def main():
         # do some fancy stuff
 
@@ -79,16 +80,16 @@ automatic system to run your program with many different configs combinations (e
 
 Configs passed on the command line must be in the format ``{prefix}{key}{sep}{value}``:
 
-* ``{prefix}`` is optional and can be any amount of the char "-".
-* ``{key}`` is a string but cannot contain the chars "-", "=" and ":".
-* ``{sep}`` is mandatory and can be one of "=", ":".
+* ``{prefix}`` is optional and can be any amount of the char ``-``.
+* ``{key}`` is a generic string but cannot contain the chars ``-``, ``=`` and ``:``.
+* ``{sep}`` is mandatory and can be either ``=`` or ``:``.
 * ``{value}`` is a string that can contain everything.
 
 For instance, let's consider the following run file:
 
 .. code-block:: yaml
 
-    # run.yaml
+    # cfg/run.yaml
 
     a: 1
     b: 2
@@ -103,9 +104,12 @@ And the following main:
     from hesiod import hmain
 
     # using a run file
-    @hmain(base_cfg_dir="./cfg/bases", run_cfg_file="./run.yaml")
+    @hmain(base_cfg_dir="./cfg/bases", run_cfg_file="./cfg/run.yaml")
     def main():
         # do some fancy stuff
+
+    if __name__ == "__main__":
+        main()
 
 If you run the main above with the command::
 
@@ -139,7 +143,7 @@ this:
 
 .. code-block:: yaml
 
-    # run.yaml
+    # cfg/run.yaml
 
     a: 1
     b: 2
@@ -149,9 +153,9 @@ this:
         f: [1, 2, 3]
         g: 1e-10
 
-If you wrap your main with ``@hmain(base_cfg_dir="cfg/bases", run_cfg_file="run.yaml")``, Hesiod will
-load ``run.yaml`` to create your config. Then, you can use the ``hcfg`` function **everywhere** in
-your code as follows:
+If you wrap your main with ``@hmain(base_cfg_dir="cfg/bases", run_cfg_file="cfg/run.yaml")``, Hesiod
+will load ``run.yaml`` to create your config. Then, you can use the ``hcfg`` function **everywhere**
+in your code as follows:
 
 .. code-block:: python
 
