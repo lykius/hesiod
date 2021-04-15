@@ -167,9 +167,9 @@ values that will be used in every run.
       - The user will select between ``TRUE`` and ``FALSE``,
       
         with the default set as specified.
-    * - ``@FILE``
+    * - ``@PATH``
     
-        ``@FILE(path/to/default)``
+        ``@PATH(path/to/default)``
       - The user will select a file/dir starting either from
         
         the current directory or from a default path.
@@ -255,11 +255,11 @@ If you write ``param: "@BOOL(false)"`` in your template file, you will get a wid
     :width: 25%
     :align: center
 
-``@FILE`` configs
+``@PATH`` configs
 -----------------
 
-Configs that use the ``@FILE`` placeholder are either in the form ``key: "@FILE"`` or in the form
-``key: "@FILE(/path/to/default)"``, where key is a string and the optional value between parenthesis
+Configs that use the ``@PATH`` placeholder are either in the form ``key: "@PATH"`` or in the form
+``key: "@PATH(/path/to/default)"``, where key is a string and the optional value between parenthesis
 indicates the default path for the config. This kind of config, in fact, allows the user to select
 a path, that can be both a file or a directory. Let's say you have a directory that looks like this::
 
@@ -273,7 +273,7 @@ a path, that can be both a file or a directory. Let's say you have a directory t
          |
          |____ file3.txt
 
-If you write ``param: "@FILE(my_dir/my_subdir)"`` in your template file, the TUI will present a 
+If you write ``param: "@PATH(my_dir/my_subdir)"`` in your template file, the TUI will present a 
 widget like this:
 
 .. image:: ../../images/file_widget_1.png

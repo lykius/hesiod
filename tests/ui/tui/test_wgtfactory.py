@@ -9,9 +9,8 @@ from hesiod.ui.tui.widgets.custom.dropdown import CustomDropdownList
 from hesiod.ui.tui.widgets.custom.filebrowser import CustomFileBrowser
 from hesiod.ui.tui.widgets.custom.radiobuttons import CustomRadioButtons
 from hesiod.ui.tui.widgets.wgtfactory import BaseWidgetParser, BoolWidgetParser, DateWidgetParser
-from hesiod.ui.tui.widgets.wgtfactory import FileWidgetParser, LiteralWidgetParser
-from hesiod.ui.tui.widgets.wgtfactory import OptionsWidgetParser, RecursiveWidgetParser
-from hesiod.ui.tui.widgets.wgtfactory import WidgetParser
+from hesiod.ui.tui.widgets.wgtfactory import LiteralWidgetParser, OptionsWidgetParser
+from hesiod.ui.tui.widgets.wgtfactory import PathWidgetParser, RecursiveWidgetParser, WidgetParser
 from hesiod.ui.tui.widgets.wgthandler import BaseWidgetHandler, BoolWidgetHandler
 from hesiod.ui.tui.widgets.wgthandler import OptionsWidgetHandler, WidgetHandler
 
@@ -74,26 +73,26 @@ def test_date_widget_parser() -> None:
                 assert widget.value == cfg[3]
 
 
-def test_file_widget_parser(simple_template_file: Path) -> None:
+def test_path_widget_parser(simple_template_file: Path) -> None:
     cfgs = [
-        ("cfg1", "@FILE", True, str(Path(".").absolute())),
-        ("cfg2", f"@FILE({str(simple_template_file)})", True, str(simple_template_file.absolute())),
-        ("cfg3", "@FILE()", False, ""),
-        ("cfg4", "@File", False, ""),
-        ("cfg5", "@file", False, ""),
+        ("cfg1", "@PATH", True, str(Path(".").absolute())),
+        ("cfg2", f"@PATH({str(simple_template_file)})", True, str(simple_template_file.absolute())),
+        ("cfg3", "@PATH()", False, ""),
+        ("cfg4", "@Path", False, ""),
+        ("cfg5", "@path", False, ""),
         ("cfg6", "something", False, ""),
     ]
 
     prefix = "prefix"
 
     for cfg in cfgs:
-        assert FileWidgetParser.can_handle(cfg[1]) == cfg[2]
+        assert PathWidgetParser.can_handle(cfg[1]) == cfg[2]
 
         if cfg[2]:
-            handler, widget = FileWidgetParser.parse(cfg[0], prefix, cfg[1], Path())[0]
+            handler, widget = PathWidgetParser.parse(cfg[0], prefix, cfg[1], Path())[0]
             assert isinstance(handler, WidgetHandler)
             assert handler.cfg_key == cfg[0]
-            assert widget.label == f"{prefix}{cfg[0]} {FileWidgetParser.HINT}:"
+            assert widget.label == f"{prefix}{cfg[0]} {PathWidgetParser.HINT}:"
             assert isinstance(widget, CustomFileBrowser)
             assert widget.value == cfg[3]
 
@@ -206,7 +205,7 @@ def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
             "subgroup2": {
                 "subsubgroup": {
                     "param1": "@DATE(today)",
-                    "param2": "@FILE",
+                    "param2": "@PATH",
                     "param3": "@BOOL(False)",
                     "param4": "@OPTIONS(1, 2, 3)",
                     "param5": "@BASE(dataset.cifar)",
@@ -222,7 +221,7 @@ def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
 
     prefix = WidgetParser.PREFIX
     date_hint = DateWidgetParser.HINT
-    file_hint = FileWidgetParser.HINT
+    file_hint = PathWidgetParser.HINT
     base_hint = BaseWidgetParser.HINT
     expected = [
         (None, "test", "test:", Label),

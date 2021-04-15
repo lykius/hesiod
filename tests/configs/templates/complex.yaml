@@ -7,8 +7,8 @@ net:
 group:
   subgroupa:
     p1: 2
-    p2: "@FILE"
-    p3: "@FILE(hesiod/ui/tui/)"
+    p2: "@PATH"
+    p3: "@PATH(hesiod/ui/tui/)"
   subgroupb:
     p1: "@OPTIONS(1;p1value;3.2)"
     p2:

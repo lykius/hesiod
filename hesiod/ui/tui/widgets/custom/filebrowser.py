@@ -3,7 +3,8 @@ from typing import List, Optional, Tuple, cast
 
 from asciimatics.event import Event, KeyboardEvent, MouseEvent  # type: ignore
 from asciimatics.screen import Screen  # type: ignore
-from asciimatics.widgets import Divider, Layout, ListBox, Text, Widget, _TempPopup  # type: ignore
+from asciimatics.widgets import Divider, Layout, ListBox, Text, Widget  # type: ignore
+from asciimatics.widgets.temppopup import _TempPopup  # type: ignore
 
 
 class FileBrowserDropdownPopup(_TempPopup):

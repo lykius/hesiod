@@ -2,7 +2,8 @@ from typing import Optional
 
 from asciimatics.event import Event, KeyboardEvent, MouseEvent  # type: ignore
 from asciimatics.screen import Screen  # type: ignore
-from asciimatics.widgets import DropdownList, _DropdownPopup  # type: ignore
+from asciimatics.widgets import DropdownList  # type: ignore
+from asciimatics.widgets.dropdownlist import _DropdownPopup  # type: ignore
 
 
 class CustomDropdownPopup(_DropdownPopup):
