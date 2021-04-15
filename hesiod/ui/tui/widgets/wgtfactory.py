@@ -22,8 +22,8 @@ class WidgetParser(ABC):
     PREFIX = "   "
     DATE_PATTERN = r"^@DATE$"
     DEFAULT_DATE_PATTERN = r"^@DATE\((today|Today|TODAY|\d{4}-\d{2}-\d{2})\)$"
-    FILE_PATTERN = r"^@FILE$"
-    DEFAULT_FILE_PATTERN = r"^@FILE\(.+\)$"
+    PATH_PATTERN = r"^@PATH$"
+    DEFAULT_PATH_PATTERN = r"^@PATH\(.+\)$"
     BASE_PATTERN = r"^@BASE\([0-9A-Za-z_.]+\)$"
     OPTIONS_PATTERN = r"^@OPTIONS\((.+)\)$"
     BOOL_PATTERN = r"^@BOOL\((true|True|TRUE|false|False|FALSE)\)$"
@@ -125,14 +125,14 @@ class DateWidgetParser(WidgetParser):
         return [(handler, widget)]
 
 
-class FileWidgetParser(WidgetParser):
+class PathWidgetParser(WidgetParser):
     HINT = "(↲ to select)"
 
     @staticmethod
     def can_handle(x: Any) -> bool:
         if isinstance(x, str):
-            can_handle = WidgetParser.match(x, WidgetParser.FILE_PATTERN)
-            can_handle = can_handle or WidgetParser.match(x, WidgetParser.DEFAULT_FILE_PATTERN)
+            can_handle = WidgetParser.match(x, WidgetParser.PATH_PATTERN)
+            can_handle = can_handle or WidgetParser.match(x, WidgetParser.DEFAULT_PATH_PATTERN)
             return can_handle
         return False
 
@@ -141,9 +141,9 @@ class FileWidgetParser(WidgetParser):
         handler = WidgetHandler(cfg_key)
 
         label = cfg_key.split(".")[-1]
-        label = f"{label_prefix}{label} {FileWidgetParser.HINT}:"
+        label = f"{label_prefix}{label} {PathWidgetParser.HINT}:"
 
-        if WidgetParser.match(cfg_value, WidgetParser.DEFAULT_FILE_PATTERN):
+        if WidgetParser.match(cfg_value, WidgetParser.DEFAULT_PATH_PATTERN):
             default = cfg_value.split("(")[-1].split(")")[0]
             path = default.lower()
         else:
@@ -304,7 +304,7 @@ class WidgetFactory:
         # specials
         parsers.append(BoolWidgetParser)
         parsers.append(DateWidgetParser)
-        parsers.append(FileWidgetParser)
+        parsers.append(PathWidgetParser)
         parsers.append(OptionsWidgetParser)
         parsers.append(BaseWidgetParser)
 
