@@ -154,11 +154,15 @@ values that will be used in every run.
     * - Placeholder
       - Description
     * - ``@BASE(key)``
+
+        ``@BASE(key,default)``
       - The user will select one of the base configs (i.e. ``.yaml`` files) 
       
         available in the path specified by ``key``. The key can represent a
         
         complete path with the notation ``dir.subdir.subsubdir`` etc.
+
+        Optionally the user can also specify a default.
     * - ``@OPTIONS(opt1;opt2;opt3;...)``
       - The user will select one of the given options.
     * - ``@BOOL(true)``
@@ -196,9 +200,11 @@ type if the interpreter recognizes it as such.
 ``@BASE`` configs
 -----------------
 
-Configs that use the ``@BASE`` placeholder are in the form ``key: "@BASE(basekey)"``, where key is a
-string and basekey is a string indicating the bases directory where Hesiod must look to gather all
-the options for the config. Let's say that your bases directory looks like this::
+Configs that use the ``@BASE`` placeholder are either in the form ``key: "@BASE(basekey)"`` or in
+the form ``key: "@BASE(basekey,default)"``, where key is a string and basekey is a string indicating
+the bases directory where Hesiod must look to gather all the options for the config. The user can
+also provide a default selection for the config with an additional string inside the parentheses.
+Let's say that your bases directory looks like this::
 
     cfg/bases
     |
@@ -227,6 +233,9 @@ write ``param: "@BASE(dataset.cifar)"`` in your template file, your options will
     :width: 90%
     :align: center
 
+To specify a default selection, you can write, for example, ``param: "@BASE(dataset,imagenet)"``
+and the default selection will be ``imagenet``.
+
 ``@OPTIONS`` configs
 --------------------
 
@@ -246,7 +255,7 @@ will be presented with the following widget in the TUI:
 -----------------
 
 Configs that use the ``@BOOL`` placeholder are either in the form ``key: "@BOOL(true)"`` or in the
-form ``key: "@BOOL(false)"``, where key is a string and the value between parenthesis indicates the
+form ``key: "@BOOL(false)"``, where key is a string and the value between parentheses indicates the
 default for the config.
 
 If you write ``param: "@BOOL(false)"`` in your template file, you will get a widget like this:
@@ -259,7 +268,7 @@ If you write ``param: "@BOOL(false)"`` in your template file, you will get a wid
 -----------------
 
 Configs that use the ``@PATH`` placeholder are either in the form ``key: "@PATH"`` or in the form
-``key: "@PATH(/path/to/default)"``, where key is a string and the optional value between parenthesis
+``key: "@PATH(/path/to/default)"``, where key is a string and the optional value between parentheses
 indicates the default path for the config. This kind of config, in fact, allows the user to select
 a path, that can be both a file or a directory. Let's say you have a directory that looks like this::
 
@@ -289,7 +298,7 @@ widget like this:
 -----------------
 
 Configs that use the ``@DATE`` placeholder are either in the form ``key: "@DATE"`` or in the form
-``key: "@DATE(default)"``, where key is a string and the optional value between parenthesis is the
+``key: "@DATE(default)"``, where key is a string and the optional value between parentheses is the
 default date for the config. The default date can be either ``today`` or a date in the format
 ``YYYY-MM-DD`` (e.g. 2021-01-11).
 
