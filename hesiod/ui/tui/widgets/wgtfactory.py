@@ -25,6 +25,7 @@ class WidgetParser(ABC):
     PATH_PATTERN = r"^@PATH$"
     DEFAULT_PATH_PATTERN = r"^@PATH\(.+\)$"
     BASE_PATTERN = r"^@BASE\([0-9A-Za-z_.]+\)$"
+    DEFAULT_BASE_PATTERN = r"^@BASE\([0-9A-Za-z_\-.]+,[0-9A-Za-z_\-]+\)$"
     OPTIONS_PATTERN = r"^@OPTIONS\((.+)\)$"
     BOOL_PATTERN = r"^@BOOL\((true|True|TRUE|false|False|FALSE)\)$"
 
@@ -212,7 +213,11 @@ class BaseWidgetParser(WidgetParser):
 
     @staticmethod
     def can_handle(x: Any) -> bool:
-        return isinstance(x, str) and WidgetParser.match(x, WidgetParser.BASE_PATTERN)
+        if isinstance(x, str):
+            can_handle = WidgetParser.match(x, WidgetParser.BASE_PATTERN)
+            can_handle = can_handle or WidgetParser.match(x, WidgetParser.DEFAULT_BASE_PATTERN)
+            return can_handle
+        return False
 
     @staticmethod
     def get_files_list(dir_path: Path) -> List[Path]:
@@ -237,8 +242,13 @@ class BaseWidgetParser(WidgetParser):
 
     @staticmethod
     def parse(cfg_key: str, label_prefix: str, cfg_value: Any, base_cfg_dir: Path) -> List[WGT_T]:
-        base_key = cfg_value.split("(")[-1].split(")")[0]
-        base_keys = base_key.split(".")
+        if WidgetParser.match(cfg_value, WidgetParser.DEFAULT_BASE_PATTERN):
+            base_key, default = cfg_value.split("(")[-1].split(")")[0].split(",")
+            base_keys = base_key.split(".")
+        else:
+            default = ""
+            base_key = cfg_value.split("(")[-1].split(")")[0]
+            base_keys = base_key.split(".")
 
         root = base_cfg_dir
         for k in base_keys:
@@ -262,6 +272,10 @@ class BaseWidgetParser(WidgetParser):
         label = f"{label_prefix}{label} {BaseWidgetParser.HINT}:"
 
         widget = CustomDropdownList(values, label=label, name=cfg_key)
+        if len(default) > 0:
+            for name, idx in values:
+                if default == name:
+                    widget.value = idx
 
         return [(handler, widget)]
 

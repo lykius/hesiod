@@ -1,7 +1,7 @@
 base: "var"
 optimizer: "adamw"
 params: "@BASE(params)"
-dataset: "@BASE(dataset)"
+dataset: "@BASE(dataset,imagenet)"
 net:
   base: "net.resnet.resnet101"
 group:

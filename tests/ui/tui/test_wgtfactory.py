@@ -159,12 +159,16 @@ def test_options_widget_parser() -> None:
 
 def test_base_widget_parser(base_cfg_dir: Path) -> None:
     cfgs = [
-        ("cfg1", "@BASE(dataset)", True, ["cifar10", "cifar100", "imagenet"]),
-        ("cfg2", "@BASE(net.resnet)", True, ["resnet18", "resnet101"]),
-        ("cfg3", "@BASE()", False, None),
-        ("cfg4", "@BASE", False, None),
-        ("cfg5", "@base", False, None),
-        ("cfg6", "something", False, None),
+        ("cfg1", "@BASE(dataset)", True, ["cifar10", "cifar100", "imagenet"], ""),
+        ("cfg2", "@BASE(net.resnet)", True, ["resnet18", "resnet101"], ""),
+        ("cfg3", "@BASE(dataset,cifar100)", True, ["cifar10", "cifar100", "imagenet"], "cifar100"),
+        ("cfg4", "@BASE(net.resnet,resnet101)", True, ["resnet18", "resnet101"], "resnet101"),
+        ("cfg5", "@BASE(dataset,test)", True, ["cifar10", "cifar100", "imagenet"], ""),
+        ("cfg6", "@BASE()", False, None, None),
+        ("cfg7", "@BASE", False, None, None),
+        ("cfg8", "@BASE(net.resnet,)", False, None, None),
+        ("cfg9", "@base", False, None, None),
+        ("cfg10", "something", False, None, None),
     ]
 
     prefix = "prefix"
@@ -180,6 +184,10 @@ def test_base_widget_parser(base_cfg_dir: Path) -> None:
             assert isinstance(widget, CustomDropdownList)
             expected_options = [(option, i) for i, option in enumerate(sorted(cfg[3]))]
             assert widget.options == expected_options
+
+            if len(cfg[4]) > 0:
+                default_idx = sorted(cfg[3]).index(cfg[4])
+                assert widget.value == default_idx
 
 
 def test_recursive_widget_parser(base_cfg_dir: Path) -> None:
