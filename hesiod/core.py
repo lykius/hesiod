@@ -74,13 +74,13 @@ def _get_cfg(
 ) -> CFG_T:
     """Load config either from template file or from run file.
 
+    If both template_cfg_path and run_cfg_path are None, an empty
+    config is returned.
+
     Args:
         base_cfg_path: The path to the directory with all the config files.
         template_cfg_path: The path to the template config file for this run.
         run_cfg_path: The path to the config file created by the user for this run.
-
-    Raises:
-        ValueError: If both template_cfg_path and run_cfg_path are None.
 
     Returns:
         The loaded config.
@@ -92,8 +92,7 @@ def _get_cfg(
         tui = TUI(template_cfg, base_cfg_path)
         return tui.show()
     else:
-        msg = "Either a valid run file or a template file must be passed to hesiod."
-        raise ValueError(msg)
+        return {}
 
 
 def _get_default_run_name(strategy: str) -> str:
@@ -164,6 +163,8 @@ def hmain(
     If ``run_cfg_file`` is passed, Hesiod will just load the given run file; otherwise,
     if ``template_cfg_file`` is passed, Hesiod will create a Text-based User Interface (TUI)
     to ask the user to fill/select the values in the given template config.
+    If both ``run_cfg_file`` and ``template_cfg_file`` are ``None``, then Hesiod will simply
+    create an empty configuration for the current run.
 
     The ``hmain`` decorator loads the configuration with the right parser (either using the TUI
     or not) and runs the decorated function.
@@ -194,7 +195,6 @@ def hmain(
             from the command line or not (default: True).
 
     Raises:
-        ValueError: If both template_cfg_file and run_cfg_file are None.
         ValueError: If hesiod is asked to parse the command line and one
             of the args is in a not supported format.
         ValueError: If the run name is not specified in the run file
