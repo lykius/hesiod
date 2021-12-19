@@ -178,6 +178,15 @@ by casting the returned value to the proper type. You can use the ``hcfg()`` fun
 
     dataset_name = hcfg("dataset.name", str)  # -> cifar10
 
+**************************************
+Set the config values programmatically
+**************************************
+
+Hesiod allows you to set config values programmatically with the function ``hesiod.set_cfg(key, value)``.
+The given ``key`` can be a single config key or a composition of subkeys separated by dots, as in
+``key.subkey.subsubkey.subsubsubkey...``. Hesiod will update properly the current config in order to
+create new configs or to change existing ones.
+
 **************
 Template files
 **************

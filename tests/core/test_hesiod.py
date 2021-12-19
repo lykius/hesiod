@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Tuple
 import pytest
 
 import hesiod.core as hcore
-from hesiod import get_cfg_copy, get_out_dir, get_run_name, hcfg, hmain
+from hesiod import get_cfg_copy, get_out_dir, get_run_name, hcfg, hmain, set_cfg
 from hesiod.core import _parse_args
 
 
@@ -272,3 +272,31 @@ def test_parse_cmd_line(base_cfg_dir: Path, complex_run_file: Path) -> None:
     test1()
     test2()
     shutil.rmtree("logs")
+
+
+def test_set_cfg(base_cfg_dir: Path, simple_run_file: Path) -> None:
+    @hmain(
+        base_cfg_dir=base_cfg_dir,
+        run_cfg_file=simple_run_file,
+        create_out_dir=False,
+        parse_cmd_line=False,
+    )
+    def test() -> None:
+        set_cfg("new_cfg", "this is a test")
+        assert hcfg("new_cfg") == "this is a test"
+
+        set_cfg("group_1.param_a", 5)
+        assert hcfg("group_1.param_a") == 5
+        assert hcfg("group_1.param_b") == 1.2
+
+        set_cfg("group_2.param_d.param_x.param_y", 1e-5)
+        assert hcfg("group_2.param_c") is True
+        assert hcfg("group_2.param_d.param_x.param_y") == 1e-5
+
+        set_cfg("group_3", "hello")
+        assert hcfg("group_3") == "hello"
+
+        set_cfg("group_5", [0.1, 0.5, 0.1])
+        assert hcfg("group_5") == [0.1, 0.5, 0.1]
+
+    test()

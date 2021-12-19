@@ -54,17 +54,7 @@ def _parse_args(args: List[str]) -> None:
             except (ValueError, SyntaxError):
                 pass
 
-            key_splits = key.split(".")
-            cfg = _CFG
-            for key in key_splits[:-1]:
-                if key not in cfg:
-                    cfg[key] = {}
-                cfg = cfg[key]
-
-            last_key = key_splits[-1]
-            if last_key not in cfg:
-                cfg[last_key] = {}
-            cfg[last_key] = value
+            set_cfg(key, value)
 
 
 def _get_cfg(
@@ -311,3 +301,26 @@ def get_run_name() -> str:
         raise ValueError("Something went wrong: current run has no name.")
 
     return run_name
+
+
+def set_cfg(key: str, value: Any) -> None:
+    """Set a specific config to the given value.
+
+    The given key is expected to be a single config key or a sequence of subkeys
+    separated by dots, as in ``key.subkey.subsubkey.subsubsubkey...``. In the second
+    case, each subkey corresponds to a config dictionary. If the given key (or one
+    of the subkeys) doesn't exist, Hesiod will create it properly.
+
+    Args:
+        key: The name of the config to be set.
+        value: The value to set.
+    """
+    key_splits = key.split(".")
+    cfg = _CFG
+    for k in key_splits[:-1]:
+        if k not in cfg or type(cfg[k]) != dict:
+            cfg[k] = {}
+        cfg = cfg[k]
+
+    last_key = key_splits[-1]
+    cfg[last_key] = value

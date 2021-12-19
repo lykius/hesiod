@@ -218,5 +218,7 @@ Hesiod provides some utility functions, summarized in the following table.
         for the current run.
     * - ``get_run_name()``
       - Returns the name of the current run.
+    * - ``set_cfg(key, value)``
+      - Set the config ``key`` to the given value.
 
 See :ref:`the API documentation <api>` for additional details.
