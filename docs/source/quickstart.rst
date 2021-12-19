@@ -122,6 +122,25 @@ created output directory a single ``.yaml`` file with the completely specified v
 config of the run (i.e. with all the bases resolved). After all that, Hesiod will run your ``main`` 
 function leaving it completely unchanged.
 
+If for any reason you don't want to load any specific config, you can omit the ``run_cfg_file``
+argument, like this:
+
+.. code-block:: python
+
+    # main.py
+
+    from hesiod import hmain
+
+    @hmain(base_cfg_dir="./cfg/bases")
+    def main():
+        # do some fancy stuff
+        ...
+
+    if __name__ == "__main__":
+        main()
+
+In this case, Hesiod will simply prepare an empty config for the current run.
+
 ************************************
 Get the config values in the program
 ************************************
@@ -158,6 +177,15 @@ by casting the returned value to the proper type. You can use the ``hcfg()`` fun
     from hesiod import hcfg
 
     dataset_name = hcfg("dataset.name", str)  # -> cifar10
+
+**************************************
+Set the config values programmatically
+**************************************
+
+Hesiod allows you to set config values programmatically with the function ``hesiod.set_cfg(key, value)``.
+The given ``key`` can be a single config key or a composition of subkeys separated by dots, as in
+``key.subkey.subsubkey.subsubsubkey...``. Hesiod will update properly the current config in order to
+create new configs or to change existing ones.
 
 **************
 Template files

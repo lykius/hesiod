@@ -54,17 +54,7 @@ def _parse_args(args: List[str]) -> None:
             except (ValueError, SyntaxError):
                 pass
 
-            key_splits = key.split(".")
-            cfg = _CFG
-            for key in key_splits[:-1]:
-                if key not in cfg:
-                    cfg[key] = {}
-                cfg = cfg[key]
-
-            last_key = key_splits[-1]
-            if last_key not in cfg:
-                cfg[last_key] = {}
-            cfg[last_key] = value
+            set_cfg(key, value)
 
 
 def _get_cfg(
@@ -74,13 +64,13 @@ def _get_cfg(
 ) -> CFG_T:
     """Load config either from template file or from run file.
 
+    If both template_cfg_path and run_cfg_path are None, an empty
+    config is returned.
+
     Args:
         base_cfg_path: The path to the directory with all the config files.
         template_cfg_path: The path to the template config file for this run.
         run_cfg_path: The path to the config file created by the user for this run.
-
-    Raises:
-        ValueError: If both template_cfg_path and run_cfg_path are None.
 
     Returns:
         The loaded config.
@@ -92,8 +82,7 @@ def _get_cfg(
         tui = TUI(template_cfg, base_cfg_path)
         return tui.show()
     else:
-        msg = "Either a valid run file or a template file must be passed to hesiod."
-        raise ValueError(msg)
+        return {}
 
 
 def _get_default_run_name(strategy: str) -> str:
@@ -164,6 +153,8 @@ def hmain(
     If ``run_cfg_file`` is passed, Hesiod will just load the given run file; otherwise,
     if ``template_cfg_file`` is passed, Hesiod will create a Text-based User Interface (TUI)
     to ask the user to fill/select the values in the given template config.
+    If both ``run_cfg_file`` and ``template_cfg_file`` are ``None``, then Hesiod will simply
+    create an empty configuration for the current run.
 
     The ``hmain`` decorator loads the configuration with the right parser (either using the TUI
     or not) and runs the decorated function.
@@ -194,7 +185,6 @@ def hmain(
             from the command line or not (default: True).
 
     Raises:
-        ValueError: If both template_cfg_file and run_cfg_file are None.
         ValueError: If hesiod is asked to parse the command line and one
             of the args is in a not supported format.
         ValueError: If the run name is not specified in the run file
@@ -311,3 +301,26 @@ def get_run_name() -> str:
         raise ValueError("Something went wrong: current run has no name.")
 
     return run_name
+
+
+def set_cfg(key: str, value: Any) -> None:
+    """Set a specific config to the given value.
+
+    The given key is expected to be a single config key or a sequence of subkeys
+    separated by dots, as in ``key.subkey.subsubkey.subsubsubkey...``. In the second
+    case, each subkey corresponds to a config dictionary. If the given key (or one
+    of the subkeys) doesn't exist, Hesiod will create it properly.
+
+    Args:
+        key: The name of the config to be set.
+        value: The value to set.
+    """
+    key_splits = key.split(".")
+    cfg = _CFG
+    for k in key_splits[:-1]:
+        if k not in cfg or type(cfg[k]) != dict:
+            cfg[k] = {}
+        cfg = cfg[k]
+
+    last_key = key_splits[-1]
+    cfg[last_key] = value

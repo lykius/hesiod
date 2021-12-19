@@ -46,6 +46,9 @@ Here's a code snippet to show you how to use ``hmain``:
     if __name__ == "__main__":
         main()
 
+Alternatively, you can omit both ``run_cfg_file`` and ``template_cfg_file``. In this case, Hesiod
+will simply prepare an empty config for the current run.
+
 Hesiod needs a name for each run. There are two options to name a run:
 
 1. Enter a name in the field ``run_name`` of the config (this must be done manually when using
@@ -215,5 +218,7 @@ Hesiod provides some utility functions, summarized in the following table.
         for the current run.
     * - ``get_run_name()``
       - Returns the name of the current run.
+    * - ``set_cfg(key, value)``
+      - Set the config ``key`` to the given value.
 
 See :ref:`the API documentation <api>` for additional details.
