@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hesiod"
-version = "0.3.2"
+version = "1.0.0"
 description = ""
 authors = [
     "Luca De Luigi <lucadeluigi91@gmail.com>",
